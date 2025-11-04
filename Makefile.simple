@@ -1,0 +1,86 @@
+# NumericRepresentations - Simple Makefile
+# Wrapper para scripts de build
+
+.PHONY: help clean build test debug release gcc clang msvc all
+
+# Default target
+help:
+	@echo "NumericRepresentations - Makefile"
+	@echo ""
+	@echo "Targets disponibles:"
+	@echo "  build          - Build con configuración por defecto (gcc debug)"
+	@echo "  test           - Solo probar compilación de headers"
+	@echo "  clean          - Limpiar archivos de build"
+	@echo ""
+	@echo "  debug          - Build en modo debug (gcc)"
+	@echo "  release        - Build en modo release (gcc)"
+	@echo ""
+	@echo "  gcc            - Build con GCC (debug)"
+	@echo "  gcc-release    - Build con GCC (release)"
+	@echo "  clang          - Build con Clang (debug)"  
+	@echo "  clang-release  - Build con Clang (release)"
+	@echo "  msvc           - Build con MSVC (debug)"
+	@echo "  msvc-release   - Build con MSVC (release)"
+	@echo ""
+	@echo "  all            - Build con todos los compiladores (debug)"
+	@echo "  all-release    - Build con todos los compiladores (release)"
+	@echo ""
+	@echo "Uso directo del script:"
+	@echo "  ./build.sh -c gcc -m release -v"
+	@echo "  powershell ./build.ps1 -Compiler clang -Mode debug"
+
+# Basic targets
+build:
+	@./build.sh -c gcc -m debug
+
+test:
+	@./build.sh -c gcc -m debug -t
+
+clean:
+	@./build.sh clean
+
+# Mode targets
+debug:
+	@./build.sh -c gcc -m debug
+
+release:
+	@./build.sh -c gcc -m release
+
+# Compiler-specific targets
+gcc:
+	@./build.sh -c gcc -m debug
+
+gcc-release:
+	@./build.sh -c gcc -m release
+
+clang:
+	@./build.sh -c clang -m debug
+
+clang-release:
+	@./build.sh -c clang -m release
+
+msvc:
+	@./build.sh -c msvc -m debug
+
+msvc-release:
+	@./build.sh -c msvc -m release
+
+# Build with all compilers
+all:
+	@echo "Building with all compilers (debug mode)..."
+	@./build.sh -c gcc -m debug
+	@./build.sh -c clang -m debug
+	@./build.sh -c msvc -m debug
+
+all-release:
+	@echo "Building with all compilers (release mode)..."
+	@./build.sh -c gcc -m release
+	@./build.sh -c clang -m release
+	@./build.sh -c msvc -m release
+
+# Test with all compilers
+test-all:
+	@echo "Testing headers with all compilers..."
+	@./build.sh -c gcc -t
+	@./build.sh -c clang -t
+	@./build.sh -c msvc -t
