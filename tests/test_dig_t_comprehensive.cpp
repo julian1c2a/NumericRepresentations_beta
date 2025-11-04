@@ -69,7 +69,11 @@ void comprehensive_dig_t_test()
     // 3. COMPARACIONES Y ORDENAMIENTO
     std::cout << "\n--- COMPARACIONES ---" << std::endl;
 
-    dig_type x(3u), y(7u), z(3u);
+    // Usar valores que respeten la aritmética modular
+    dig_type x(1u), y(3u), z(1u); // En cualquier base >= 4, 1 < 3
+
+    // Verificar valores antes de comparar
+    std::cout << "x = " << x.get() << ", y = " << y.get() << ", z = " << z.get() << std::endl;
 
     // Comparaciones tradicionales
     assert(x < y);

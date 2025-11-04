@@ -32,6 +32,36 @@
 #include <functional>
 #include <iterator>
 
+/**
+ * @file basic_types.hpp
+ * @brief Tipos básicos y meta-funciones para el sistema de representaciones numéricas
+ *
+ * @details
+ * Este archivo define el sistema de tipos fundamental del proyecto, incluyendo:
+ *
+ * **1. Aliases de tipos estándar:** Nombres simplificados para tipos enteros estándar
+ *
+ * **2. Sistema de meta-funciones para escalamiento de tipos:**
+ * - `sig_UInt_for_UInt_t<T>`: Obtiene el siguiente tipo entero **sin signo** de mayor capacidad
+ * - `sig_SInt_for_UInt_t<T>`: Obtiene el siguiente tipo entero **con signo** de mayor capacidad
+ *
+ * **3. Convención de nombres IMPORTANTE:**
+ * - El prefijo "sig_" significa "**siguiente**" (español: next/higher capacity)
+ * - NO significa "signed" (con signo)
+ * - Ejemplo: `sig_uint_t` = "siguiente uint_t" = tipo uint con mayor capacidad
+ *
+ * **4. Conceptos y traits:** Validación de tipos en tiempo de compilación
+ *
+ * @note El uso del español en algunos nombres refleja el origen del proyecto
+ * @note Las meta-funciones evitan overflow en operaciones aritméticas intermedias
+ *
+ * @example
+ * ```cpp
+ * // Escalamiento de tipos
+ * using bigger = sig_UInt_for_UInt_t<uint32_t>; // = uint64_t
+ * using signed_bigger = sig_SInt_for_UInt_t<uint32_t>; // = int64_t
+ * ```
+ */
 namespace NumRepr
 {
   /// NUEVOS NOMBRES PARA LOS ENTEROS O PARECIDOS
@@ -46,8 +76,54 @@ namespace NumRepr
   using uint_t = unsigned int;
   using ulint_t = unsigned long int;
   using ullint_t = unsigned long long int;
-  using uint128_t = __uint128_t; /// ROMPE LA PORTABILIDAD
-  using sint128_t = __int128_t;  /// ROMPE LA PORTABILIDAD
+
+  // 128-bit types - compiler specific
+#if defined(__GNUC__) && !defined(__clang__)
+  // GCC specific 128-bit types
+  using uint128_t = __uint128_t;
+  using sint128_t = __int128_t;
+#elif defined(__clang__)
+// Clang specific 128-bit types (if available)
+#if __has_extension(int128)
+  using uint128_t = __uint128_t;
+  using sint128_t = __int128_t;
+#else
+  // Fallback: use pair of 64-bit or disable 128-bit operations
+  struct uint128_t
+  {
+    std::uint64_t low, high;
+  };
+  struct sint128_t
+  {
+    std::uint64_t low;
+    std::int64_t high;
+  };
+#endif
+#elif defined(_MSC_VER)
+  // MSVC doesn't have native 128-bit types
+  // We can use __m128i from SSE or create our own
+  struct uint128_t
+  {
+    std::uint64_t low, high;
+  };
+  struct sint128_t
+  {
+    std::uint64_t low;
+    std::int64_t high;
+  };
+#else
+  // Generic fallback for other compilers
+  struct uint128_t
+  {
+    std::uint64_t low, high;
+  };
+  struct sint128_t
+  {
+    std::uint64_t low;
+    std::int64_t high;
+  };
+#endif
+
   using size_t = std::size_t;
   using sint8_t = std::int8_t;
   using sint16_t = std::int16_t;
@@ -113,7 +189,7 @@ namespace NumRepr
     char *clear_ccad(char *, usint_t);
 
     template <template <uchint_t B> class T, uchint_t B>
-    inline constexpr const char *devCadenaC(
+    inline const char *devCadenaC(
         T<B> arg,
         size_t long_ccad = 64) noexcept
     {
@@ -293,13 +369,33 @@ namespace NumRepr
 
     } // namespace ugly_details_UInt_for_UInt
 
-    /// FUNCIÓN DE DADO UN TIPO ENTERO SIN SIGNO ME DA OTRO TIPO ENTERO SIN SIGNO
-    ///      DADO      -> DEVUELVE
-    ///      UINT8_T   -> UNIT16_T
-    ///      UINT16_T  -> UNIT32_T
-    ///      UINT32_T  -> UNIT64_T
-    ///      UINT64_T  -> UNIT128_T
-    ///      UINT128_T -> VOID
+    /**
+     * @brief Meta-función que obtiene el siguiente tipo entero sin signo de mayor capacidad
+     *
+     * @tparam UInt_t Tipo entero sin signo de entrada
+     *
+     * @details
+     * Esta meta-función implementa una escalera de tipos, devolviendo el siguiente
+     * tipo entero sin signo con mayor capacidad que el tipo de entrada.
+     * El prefijo "sig_" significa "**siguiente**" (next/higher), NO "signed".
+     *
+     * **Mapeo de tipos:**
+     * - `uint8_t`  → `uint16_t`
+     * - `uint16_t` → `uint32_t`
+     * - `uint32_t` → `uint64_t`
+     * - `uint64_t` → `uint128_t` (si está disponible)
+     * - `uint128_t`→ `void` (no hay siguiente tipo)
+     *
+     * @note El prefijo "sig_" deriva del español "**siguiente**", no de "signed"
+     * @note Útil para evitar overflow en operaciones aritméticas intermedias
+     * @note Se usa en dig_t para parsing de números grandes
+     *
+     * @example
+     * ```cpp
+     * using next_type = sig_UInt_for_UInt_t<uint32_t>; // next_type = uint64_t
+     * using bigger = sig_UInt_for_UInt_t<uint16_t>;    // bigger = uint32_t
+     * ```
+     */
     template <typename UInt_t>
     using sig_UInt_for_UInt_t =
         typename ugly_details_UInt_for_UInt::__sig_UInt_for_UInt_t<UInt_t>::type;
@@ -369,13 +465,34 @@ namespace NumRepr
 
     } // namespace ugly_details_sig_SInt_for_UInt
 
-    /// FUNCIÓN DE DADO UN TIPO ENTERO SIN SIGNO ME DA OTRO TIPO ENTERO CON SIGNO
-    ///      DADO      -> DEVUELVE
-    ///      UINT8_T   -> SNIT16_T
-    ///      UINT16_T  -> SNIT32_T
-    ///      UINT32_T  -> SNIT64_T
-    ///      UINT64_T  -> SNIT128_T
-    ///      UINT128_T -> VOID
+    /**
+     * @brief Meta-función que obtiene el siguiente tipo entero CON SIGNO de mayor capacidad
+     *
+     * @tparam UInt_t Tipo entero sin signo de entrada
+     *
+     * @details
+     * Esta meta-función toma un tipo entero **sin signo** y devuelve el siguiente
+     * tipo entero **CON SIGNO** de mayor capacidad. Es complementaria a sig_UInt_for_UInt_t.
+     * El prefijo "sig_" significa "**siguiente**" (next/higher), NO "signed".
+     *
+     * **Mapeo de tipos:**
+     * - `uint8_t`  → `int16_t`
+     * - `uint16_t` → `int32_t`
+     * - `uint32_t` → `int64_t`
+     * - `uint64_t` → `int128_t` (si está disponible)
+     * - `uint128_t`→ `void` (no hay siguiente tipo)
+     *
+     * @note El prefijo "sig_" deriva del español "**siguiente**", no de "signed"
+     * @note Útil cuando se necesita manejar valores negativos temporalmente
+     * @note El tipo resultante SÍ tiene signo, pero el "sig_" se refiere a "siguiente"
+     * @note Se usa para operaciones que pueden generar resultados negativos intermedios
+     *
+     * @example
+     * ```cpp
+     * using signed_next = sig_SInt_for_UInt_t<uint32_t>; // signed_next = int64_t
+     * using bigger_signed = sig_SInt_for_UInt_t<uint16_t>; // bigger_signed = int32_t
+     * ```
+     */
     template <typename UInt_t>
     using sig_SInt_for_UInt_t =
         typename ugly_details_sig_SInt_for_UInt::__sig_SInt_for_UInt_t<UInt_t>::type;

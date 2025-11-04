@@ -39,13 +39,14 @@ void test_comparison_operators()
 
     // 2. Test operadores relacionales (<, >, <=, >=)
     std::cout << "\n--- OPERADORES RELACIONALES ---" << std::endl;
-    dig_type d(3u);
-    dig_type e(8u);
-    dig_type f(3u);
+    // Usar valores que garantizan d < e en todas las bases
+    dig_type d = dig_type::dig_0();   // 0 (mínimo)
+    dig_type e = dig_type::dig_max(); // B-1 (máximo)
+    dig_type f = dig_type::dig_0();   // Igual a d para tests de igualdad
 
-    std::cout << "d = " << d.get() << ", e = " << e.get() << ", f = " << f.get() << std::endl;
+    std::cout << "d = " << d.get() << " (min), e = " << e.get() << " (max), f = " << f.get() << std::endl;
 
-    // Menor que
+    // Menor que (0 < B-1 siempre es cierto para B > 1)
     assert(d < e);
     std::cout << "✅ d < e: " << (d < e) << std::endl;
 
