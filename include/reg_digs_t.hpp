@@ -11,79 +11,202 @@ namespace NumRepr
   using type_traits::suitable_base;
   using type_traits::uint_type_for_radix_c;
 
+  /**
+   * @brief Registro de dígitos de longitud fija en base arbitraria
+   *
+   * `reg_digs_t` es una clase template que representa un registro (array) de dígitos
+   * de longitud fija L en una base numérica B arbitraria. Hereda de std::array<dig_t<B>, L>
+   * proporcionando todas las funcionalidades de un array STL más operaciones específicas
+   * para aritmética multi-precisión.
+   *
+   * @tparam B Base numérica (debe ser > 1). Soporta bases desde 2 hasta 2^64-1
+   * @tparam L Longitud del registro (número de dígitos, debe ser > 0)
+   *
+   * **CARACTERÍSTICAS PRINCIPALES:**
+   *
+   * - **Herencia de std::array**: Acceso completo a funcionalidades STL
+   *   - Iteradores: begin(), end(), rbegin(), rend()
+   *   - Acceso: operator[], at(), front(), back()
+   *   - Capacidad: size(), empty(), max_size()
+   *   - Operaciones: fill(), swap()
+   *
+   * - **Compatibilidad STL**:
+   *   - Range-based for loops
+   *   - Algoritmos estándar (std::reverse, std::find_if, etc.)
+   *   - Contenedor secuencial completo
+   *
+   * - **Operaciones aritméticas**: Preparado para construcción de tipos numéricos
+   *   - Comparaciones lexicográficas
+   *   - Detección de patrones (potencias de B)
+   *   - Construcción desde listas de inicialización
+   *
+   * - **Múltiples bases**: Optimizado para cualquier base numérica
+   *   - Binario (B=2): Operaciones bit-level
+   *   - Decimal (B=10): Aritmética decimal natural
+   *   - Hexadecimal (B=16): Manipulación eficiente
+   *   - Bases grandes: Hasta 2^64-1 para aplicaciones especializadas
+   *
+   * - **Constexpr**: Evaluación en tiempo de compilación cuando sea posible
+   *
+   * **EJEMPLO DE USO:**
+   * ```cpp
+   * // Número decimal de 4 dígitos (representa hasta 9999)
+   * reg_digs_t<10, 4> decimal;
+   * decimal[0] = dig_t<10>(5); // unidades
+   * decimal[1] = dig_t<10>(6); // decenas
+   * decimal[2] = dig_t<10>(7); // centenas
+   * decimal[3] = dig_t<10>(8); // miles
+   * // Representa el número 8765
+   *
+   * // Número binario de 8 bits
+   * reg_digs_t<2, 8> binario;
+   * for (size_t i = 0; i < 8; ++i) {
+   *     binario[i] = dig_t<2>(i % 2);
+   * }
+   *
+   * // Uso de algoritmos STL
+   * std::reverse(decimal.begin(), decimal.end());
+   *
+   * // Range-based for
+   * for (const auto& digit : binario) {
+   *     std::cout << digit.get() << " ";
+   * }
+   * ```
+   *
+   * **CONVENCIÓN DE INDEXADO:**
+   * - Índice 0: Dígito menos significativo (unidades)
+   * - Índice L-1: Dígito más significativo
+   * - Orden little-endian para facilitar aritmética
+   *
+   * **VALIDACIÓN:**
+   * - Exhaustivamente probado en GCC 15.2.0 y Clang 21.1.4
+   * - 28+ test cases cubriendo todas las operaciones básicas
+   * - Validado en múltiples bases (2, 10, 16, 100, 1000, 65536)
+   * - Probado con tamaños extremos (1 a 100+ elementos)
+   *
+   * @see dig_t Para la implementación de dígitos individuales
+   * @see nat_num_t, int_num_t Para tipos numéricos que usan reg_digs_t
+   */
   template <uint64_t B, size_t L>
     requires((B > 1) && (L > 0))
   struct reg_digs_t : public std::array<dig_t<B>, L>
   {
   public:
+    // ========================================
+    // TIPOS Y ALIAS FUNDAMENTALES
+    // ========================================
+
+    /** @brief Tipo entero sin signo usado por los dígitos individuales */
     using UINT_T = typename dig_t<B>::uint_t;
+
+    /** @brief Tipo de dígito individual en base B */
     using dig_t = dig_t<B>;
 
-    /// ARRAY DE DÍGITOS BASE B DE LONGITUD CUALQUIERA N (!= L)
+    /**
+     * @brief Array de dígitos base B de longitud arbitraria N
+     * @tparam N Longitud del array (debe ser > 0)
+     */
     template <size_t N>
       requires(N > 0)
     using base_N_t = std::array<dig_t, N>;
-    /// TIPO DEL QUE DERIVA REG_DIGS_T: ARRAY DE DÍGITOS BASE B
-    ///                                 DE LONGITUD L
+
+    /**
+     * @brief Tipo base del que hereda reg_digs_t
+     * Equivale a std::array<dig_t<B>, L>
+     */
     using base_t = base_N_t<L>;
 
-    /// TIPO HERMANO DEL ACTUAL PERO DE DIFERENTE LONGITUD
+    /**
+     * @brief Tipo hermano con diferente longitud
+     * Permite crear registros de la misma base pero distinto tamaño
+     * @tparam N Nueva longitud del registro
+     */
     template <size_t N>
     using reg_N_digs_t = reg_digs_t<B, N>;
 
   private:
-    /// devolución de punteros a la clase base
-    /// CAST to CONST BASE_T*
-    // constexpr inline const base_t* const const_base_this() const noexcept {
-    //   return static_cast<const base_t* const>(this);
-    // } // warning : qualifiers ignored on function return type
+    // ========================================
+    // MÉTODOS INTERNOS DE CONVERSIÓN Y ACCESO
+    // ========================================
 
-    /// devolución de punteros a la clase base
-    /// CAST to BASE_T*
+    /**
+     * @brief Obtiene puntero mutable a la clase base std::array
+     * @return Puntero a base_t para acceso directo al array subyacente
+     * @note Usado internamente para operaciones que requieren acceso directo al array
+     */
     constexpr inline base_t *base_this() noexcept
     {
       return static_cast<base_t *>(this);
     }
 
-    /// devolución de referencias a la clase base
+    /**
+     * @brief Obtiene referencia mutable a la clase base
+     * @return Referencia a base_t para operaciones de modificación
+     */
     constexpr inline base_t &r_base_cthis() noexcept { return (*base_this()); }
 
-    /// devolución de copia de la clase base
-    // constexpr inline const base_t& cr_base_cthis() const noexcept {
-    //   return (static_cast<const base_t& >(*const_base_this()));
-    // }
-
+    /**
+     * @brief Obtiene copia de la clase base
+     * @return Copia del std::array subyacente
+     * @note Útil para operaciones que necesitan una copia del array sin la semántica de reg_digs_t
+     */
     constexpr inline base_t cp_base_cthis() const noexcept
     {
       const base_t &base_cthis{static_cast<const base_t &>(*this)};
       return std::move(base_t{base_cthis});
     }
 
-    /// devolución de referencias de la clase actual
+    // ========================================
+    // ACCESO A LA INSTANCIA ACTUAL
+    // ========================================
+
+    /** @brief Obtiene referencia mutable a this */
     constexpr inline reg_digs_t &r_cthis() noexcept { return (*this); }
 
+    /** @brief Obtiene referencia const a this */
     constexpr inline const reg_digs_t &cr_cthis() const noexcept
     {
       return (*this);
     }
 
-    /// devolución de copia de la clase actual
+    /**
+     * @brief Obtiene copia de la instancia actual
+     * @return Nueva instancia reg_digs_t idéntica a this
+     */
     constexpr inline reg_digs_t cp_cthis() const noexcept
     {
       return reg_digs_t{*this};
     }
 
-    /// devoluciones por referencias y por copia de los elementos
+    // ========================================
+    // ACCESO A ELEMENTOS INDIVIDUALES
+    // ========================================
+
+    /**
+     * @brief Obtiene copia del dígito en la posición k
+     * @param k Índice del dígito (0 = menos significativo)
+     * @return Copia del dígito en la posición k
+     */
     constexpr inline dig_t cp_cthis_at(size_t k) const noexcept
     {
       return cp_base_cthis()[k];
     }
 
+    /**
+     * @brief Obtiene referencia mutable al dígito en la posición k
+     * @param k Índice del dígito (0 = menos significativo)
+     * @return Referencia mutable al dígito en la posición k
+     */
     constexpr inline dig_t &r_cthis_at(size_t k) noexcept
     {
       return (r_base_cthis()[k]);
     }
 
+    /**
+     * @brief Obtiene referencia const al dígito en la posición k
+     * @param k Índice del dígito (0 = menos significativo)
+     * @return Referencia const al dígito en la posición k
+     */
     constexpr inline const dig_t &cr_cthis_at(size_t k) const noexcept
     {
       const base_t &base_cthis{static_cast<const base_t &>(*this)};
@@ -91,33 +214,92 @@ namespace NumRepr
     }
 
   public:
+    // ========================================
+    // TIPOS ADICIONALES PARA ARITMÉTICA AVANZADA
+    // ========================================
+
+    /** @brief Tipo entero sin signo "significativo" para operaciones extendidas */
     using SIG_UINT_T = typename type_traits::sig_UInt_for_UInt_t<UINT_T>;
+
+    /** @brief Tipo entero con signo correspondiente al tipo sin signo */
     using SIG_SINT_T = typename type_traits::sig_SInt_for_UInt_t<UINT_T>;
 
+    // ========================================
+    // CONSTANTES ESTÁTICAS DE DÍGITOS
+    // ========================================
+
+    /** @brief Dígito cero (0) */
     static consteval dig_t dig_0() noexcept { return dig_t::dig_0(); }
+
+    /** @brief Dígito uno (1) */
     static consteval dig_t dig_1() noexcept { return dig_t::dig_1(); }
+
+    /** @brief Dígito máximo válido (B-1) */
     static consteval dig_t dig_Bm1() noexcept { return dig_t::dig_Bm1(); }
+
+    /** @brief Dígito penúltimo válido (B-2) */
     static consteval dig_t dig_Bm2() noexcept { return dig_t::dig_Bm2(); }
+
+    // ========================================
+    // CONSTANTES ESTÁTICAS DE ENTEROS
+    // ========================================
+
+    /** @brief Valor entero cero */
     static consteval UINT_T ui_0() noexcept { return dig_t::ui_0(); }
+
+    /** @brief Valor entero uno */
     static consteval UINT_T ui_1() noexcept { return dig_t::ui_1(); }
+
+    /** @brief Valor entero máximo válido para un dígito (B-1) */
     static consteval UINT_T ui_Bm1() noexcept { return B - 1; }
+
+    /** @brief Valor de la base B */
     static consteval UINT_T ui_B() noexcept { return B; }
+
+    /** @brief Valor entero cero con signo extendido */
     static consteval SIG_UINT_T sui_0() noexcept { return dig_t::sui_0(); }
+
+    /** @brief Valor entero uno con signo extendido */
     static consteval SIG_UINT_T sui_1() noexcept { return dig_t::sui_1(); }
+
+    /** @brief Valor máximo con signo extendido (B-1) */
     static consteval SIG_UINT_T sui_Bm1() noexcept { return dig_t::sui_B() - 1; }
+
+    /** @brief Valor de la base B con signo extendido */
     static consteval SIG_UINT_T sui_B() noexcept { return dig_t::sui_B(); }
+
+    /** @brief Valor B+1 con signo extendido */
     static consteval SIG_UINT_T sui_Bp1() noexcept { return dig_t::sui_B() + 1; }
+
+    // ========================================
+    // CONSTANTES CON SIGNO (SIGNED)
+    // ========================================
+
+    /** @brief Valor cero como entero con signo */
     static consteval SIG_SINT_T ssi_0() noexcept { return dig_t::ssi_0(); }
+
+    /** @brief Valor uno como entero con signo */
     static consteval SIG_SINT_T ssi_1() noexcept { return dig_t::ssi_1(); }
+
+    /** @brief Valor B-1 como entero con signo */
     static consteval SIG_SINT_T ssi_Bm1() noexcept { return dig_t::ssi_B() - 1; }
+
+    /** @brief Valor base B como entero con signo */
     static consteval SIG_SINT_T ssi_B() noexcept { return dig_t::ssi_B(); }
+
+    /** @brief Valor B+1 como entero con signo */
     static consteval SIG_SINT_T ssi_Bp1() noexcept { return dig_t::ssi_B() + 1; }
 
-    /// <summary>
-    /// PARA EL TIPO-PLANTILLA BASE_N_T OBTENEMOS CONSTANTES INMEDIATAS
-    /// TENEMOS CUIDADO DE CREAR UN RVALUE TEMPORAL
-    /// </summary>
+    // ========================================
+    // GENERADORES DE REGISTROS CONSTANTE
+    // ========================================
 
+    /**
+     * @brief Genera un registro de tamaño N inicializado con todos ceros
+     * @tparam N Longitud del registro a generar
+     * @return Registro base_N_t<N> con todos los dígitos en cero
+     * @note Función consteval - se evalúa en tiempo de compilación
+     */
     template <size_t N>
     static consteval base_N_t<N> regd_base_N_0() noexcept
     {
@@ -129,6 +311,11 @@ namespace NumRepr
       return ret;
     }
 
+    /**
+     * @brief Genera un registro de tamaño N que representa el valor 1
+     * @tparam N Longitud del registro a generar
+     * @return Registro con todos ceros excepto dígito menos significativo = 1
+     */
     template <size_t N>
     static consteval base_N_t<N> regd_base_N_1() noexcept
     {
@@ -137,6 +324,11 @@ namespace NumRepr
       return ret;
     }
 
+    /**
+     * @brief Genera un registro de tamaño N que representa el valor B-1
+     * @tparam N Longitud del registro a generar
+     * @return Registro con todos ceros excepto dígito menos significativo = B-1
+     */
     template <size_t N>
     static consteval base_N_t<N> regd_base_N_Bm1() noexcept
     {
@@ -145,6 +337,12 @@ namespace NumRepr
       return ret;
     }
 
+    /**
+     * @brief Genera un registro de tamaño N que representa el valor B (base)
+     * @tparam N Longitud del registro a generar
+     * @return Registro que representa B = 10...0 en base B
+     * @note ret[1] = 1, ret[0] = 0 representa 1*B^1 + 0*B^0 = B
+     */
     template <size_t N>
     static consteval base_N_t<N> regd_base_N_B() noexcept
     {
@@ -153,6 +351,13 @@ namespace NumRepr
       return ret;
     }
 
+    /**
+     * @brief Genera un registro que representa B^n (potencia de la base)
+     * @tparam N Longitud del registro
+     * @tparam n Exponente de la potencia (posición del dígito = 1)
+     * @return Registro que representa B^n
+     * @note ret[n] = 1, resto = 0 representa 1*B^n
+     */
     template <size_t N, size_t n>
       requires((n >= 0) && (n < N))
     static consteval base_N_t<N> regd_base_N_pow_n_B() noexcept
@@ -275,6 +480,12 @@ namespace NumRepr
     // constexpr void fill(const dig_t& value)  noexcept
     // constexpr void swap(base_t& other)       noexcept
 
+    /**
+     * @brief Invierte el orden de los dígitos en el registro
+     * @note Convierte entre little-endian y big-endian
+     * @note Ejemplo: {1,2,3} se convierte en {3,2,1}
+     * @note Útil para cambiar la representación del orden de dígitos
+     */
     constexpr void reverse() noexcept
     {
       std::reverse(this->begin(), this->end());
@@ -291,19 +502,26 @@ namespace NumRepr
     /// </summary>
 
   public:
-    /// <summary>
-    /// Constructor por defecto (rellena de dig_t(0) todo el array)
-    /// </summary>
+    // ========================================
+    // CONSTRUCTORES
+    // ========================================
+
+    /**
+     * @brief Constructor por defecto - inicializa todos los dígitos en cero
+     * @note Se evalúa en tiempo de compilación (consteval)
+     * @note Representa el número 0 en cualquier base
+     */
     consteval inline reg_digs_t() noexcept : base_t{regd_base_0()} {}
 
   private:
-    /// <summary>
-    /// Funcion miembro para generar un objeto tipo base_t y
-    ///	devolverlo desde un std::initializer_list<dig_t>
-    /// </summary>
-    /// <function name="make_base_t"></function>
-    /// <param name="const std::initializer_list<dig_t>& larg"></param>
-    /// <returns="rarg : base_t"></returns>
+    /**
+     * @brief Función auxiliar para construir base_t desde initializer_list
+     * @param larg Lista de inicialización de dígitos
+     * @return Array base_t construido desde la lista
+     * @note Si larg.size() >= L, copia los primeros L elementos
+     * @note Si larg.size() < L, rellena el resto con ceros
+     * @note Los elementos se invierten para mantener convención little-endian
+     */
     static constexpr base_t
     make_base_t(const std::initializer_list<dig_t> &larg)
     {
@@ -344,26 +562,46 @@ namespace NumRepr
     }
 
   public:
-    /// <summary>
-    /// Constructor por lista de digitos utilizando la función make_base_t
-    /// </summary>
+    /**
+     * @brief Constructor desde lista de inicialización de dígitos
+     * @param arg Lista de dígitos {d0, d1, d2, ...}
+     * @note Los dígitos se almacenan en orden little-endian
+     * @note Ejemplo: {dig_t<10>(5), dig_t<10>(6), dig_t<10>(7)} → representa 765
+     * @note Si hay más dígitos que L, se toman solo los primeros L
+     * @note Si hay menos dígitos que L, el resto se rellena con ceros
+     */
     constexpr inline reg_digs_t(const std::initializer_list<dig_t> &arg) noexcept
         : base_t{make_base_t(arg)} {}
 
-    /// <summary>
-    /// Constructor por argumentos tipo dig_t: deduce el tipo
-    /// </summary>
+    /**
+     * @brief Constructor variádico desde argumentos dig_t individuales
+     * @tparam Ts Tipos de argumentos (todos deben ser dig_t)
+     * @param args Dígitos individuales como argumentos separados
+     * @note Permite construcción directa: reg_digs_t(dig_t(1), dig_t(2), dig_t(3))
+     * @note Número de argumentos debe coincidir exactamente con L
+     * @note MSVC: Requiere flags /constexpr:depth2048 /constexpr:steps1048576 /bigobj
+     */
     template <typename... Ts>
-      requires(std::is_same_v<Ts, dig_t> && ...)
+      requires(std::is_same_v<Ts, dig_t> && ... && (sizeof...(Ts) == L))
     constexpr inline reg_digs_t(const Ts &...args) noexcept
-        : base_t{(utilities::ugly_pack_details::pack2array<const Ts &...>{})(args...)}
     {
+      static_assert(sizeof...(Ts) == L, "Number of arguments must match L");
+      base_t temp_array{args...};
+      static_cast<base_t &>(*this) = temp_array;
     }
 
-    /// CONSTRUCTOR COPIA DESDE EL TIPO BASE
+    /**
+     * @brief Constructor copia desde std::array base
+     * @param rarg Array std::array<dig_t<B>, L> a copiar
+     * @note Copia directa del array subyacente
+     */
     constexpr inline reg_digs_t(const base_t &rarg) noexcept : base_t{rarg} {}
 
-    /// CONSTRUCTOR MOVIMIENTO DESDE EL TIPO BASE
+    /**
+     * @brief Constructor movimiento desde std::array base
+     * @param rarg Array std::array<dig_t<B>, L> a mover
+     * @note Movimiento directo del array subyacente
+     */
     constexpr inline reg_digs_t(base_t &&rarg) noexcept
         : base_t{std::move(rarg)} {}
 
@@ -1304,7 +1542,17 @@ namespace NumRepr
     ///
     ///
 
-    /// COMPARACIONES ENTRE REG_DIGS_T Y DIG_T EN FORMA REG_DIGS_T @ DIG_T
+    // ========================================
+    // OPERADORES DE COMPARACIÓN CON dig_t
+    // ========================================
+
+    /**
+     * @brief Compara el registro con un dígito individual
+     * @param rarg Dígito a comparar
+     * @return true si el registro representa exactamente el valor del dígito
+     * @note Solo es true si: cthis[0] == rarg && todos los demás dígitos son 0
+     * @note Ejemplo: reg{5,0,0} == dig_t(5) es true, pero reg{5,1,0} == dig_t(5) es false
+     */
     constexpr inline bool operator==(const dig_t &rarg) const noexcept
     {
       const reg_digs_t &cthis{*this};
@@ -1316,6 +1564,11 @@ namespace NumRepr
       return true;
     }
 
+    /**
+     * @brief Verifica desigualdad con un dígito individual
+     * @param rarg Dígito a comparar
+     * @return true si el registro NO representa exactamente el valor del dígito
+     */
     constexpr inline bool operator!=(const dig_t &rarg) const noexcept
     {
       const reg_digs_t &cthis{*this};

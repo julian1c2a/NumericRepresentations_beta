@@ -41,14 +41,23 @@ set "TOTAL_COUNT=3"
 REM ===== MSVC =====
 echo [1/3] MSVC (Visual Studio 2022)
 echo ----------------------------------------------------------------------
-set "MSVC_FLAGS=/EHsc /std:c++latest /I.\include"
+REM Usar flags extendidos por defecto para template metaprogramming
+set "MSVC_FLAGS=/EHsc /std:c++latest /I.\include /constexpr:depth2048 /constexpr:steps1048576 /bigobj /permissive-"
 cl %MSVC_FLAGS% "%SOURCE_FILE%" /Fe:"%BASE_NAME%_msvc.exe" >nul 2>&1
 if !ERRORLEVEL! EQU 0 (
-    echo ✅ MSVC: Compilación exitosa
+    echo ✅ MSVC: Compilación exitosa (flags extendidos)
     set /a SUCCESS_COUNT+=1
 ) else (
-    echo ❌ MSVC: Error de compilación
-    cl %MSVC_FLAGS% "%SOURCE_FILE%" /Fe:"%BASE_NAME%_msvc.exe"
+    echo ❌ MSVC: Error de compilación incluso con flags extendidos
+    set "MSVC_FALLBACK=/EHsc /std:c++latest /I.\include"
+    cl !MSVC_EXTENDED! "%SOURCE_FILE%" /Fe:"%BASE_NAME%_msvc.exe" >nul 2>&1
+    if !ERRORLEVEL! EQU 0 (
+        echo ✅ MSVC: Compilación exitosa con flags extendidos
+        set /a SUCCESS_COUNT+=1
+    ) else (
+        echo ❌ MSVC: Error persistente incluso con flags extendidos
+        cl !MSVC_EXTENDED! "%SOURCE_FILE%" /Fe:"%BASE_NAME%_msvc.exe"
+    )
 )
 echo.
 
