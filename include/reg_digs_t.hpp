@@ -1,6 +1,7 @@
 #ifndef REG_DIGS_T_HPP_INCLUDED
 #define REG_DIGS_T_HPP_INCLUDED
 
+#include <algorithm> // Para std::reverse, std::find_if, std::count_if
 #include "dig_t.hpp"
 #include "utilities.hpp"
 
