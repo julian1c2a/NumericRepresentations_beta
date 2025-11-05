@@ -57,14 +57,16 @@ reg[2] = dig_t<10>(3);
 
 ## 📁 Headers Documentados
 
-| Header                    | Estado          | Descripción                         |
-| ------------------------- | --------------- | ----------------------------------- |
-| `basic_types.hpp`         | ✅ Documentado   | Tipos fundamentales del sistema     |
-| `auxiliary_types.hpp`     | ✅ Documentado   | Utilidades matemáticas              |
-| `auxiliary_functions.hpp` | ✅ Documentado   | Funciones auxiliares                |
-| `dig_t.hpp`               | ✅ Funcional     | Dígitos en bases arbitrarias        |
-| `utilities.hpp`           | ✅ Refactorizado | Template metaprogramming optimizado |
-| `reg_digs_t.hpp`          | ✅ Documentado   | Registros de dígitos (COMPLETO)     |
+| Header                           | Estado          | Descripción                         |
+| -------------------------------- | --------------- | ----------------------------------- |
+| `basic_types.hpp`                | ✅ Documentado   | Tipos fundamentales del sistema     |
+| `auxiliary_types.hpp`            | ✅ Documentado   | Utilidades matemáticas              |
+| `auxiliary_functions.hpp`        | ✅ Documentado   | Funciones auxiliares                |
+| `dig_t.hpp`                      | ✅ Funcional     | Dígitos en bases arbitrarias        |
+| `utilities.hpp`                  | ✅ Refactorizado | Template metaprogramming optimizado |
+| `reg_digs_t.hpp`                 | ✅ Documentado   | Registros de dígitos (COMPLETO)     |
+| `nat_reg_digs_t.hpp`             | ✅ Documentado   | Números naturales (COMPLETO)        |
+| `BINARIOS_NATURALES_ANALISIS.md` | ✅ Completo      | Análisis binarios base 2            |
 
 ## 🎯 Uso Típico
 
@@ -125,6 +127,21 @@ registro.reverse();               // [1,9,8,5] -> [5,8,9,1]
 
 // Acceso y modificación
 auto primer_digito = registro[0].get();
+```
+
+### 4. Números Binarios Naturales
+```cpp
+// Concepto: nat_reg_digs_t<2, L> = base 2, representación posicional
+using Binary4 = nat_reg_digs_t<2, 4>;  // 4 bits, rango 0-15
+
+// ⚠️ NOTA: nat_reg_digs_t tiene problemas de compilación actualmente
+// 💡 ALTERNATIVA FUNCIONAL: usar reg_digs_t<2, L>
+using BinaryReg4 = reg_digs_t<2, 4>;   
+
+BinaryReg4 binario;
+binario[0] = dig_t<2>{1}; // bit 0 = 1 (LSB) 
+binario[2] = dig_t<2>{1}; // bit 2 = 1
+// Representa: 1×2^0 + 1×2^2 = 1 + 4 = 5 decimal
 ```
 
 ## 🏆 Estado del Proyecto

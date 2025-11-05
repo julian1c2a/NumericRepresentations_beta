@@ -6,7 +6,9 @@
 
 #include "base_num_t.hpp"
 
-#include "nat_reg_digs_t.hpp"#include "base_num_t.hpp"#include "base_num_t.hpp"
+#include "nat_reg_digs_t.hpp"
+#include "base_num_t.hpp"
+
 
 
 

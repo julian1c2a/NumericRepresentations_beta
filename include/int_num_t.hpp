@@ -19,11 +19,11 @@ template <std::uint64_t B>
 class int_num_t : protected base_num_t<B> {
 public:
   using dig_t = dig_t<B>;
-  using UINT_T = typename dig_t::UINT_T;
+  using uint_t = typename dig_t::uint_t;
   using base_num_t = base_num_t<B>;
   using nat_num_t = nat_num_t<B>;
-  using SIG_UINT_T = typename dig_t::SIG_UINT_T;
-  using SIG_SINT_T = typename dig_t::SIG_SINT_T;
+  using sig_uint_t = typename dig_t::sig_uint_t;
+  using sig_sint_t = typename dig_t::sig_sint_t;
 
   // Iterator types
   using str_iterator = typename base_num_t::str_iterator;
@@ -131,7 +131,7 @@ public:
 
     } else if (ch >= '0' && ch <= '9') {  inline void push_front(dig_t<B> parg) {
 
-      UINT_T digit_val = static_cast<UINT_T>(ch - '0');    dig_string &cthis = (*this);
+      uint_t digit_val = static_cast<uint_t>(ch - '0');    dig_string &cthis = (*this);
 
       if (digit_val < B) {    cthis.dig_string::push_front(parg);
 
@@ -209,7 +209,7 @@ public:
 
     while (temp > 0) {  }
 
-      digits.push_back(dig_t{static_cast<UINT_T>(temp % B)});
+      digits.push_back(dig_t{static_cast<uint_t>(temp % B)});
 
       temp /= B;public:
 
