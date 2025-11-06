@@ -1,0 +1,281 @@
+cmake_minimum_required(VERSION 3.25)
+project(NumericRepresentations CXX)
+
+# C++23 Standard
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Compiler detection and configuration
+message(STATUS "Compiler: ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+
+# Compiler-specific flags
+if(MSVC)
+    # Visual Studio / MSVC
+    message(STATUS "Configuring for MSVC")
+    add_compile_options(
+        /std:c++23
+        /W4                    # High warning level
+        /permissive-          # Strict standards compliance
+        /EHsc                 # Exception handling
+        /utf-8                # UTF-8 source files
+        /Zc:__cplusplus       # Correct __cplusplus value
+        /bigobj               # Large object files for templates
+    )
+    add_compile_definitions(_CRT_SECURE_NO_WARNINGS)
+    
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GCC
+    message(STATUS "Configuring for GCC")
+    add_compile_options(
+        -std=c++23
+        -Wall -Wextra -Wpedantic
+        -fconcepts-diagnostics-depth=512
+        -ftemplate-backtrace-limit=0
+        -march=native          # Optimize for current CPU
+    )
+    
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    # Clang
+    message(STATUS "Configuring for Clang")
+    add_compile_options(
+        -std=c++23
+        -Wall -Wextra -Wpedantic
+        -ftemplate-backtrace-limit=0
+        -march=native          # Optimize for current CPU
+    )
+    
+else()
+    message(WARNING "Unknown compiler: ${CMAKE_CXX_COMPILER_ID}")
+    add_compile_options(-std=c++23 -Wall -Wextra)
+endif()
+
+# Debug/Release configurations
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    message(STATUS "Debug build")
+    if(MSVC)
+        add_compile_options(/Od /Zi)
+        add_link_options(/DEBUG)
+    else()
+        add_compile_options(-g -O0 -DDEBUG)
+    endif()
+else()
+    message(STATUS "Release build")
+    if(MSVC)
+        add_compile_options(/O2 /DNDEBUG)
+    else()
+        add_compile_options(-O3 -DNDEBUG)
+    endif()
+endif()
+
+# Include directories
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+# Main executable
+add_executable(NumericRepresentations 
+    src/main.cpp 
+    src/test_driver.cpp 
+    src/get.cpp
+)
+
+# Test executables for existing basic tests
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_basic.cpp")
+    add_executable(test_basic test_basic.cpp)
+endif()
+
+# ===================================================================
+# COMPREHENSIVE CTEST CONFIGURATION
+# Tests organized by categories for nat_reg_digs_t and int_reg_digs_t
+# ===================================================================
+
+# Enable testing with CTest
+enable_testing()
+
+# ===================================================================
+# NAT_REG_DIGS_T TEST SUITE - Natural Numbers (8-Phase Analysis)
+# ===================================================================
+
+# Phase 1: Basic Methods and Fundamentals
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_basic_methods.cpp")
+    add_executable(test_nat_basic_methods test_basic_methods.cpp)
+    add_test(
+        NAME nat_reg_digs_basic_methods
+        COMMAND test_nat_basic_methods
+    )
+    set_tests_properties(nat_reg_digs_basic_methods PROPERTIES
+        LABELS "nat_reg_digs_t;basic;phase1"
+        TIMEOUT 30
+    )
+endif()
+
+# Phase 2: Factory Methods
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_factory_methods.cpp")
+    add_executable(test_nat_factory_methods test_factory_methods.cpp)
+    add_test(
+        NAME nat_reg_digs_factory_methods
+        COMMAND test_nat_factory_methods
+    )
+    set_tests_properties(nat_reg_digs_factory_methods PROPERTIES
+        LABELS "nat_reg_digs_t;factory;phase2"
+        TIMEOUT 30
+    )
+endif()
+
+# Phase 3: Constructors
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_minimal_constructors.cpp")
+    add_executable(test_nat_constructors test_minimal_constructors.cpp)
+    add_test(
+        NAME nat_reg_digs_constructors
+        COMMAND test_nat_constructors
+    )
+    set_tests_properties(nat_reg_digs_constructors PROPERTIES
+        LABELS "nat_reg_digs_t;constructors;phase3"
+        TIMEOUT 30
+    )
+endif()
+
+# Phase 4: Set Operations
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_set_operations.cpp")
+    add_executable(test_nat_set_operations test_set_operations.cpp)
+    add_test(
+        NAME nat_reg_digs_set_operations
+        COMMAND test_nat_set_operations
+    )
+    set_tests_properties(nat_reg_digs_set_operations PROPERTIES
+        LABELS "nat_reg_digs_t;set_operations;phase4"
+        TIMEOUT 30
+    )
+endif()
+
+# Phase 5: Assignment Operators
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_assignment_operators.cpp")
+    add_executable(test_nat_assignment_operators test_assignment_operators.cpp)
+    add_test(
+        NAME nat_reg_digs_assignment_operators
+        COMMAND test_nat_assignment_operators
+    )
+    set_tests_properties(nat_reg_digs_assignment_operators PROPERTIES
+        LABELS "nat_reg_digs_t;assignment;operators;phase5"
+        TIMEOUT 30
+    )
+endif()
+
+# Phase 6: Arithmetic Operators
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_arithmetic_operators.cpp")
+    add_executable(test_nat_arithmetic_operators test_arithmetic_operators.cpp)
+    add_test(
+        NAME nat_reg_digs_arithmetic_operators
+        COMMAND test_nat_arithmetic_operators
+    )
+    set_tests_properties(nat_reg_digs_arithmetic_operators PROPERTIES
+        LABELS "nat_reg_digs_t;arithmetic;operators;phase6"
+        TIMEOUT 45
+    )
+endif()
+
+# Phase 7: Comparison Operators
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_comparison_operators.cpp")
+    add_executable(test_nat_comparison_operators test_comparison_operators.cpp)
+    add_test(
+        NAME nat_reg_digs_comparison_operators
+        COMMAND test_nat_comparison_operators
+    )
+    set_tests_properties(nat_reg_digs_comparison_operators PROPERTIES
+        LABELS "nat_reg_digs_t;comparison;operators;phase7"
+        TIMEOUT 30
+    )
+endif()
+
+# Phase 8: I/O Operations
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_io_operations.cpp")
+    add_executable(test_nat_io_operations test_io_operations.cpp)
+    add_test(
+        NAME nat_reg_digs_io_operations
+        COMMAND test_nat_io_operations
+    )
+    set_tests_properties(nat_reg_digs_io_operations PROPERTIES
+        LABELS "nat_reg_digs_t;io_operations;strings;phase8"
+        TIMEOUT 30
+    )
+endif()
+
+# ===================================================================
+# INT_REG_DIGS_T TEST SUITE - Signed Integers (Base Complement)
+# ===================================================================
+
+# Phase 1: Basic Methods and Instantiation
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_int_ultra_minimal.cpp")
+    add_executable(test_int_ultra_minimal_exe test_int_ultra_minimal.cpp)
+    add_test(
+        NAME int_reg_digs_ultra_minimal
+        COMMAND test_int_ultra_minimal_exe
+    )
+    set_tests_properties(int_reg_digs_ultra_minimal PROPERTIES
+        LABELS "int_reg_digs_t;basic;minimal;phase1"
+        TIMEOUT 30
+    )
+endif()
+
+# Additional signed integer tests
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_int_basic_methods.cpp")
+    add_executable(test_int_basic_methods_exe test_int_basic_methods.cpp)
+    add_test(
+        NAME int_reg_digs_basic_methods
+        COMMAND test_int_basic_methods_exe
+    )
+    set_tests_properties(int_reg_digs_basic_methods PROPERTIES
+        LABELS "int_reg_digs_t;basic;methods"
+        TIMEOUT 30
+    )
+endif()
+
+# ===================================================================
+# AUXILIARY AND UTILITY TESTS
+# ===================================================================
+
+# Basic test if it exists
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_basic.cpp")
+    add_test(NAME basic_test COMMAND test_basic)
+    set_tests_properties(basic_test PROPERTIES
+        LABELS "auxiliary;utilities"
+        TIMEOUT 20
+    )
+endif()
+
+# Additional utility tests if they exist
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test_minimal_factory.cpp")
+    add_executable(test_minimal_factory_exe test_minimal_factory.cpp)
+    add_test(
+        NAME minimal_factory_test
+        COMMAND test_minimal_factory_exe
+    )
+    set_tests_properties(minimal_factory_test PROPERTIES
+        LABELS "utilities;factory;minimal"
+        TIMEOUT 20
+    )
+endif()
+
+# ===================================================================
+# TEST SUITES AND ORGANIZATION
+# ===================================================================
+
+# Define custom test suites for easy execution
+# Run all nat_reg_digs_t tests: ctest -L nat_reg_digs_t
+# Run specific phase: ctest -L phase1
+# Run all basic tests: ctest -L basic
+# Run all operator tests: ctest -L operators
+
+# Verbose output for all tests (only for tests that exist)
+# Note: This will be populated dynamically based on which tests actually get created
+
+# Summary message
+message(STATUS "CTest Configuration Summary:")
+message(STATUS "  - nat_reg_digs_t test suite: 8 phases configured (conditional on file existence)")
+message(STATUS "  - int_reg_digs_t test suite: Basic methods configured (conditional on file existence)")
+message(STATUS "  - Auxiliary tests: Configured conditionally")
+message(STATUS "  - Use 'ctest --verbose' to see detailed output")
+message(STATUS "  - Use 'ctest -L nat_reg_digs_t' for natural number tests")
+message(STATUS "  - Use 'ctest -L int_reg_digs_t' for signed integer tests")
+message(STATUS "  - Use 'ctest -L phase1' for basic functionality tests")
+message(STATUS "  - Use 'ctest -L operators' for operator tests")

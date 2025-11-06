@@ -1,0 +1,92 @@
+[
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/NumericRepresentations.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\NumericRepresentations.dir\\src\\main.cpp.obj -c D:\\GDrive\\NumericRepresentations\\src\\main.cpp",
+  "file": "D:/GDrive/NumericRepresentations/src/main.cpp",
+  "output": "CMakeFiles/NumericRepresentations.dir/src/main.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/NumericRepresentations.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\NumericRepresentations.dir\\src\\test_driver.cpp.obj -c D:\\GDrive\\NumericRepresentations\\src\\test_driver.cpp",
+  "file": "D:/GDrive/NumericRepresentations/src/test_driver.cpp",
+  "output": "CMakeFiles/NumericRepresentations.dir/src/test_driver.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/NumericRepresentations.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\NumericRepresentations.dir\\src\\get.cpp.obj -c D:\\GDrive\\NumericRepresentations\\src\\get.cpp",
+  "file": "D:/GDrive/NumericRepresentations/src/get.cpp",
+  "output": "CMakeFiles/NumericRepresentations.dir/src/get.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_basic.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_basic.dir\\test_basic.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_basic.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_basic.cpp",
+  "output": "CMakeFiles/test_basic.dir/test_basic.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_nat_basic_methods.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_nat_basic_methods.dir\\test_basic_methods.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_basic_methods.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_basic_methods.cpp",
+  "output": "CMakeFiles/test_nat_basic_methods.dir/test_basic_methods.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_nat_factory_methods.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_nat_factory_methods.dir\\test_factory_methods.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_factory_methods.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_factory_methods.cpp",
+  "output": "CMakeFiles/test_nat_factory_methods.dir/test_factory_methods.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_nat_constructors.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_nat_constructors.dir\\test_minimal_constructors.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_minimal_constructors.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_minimal_constructors.cpp",
+  "output": "CMakeFiles/test_nat_constructors.dir/test_minimal_constructors.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_nat_set_operations.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_nat_set_operations.dir\\test_set_operations.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_set_operations.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_set_operations.cpp",
+  "output": "CMakeFiles/test_nat_set_operations.dir/test_set_operations.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_nat_assignment_operators.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_nat_assignment_operators.dir\\test_assignment_operators.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_assignment_operators.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_assignment_operators.cpp",
+  "output": "CMakeFiles/test_nat_assignment_operators.dir/test_assignment_operators.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_nat_arithmetic_operators.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_nat_arithmetic_operators.dir\\test_arithmetic_operators.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_arithmetic_operators.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_arithmetic_operators.cpp",
+  "output": "CMakeFiles/test_nat_arithmetic_operators.dir/test_arithmetic_operators.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_nat_comparison_operators.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_nat_comparison_operators.dir\\test_comparison_operators.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_comparison_operators.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_comparison_operators.cpp",
+  "output": "CMakeFiles/test_nat_comparison_operators.dir/test_comparison_operators.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_nat_io_operations.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_nat_io_operations.dir\\test_io_operations.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_io_operations.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_io_operations.cpp",
+  "output": "CMakeFiles/test_nat_io_operations.dir/test_io_operations.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_int_ultra_minimal_exe.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_int_ultra_minimal_exe.dir\\test_int_ultra_minimal.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_int_ultra_minimal.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_int_ultra_minimal.cpp",
+  "output": "CMakeFiles/test_int_ultra_minimal_exe.dir/test_int_ultra_minimal.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_int_basic_methods_exe.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_int_basic_methods_exe.dir\\test_int_basic_methods.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_int_basic_methods.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_int_basic_methods.cpp",
+  "output": "CMakeFiles/test_int_basic_methods_exe.dir/test_int_basic_methods.cpp.obj"
+},
+{
+  "directory": "D:/GDrive/NumericRepresentations/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe  @CMakeFiles/test_minimal_factory_exe.dir/includes_CXX.rsp -g -std=c++23 -std=c++23 -Wall -Wextra -Wpedantic -fconcepts-diagnostics-depth=512 -ftemplate-backtrace-limit=0 -march=native -g -O0 -DDEBUG -o CMakeFiles\\test_minimal_factory_exe.dir\\test_minimal_factory.cpp.obj -c D:\\GDrive\\NumericRepresentations\\test_minimal_factory.cpp",
+  "file": "D:/GDrive/NumericRepresentations/test_minimal_factory.cpp",
+  "output": "CMakeFiles/test_minimal_factory_exe.dir/test_minimal_factory.cpp.obj"
+}
+]

@@ -1,0 +1,16 @@
+D:/GDrive/NumericRepresentations/build/CMakeFiles/NumericRepresentations.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_basic.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_nat_basic_methods.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_nat_factory_methods.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_nat_constructors.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_nat_set_operations.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_nat_assignment_operators.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_nat_arithmetic_operators.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_nat_comparison_operators.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_nat_io_operations.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_int_ultra_minimal_exe.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_int_basic_methods_exe.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test_minimal_factory_exe.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/test.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/edit_cache.dir
+D:/GDrive/NumericRepresentations/build/CMakeFiles/rebuild_cache.dir
