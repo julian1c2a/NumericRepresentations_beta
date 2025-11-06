@@ -691,7 +691,10 @@ namespace NumRepr
     /// </summary>
     template <size_t N>
     constexpr inline reg_digs_t(base_N_t<N> &&arg) noexcept
-        : base_t{std::move(move_arg_N<N>(std::move(arg)))} {}
+        : base_t{}
+    {
+      move_arg_N<N>(std::move(arg));
+    }
 
   private:
     /// <summary="Funcion de normalizacion a dig_t (dígitos base B) que construye
@@ -1802,7 +1805,7 @@ namespace NumRepr
       std::string reg_escrito{};
       std::stringstream os{};
       os << "reg_digs_t#";
-      for (std::int64_t ix{this->size() - 1}; ix > -1; --ix)
+      for (std::int64_t ix{static_cast<std::int64_t>(this->size()) - 1}; ix > -1; --ix)
       {
         os << (*this)(ix);
         if (ix != 0)
@@ -2715,8 +2718,8 @@ namespace NumRepr
       dig_t<B> &left, dig_t<B> right, dig_t<B> carryin) noexcept
   {
     using namespace type_traits;
-    using UINT_T = dig_t<B>::UINT_T;
-    using SIG_UINT_T = dig_t<B>::SIG_UINT_T;
+    using UINT_T = typename dig_t<B>::uint_t;
+    using SIG_UINT_T = typename dig_t<B>::sig_uint_t;
     constexpr UINT_T LIMIT{sqrt_max<UINT_T>()};
     constexpr bool BASE_IS_BOTTOM_LIMIT{B < LIMIT};
     using ELEC_UINT_T = std::conditional_t<BASE_IS_BOTTOM_LIMIT, /// CONDITION

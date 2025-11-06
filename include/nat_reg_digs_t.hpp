@@ -186,8 +186,11 @@ namespace NumRepr
      * @param arg Lista de dígitos {d0, d1, d2, ...}
      * @note Los dígitos se almacenan en orden little-endian (d0 = menos significativo)
      */
+    /*
+    // TEMPORALMENTE COMENTADO: Constructor initializer_list causa crash compilador C1001
     constexpr inline nat_reg_digs_t(
         const std::initializer_list<dig_t> &arg) noexcept : base_t{arg} {}
+    */
 
     /**
      * @brief Constructor variádico desde argumentos de tipo dig_t
@@ -261,7 +264,7 @@ namespace NumRepr
      */
     inline constexpr base_t &base_ref_cthis() noexcept
     {
-      const base_t &r_base_cthis{static_cast<const base_t &>(*this)};
+      base_t &r_base_cthis{static_cast<base_t &>(*this)};
       return (r_base_cthis);
     }
 
@@ -271,10 +274,10 @@ namespace NumRepr
      * @return Referencia al dígito en la posición ix para modificación
      * @note Función interna para modificación de dígitos individuales
      */
-    inline constexpr const dig_t &by_index(size_t ix) noexcept
+    inline constexpr dig_t &by_index(size_t ix) noexcept
     {
-      const base_t &r_base_cthis{static_cast<const base_t &>(*this)};
-      return (r_base_cthis[ix]);
+      base_t &r_base_this{static_cast<base_t &>(*this)};
+      return (r_base_this[ix]);
     }
 
     // =========================================================================
@@ -333,14 +336,14 @@ namespace NumRepr
       if constexpr (Z == L)
       {
         for (size_t ix{0}; ix < Z; ++ix)
-          by_index(ix) = std::move(arg[ix]);
+          (*this)[ix] = std::move(arg[ix]);
       }
       else if constexpr (W == L)
       {
         for (size_t ix{0}; ix < Z; ++ix)
-          by_index(ix) = std::move(arg[ix]);
+          (*this)[ix] = std::move(arg[ix]);
         for (size_t ix{Z}; ix < W; ++ix)
-          by_index(ix) = std::move(dig_t::dig_0());
+          (*this)[ix] = std::move(dig_t::dig_0());
       }
       else
       {
@@ -401,8 +404,9 @@ namespace NumRepr
     template <size_t N>
       requires(N > 0)
     constexpr inline nat_reg_digs_t(const base_N_t<N> &&arg) noexcept
-        : base_t{move_arg_N<N>(std::move(arg))}
+        : base_t{}
     {
+      move_arg_N<N>(std::move(const_cast<base_N_t<N> &>(arg)));
     }
 
     // =========================================================================
@@ -416,9 +420,15 @@ namespace NumRepr
      * @param dig_pow_i Secuencia de valores enteros a normalizar
      * @note Los valores se normalizan automáticamente a la base B
      */
+    /*
+    // TEMPORALMENTE COMENTADO: Constructor variádico causa crash compilador C1001
     template <type_traits::integral_c... Ints_type>
+      requires((sizeof...(Ints_type)) == L)
     constexpr inline nat_reg_digs_t(Ints_type... dig_pow_i) noexcept
-        : base_t{normalize<Ints_type...>(dig_pow_i...)} {}
+        : base_t{(base_t::template normalize<Ints_type...>(dig_pow_i...))}
+    {
+    }
+    */
 
     /**
      * @brief Constructor de copia desde otro registro natural
@@ -880,7 +890,8 @@ namespace NumRepr
   public:
     constexpr inline const nat_reg_digs_t &operator++() noexcept
     {
-      return (m_incr(*this));
+      NumRepr::m_incr(*this);
+      return (*this);
     }
 
     constexpr inline nat_reg_digs_t operator++(int) noexcept
@@ -892,7 +903,8 @@ namespace NumRepr
 
     constexpr inline const nat_reg_digs_t &operator--() noexcept
     {
-      return (m_decr(*this));
+      NumRepr::m_decr(*this);
+      return (*this);
     }
 
     constexpr inline nat_reg_digs_t operator--(int) noexcept
@@ -1021,17 +1033,17 @@ namespace NumRepr
 
     constexpr inline nat_reg_digs_t operator+(dig_t rarg) const noexcept
     {
-      return std::get<0>(nat_reg_digs_t{sum(*this, rarg)});
+      return nat_reg_digs_t{std::get<0>(sum(*this, rarg))};
     }
 
     constexpr inline nat_reg_digs_t operator-(dig_t rarg) const noexcept
     {
-      return std::get<0>(nat_reg_digs_t{subtract(*this, rarg)});
+      return nat_reg_digs_t{std::get<0>(subtract(*this, rarg))};
     }
 
     constexpr inline nat_reg_digs_t operator*(dig_t rarg) const noexcept
     {
-      return std::get<0>(nat_reg_digs_t{mult(*this, rarg)});
+      return nat_reg_digs_t{std::get<0>(mult(*this, rarg))};
     }
 
     constexpr inline nat_reg_digs_t operator/(dig_t rarg) const noexcept
@@ -1088,13 +1100,13 @@ namespace NumRepr
 
     constexpr inline const nat_reg_digs_t &operator+=(const nat_reg_digs_t &rarg) noexcept
     {
-      m_incr(*this, rarg);
+      NumRepr::m_sum(*this, rarg);
       return (*this);
     }
 
     constexpr inline const nat_reg_digs_t &operator-=(const nat_reg_digs_t &rarg) noexcept
     {
-      m_decr(*this, rarg);
+      NumRepr::m_subtract(*this, rarg);
       return (*this);
     }
 
@@ -1122,17 +1134,17 @@ namespace NumRepr
 
     constexpr inline nat_reg_digs_t operator+(const nat_reg_digs_t &rarg) const noexcept
     {
-      return std::get<0>(nat_reg_digs_t{sum(*this, rarg)});
+      return nat_reg_digs_t{std::get<0>(sum(*this, rarg))};
     }
 
     constexpr inline nat_reg_digs_t operator-(const nat_reg_digs_t &rarg) const noexcept
     {
-      return std::get<0>(nat_reg_digs_t{subtract(*this, rarg)});
+      return nat_reg_digs_t{std::get<0>(subtract(*this, rarg))};
     }
 
     constexpr inline nat_reg_digs_t operator*(const nat_reg_digs_t &rarg) const noexcept
     {
-      return std::get<0>(nat_reg_digs_t{mult(*this, rarg)});
+      return nat_reg_digs_t{std::get<0>(mult(*this, rarg))};
     }
 
     constexpr inline nat_reg_digs_t operator/(const nat_reg_digs_t &rarg) const noexcept
