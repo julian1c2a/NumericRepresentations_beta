@@ -1209,6 +1209,163 @@ namespace NumRepr
       strstr_os << static_cast<sig_uint_t>(B);
       return strstr_os.str();
     }
+
+    // ===================================================================
+    // MÉTODOS MATEMÁTICOS ADICIONALES (compatibles con int_reg_digs_t)
+    // ===================================================================
+
+    /// @brief Valor absoluto (identidad para números naturales)
+    /// @return Copia del mismo número (siempre positivo)
+    constexpr inline nat_reg_digs_t abs() const noexcept
+    {
+      return *this; // Los números naturales son siempre no-negativos
+    }
+
+    /// @brief Valor absoluto en place (no-op para números naturales)
+    /// @return Referencia al mismo objeto
+    constexpr inline const nat_reg_digs_t &abs_in_place() noexcept
+    {
+      return *this; // No hay cambios necesarios
+    }
+
+    /// @brief Función signo para números naturales
+    /// @return 0 si es cero, 1 si es positivo
+    constexpr inline int sign() const noexcept
+    {
+      return is_zero() ? 0 : 1;
+    }
+
+    /// @brief Verifica si el número es cero
+    /// @return true si todos los dígitos son cero
+    constexpr inline bool is_zero() const noexcept
+    {
+      for (size_t i = 0; i < L; ++i)
+      {
+        if ((*this)[i].get() != 0)
+        {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    /// @brief Verifica si el número es positivo
+    /// @return true si no es cero (números naturales > 0)
+    constexpr inline bool is_positive() const noexcept
+    {
+      return !is_zero();
+    }
+
+    /// @brief Verifica si el número es negativo
+    /// @return false siempre (números naturales no son negativos)
+    constexpr inline bool is_negative() const noexcept
+    {
+      return false;
+    }
+
+    /// @brief Valor máximo representable en esta configuración
+    /// @return Número con todos los dígitos en valor máximo (B-1)
+    static consteval nat_reg_digs_t max_value() noexcept
+    {
+      nat_reg_digs_t result;
+      for (size_t i = 0; i < L; ++i)
+      {
+        result[i] = dig_t{B - 1}; // Cada dígito al máximo (B-1)
+      }
+      return result;
+    }
+
+    /// @brief Valor mínimo representable en esta configuración
+    /// @return Número cero (mínimo valor natural)
+    static consteval nat_reg_digs_t min_value() noexcept
+    {
+      return nat_reg_digs_t{}; // Constructor por defecto = todos ceros
+    }
+
+    /// @brief Intercambia contenido con otro número
+    /// @param other Otro número a intercambiar
+    constexpr inline void swap(nat_reg_digs_t &other) noexcept
+    {
+      for (size_t i = 0; i < L; ++i)
+      {
+        auto temp = (*this)[i];
+        (*this)[i] = other[i];
+        other[i] = temp;
+      }
+    }
+
+    /// @brief Conversión a string con formato personalizable
+    /// @param separator Separador entre dígitos (ej: "," para 1,2,3,4)
+    /// @param show_base_info Si mostrar información de base y longitud
+    /// @return String formateado del número
+    std::string to_string_formatted(const std::string &separator = ",",
+                                    bool show_base_info = false) const noexcept
+    {
+      std::stringstream ss;
+
+      if (show_base_info)
+      {
+        ss << "[B" << B << ",L" << L << "]:";
+      }
+
+      // Mostrar dígitos desde el más significativo al menos significativo
+      for (int32_t ix = static_cast<int32_t>(L) - 1; ix >= 0; --ix)
+      {
+        ss << static_cast<sig_uint_t>((*this)[ix].get());
+        if (ix > 0 && !separator.empty())
+        {
+          ss << separator;
+        }
+      }
+
+      return ss.str();
+    }
+
+    // ===================================================================
+    // FUNCIONES FRIEND PARA COMPATIBILIDAD STL
+    // ===================================================================
+
+    /// @brief Función abs global (identidad para naturales)
+    friend constexpr nat_reg_digs_t abs(const nat_reg_digs_t &x) noexcept
+    {
+      return x; // Valor absoluto es identidad
+    }
+
+    /// @brief Función swap global
+    friend constexpr void swap(nat_reg_digs_t &a, nat_reg_digs_t &b) noexcept
+    {
+      a.swap(b);
+    }
+
+    /// @brief Función sign global
+    friend constexpr int sign(const nat_reg_digs_t &x) noexcept
+    {
+      return x.sign();
+    }
+
+    /// @brief Función min global
+    friend constexpr const nat_reg_digs_t &min(const nat_reg_digs_t &a, const nat_reg_digs_t &b) noexcept
+    {
+      return (a <= b) ? a : b;
+    }
+
+    /// @brief Función max global
+    friend constexpr const nat_reg_digs_t &max(const nat_reg_digs_t &a, const nat_reg_digs_t &b) noexcept
+    {
+      return (a >= b) ? a : b;
+    }
+
+    /// @brief Función clamp global - limita valor entre mín y máx
+    friend constexpr nat_reg_digs_t clamp(const nat_reg_digs_t &value,
+                                          const nat_reg_digs_t &min_val,
+                                          const nat_reg_digs_t &max_val) noexcept
+    {
+      if (value < min_val)
+        return min_val;
+      if (value > max_val)
+        return max_val;
+      return value;
+    }
   };
 
   /****************************/
@@ -1529,6 +1686,173 @@ namespace NumRepr
   {
     os << arg.to_string();
     return (os);
+  }
+
+  // ===================================================================
+  // FUNCIONES UTILITARIAS GLOBALES
+  // ===================================================================
+
+  /// @brief Máximo Común Divisor usando algoritmo de Euclides
+  /// @param a Primer número
+  /// @param b Segundo número
+  /// @return MCD de a y b
+  /// @note COMENTADO: Problemas con operator% y fediv
+  /*
+  template <std::uint64_t Base, std::size_t Length>
+  constexpr nat_reg_digs_t<Base, Length> gcd(nat_reg_digs_t<Base, Length> a,
+                                             nat_reg_digs_t<Base, Length> b)
+  {
+    // Algoritmo de Euclides
+    while (!b.is_zero())
+    {
+      auto temp = b;
+      b = a % b;
+      a = temp;
+    }
+    return a;
+  }
+
+  /// @brief Mínimo Común Múltiplo
+  /// @param a Primer número
+  /// @param b Segundo número
+  /// @return MCM de a y b
+  /// @note COMENTADO: Depende de gcd que tiene problemas
+  template <std::uint64_t Base, std::size_t Length>
+  constexpr nat_reg_digs_t<Base, Length> lcm(const nat_reg_digs_t<Base, Length> &a,
+                                             const nat_reg_digs_t<Base, Length> &b)
+  {
+    if (a.is_zero() || b.is_zero())
+    {
+      return nat_reg_digs_t<Base, Length>{}; // LCM(0, x) = 0
+    }
+
+    auto mcd = gcd(a, b);
+    return (a / mcd) * b; // LCM = (a*b)/GCD(a,b) reordenado para evitar overflow
+  }
+  */
+
+  /// @brief Potenciación entera eficiente (exponenciación por cuadrados)
+  /// @param base Base de la potenciación
+  /// @param exponent Exponente (entero no negativo)
+  /// @return base^exponent
+  template <std::uint64_t Base, std::size_t Length>
+  constexpr nat_reg_digs_t<Base, Length> power(const nat_reg_digs_t<Base, Length> &base,
+                                               std::size_t exponent)
+  {
+    if (exponent == 0)
+    {
+      nat_reg_digs_t<Base, Length> one{};
+      one[0] = typename nat_reg_digs_t<Base, Length>::dig_t{1};
+      return one;
+    }
+
+    if (exponent == 1)
+    {
+      return base;
+    }
+
+    // Exponenciación por cuadrados
+    nat_reg_digs_t<Base, Length> result{};
+    result[0] = typename nat_reg_digs_t<Base, Length>::dig_t{1}; // result = 1
+    nat_reg_digs_t<Base, Length> current_base = base;
+
+    while (exponent > 0)
+    {
+      if (exponent % 2 == 1)
+      { // Si exponente es impar
+        result = result * current_base;
+      }
+      current_base = current_base * current_base; // base = base²
+      exponent /= 2;
+    }
+
+    return result;
+  }
+
+  /// @brief Crear nat_reg_digs_t desde string decimal
+  /// @param str String con representación decimal del número
+  /// @return Número creado desde el string
+  template <std::uint64_t Base, std::size_t Length>
+  nat_reg_digs_t<Base, Length> from_string(const std::string &str)
+  {
+    nat_reg_digs_t<Base, Length> result{};
+    nat_reg_digs_t<Base, Length> base_power{};
+    base_power[0] = typename nat_reg_digs_t<Base, Length>::dig_t{1}; // power = 1
+
+    // Procesar dígitos desde el menos significativo
+    for (auto it = str.rbegin(); it != str.rend(); ++it)
+    {
+      char c = *it;
+      if (c >= '0' && c <= '9')
+      {
+        uint64_t digit_val = c - '0';
+        if (digit_val < Base)
+        { // Validar que el dígito sea válido para la base
+          nat_reg_digs_t<Base, Length> digit_contrib{};
+          digit_contrib[0] = typename nat_reg_digs_t<Base, Length>::dig_t{digit_val};
+          result = result + (digit_contrib * base_power);
+
+          // Actualizar potencia de la base
+          nat_reg_digs_t<Base, Length> base_val{};
+          base_val[0] = typename nat_reg_digs_t<Base, Length>::dig_t{Base};
+          base_power = base_power * base_val;
+        }
+      }
+      // Ignorar caracteres no numéricos (espacios, comas, etc.)
+    }
+
+    return result;
+  }
+
+  /// @brief Verificar si un número es potencia de la base
+  /// @param num Número a verificar
+  /// @return true si num es potencia de Base (1, Base, Base², Base³, ...)
+  template <std::uint64_t Base, std::size_t Length>
+  constexpr bool is_power_of_base(const nat_reg_digs_t<Base, Length> &num)
+  {
+    if (num.is_zero())
+    {
+      return false; // 0 no es potencia de ninguna base
+    }
+
+    // Verificar si es 1 (Base^0)
+    if (num[0].get() == 1)
+    {
+      for (size_t i = 1; i < Length; ++i)
+      {
+        if (num[i].get() != 0)
+        {
+          return false;
+        }
+      }
+      return true; // num == 1
+    }
+
+    // Buscar el primer dígito no cero (debe ser 1 y estar en posición múltiplo de log_Base)
+    size_t first_nonzero_pos = Length;
+    for (size_t i = 0; i < Length; ++i)
+    {
+      if (num[i].get() != 0)
+      {
+        if (num[i].get() != 1)
+        {
+          return false; // Primer dígito no cero debe ser 1
+        }
+        first_nonzero_pos = i;
+        break;
+      }
+    }
+
+    // Verificar que todos los demás dígitos sean cero
+    for (size_t i = first_nonzero_pos + 1; i < Length; ++i)
+    {
+      if (num[i].get() != 0)
+      {
+        return false;
+      }
+    }
+
+    return true; // Es potencia de la base
   }
 
 } // namespace NumRepr

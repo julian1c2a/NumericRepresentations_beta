@@ -69,7 +69,15 @@ namespace NumRepr
     constexpr void flip_sign() { (*this)[R] = is_plus() ? dig_Bm1() : dig_0(); }
     constexpr void set_plus() { (*this)[R] = dig_0(); }
     constexpr void set_minus() { (*this)[R] = dig_Bm1(); }
-    constexpr void normalize_sign() { is_minus() ? set_minus() : dig_t{}; }
+    constexpr void normalize_sign()
+    {
+      base_t &r_base_cthis{*static_cast<base_t *>(this)};
+      // Normalizar -0 a +0 (caso más común de inconsistencia)
+      if (is_minus() && r_base_cthis.is_0())
+      {
+        set_plus();
+      }
+    }
     static consteval dig_t minus() { return dig_Bm1(); }
     static consteval dig_t plus() { return dig_0(); }
 
@@ -236,7 +244,10 @@ namespace NumRepr
 
     /// CONSTRUCTOR POR LISTA DE DIGITOS
     constexpr inline int_reg_digs_t(const std::initializer_list<dig_t> &arg) noexcept
-        : base_t{arg} {}
+        : base_t{arg}
+    {
+      normalize_sign();
+    }
 
     /// CONSTRUCTOR POR ARGUMENTOS DIGITOS SIN LIMITE: DEDUCE EL TIPO
     template <typename... Ts>
@@ -668,7 +679,12 @@ namespace NumRepr
       {
         const base_t &cr_base_cthis{*static_cast<const base_t *const>(this)};
         const base_t &cr_base_arg{*static_cast<const base_t *const>(&arg)};
-        return (cr_base_cthis <= cr_base_arg);
+        // Para números negativos: mayor magnitud = menor número (invertir comparación)
+        // Para números positivos: mayor magnitud = mayor número (comparación normal)
+        if (is_minus())
+          return (cr_base_cthis >= cr_base_arg); // Invertido para negativos
+        else
+          return (cr_base_cthis <= cr_base_arg); // Normal para positivos
       }
     }
 
@@ -698,7 +714,12 @@ namespace NumRepr
       {
         const base_t &cr_base_cthis{*static_cast<const base_t *const>(this)};
         const base_t &cr_base_arg{*static_cast<const base_t *const>(&arg)};
-        return (cr_base_cthis >= cr_base_arg);
+        // Para números negativos: mayor magnitud = menor número (invertir comparación)
+        // Para números positivos: mayor magnitud = mayor número (comparación normal)
+        if (is_minus())
+          return (cr_base_cthis <= cr_base_arg); // Invertido para negativos
+        else
+          return (cr_base_cthis >= cr_base_arg); // Normal para positivos
       }
     }
 
@@ -728,7 +749,12 @@ namespace NumRepr
       {
         const base_t &cr_base_cthis{*static_cast<const base_t *const>(this)};
         const base_t &cr_base_arg{*static_cast<const base_t *const>(&arg)};
-        return (cr_base_cthis < cr_base_arg);
+        // Para números negativos: mayor magnitud = menor número (invertir comparación)
+        // Para números positivos: mayor magnitud = mayor número (comparación normal)
+        if (is_minus())
+          return (cr_base_cthis > cr_base_arg); // Invertido para negativos
+        else
+          return (cr_base_cthis < cr_base_arg); // Normal para positivos
       }
     }
 
@@ -758,7 +784,12 @@ namespace NumRepr
       {
         const base_t &cr_base_cthis{*static_cast<const base_t *const>(this)};
         const base_t &cr_base_arg{*static_cast<const base_t *const>(&arg)};
-        return (cr_base_cthis > cr_base_arg);
+        // Para números negativos: mayor magnitud = menor número (invertir comparación)
+        // Para números positivos: mayor magnitud = mayor número (comparación normal)
+        if (is_minus())
+          return (cr_base_cthis < cr_base_arg); // Invertido para negativos
+        else
+          return (cr_base_cthis > cr_base_arg); // Normal para positivos
       }
     }
 
@@ -783,14 +814,26 @@ namespace NumRepr
     constexpr inline std::strong_ordering operator<=>(const int_reg_N_digs_t<N> &arg) const
         noexcept
     {
-      const int_reg_digs_t &cr_base_cthis{*static_cast<const base_t *const>(this)};
       if (is_plus() && arg.is_minus())
         return std::strong_ordering::greater;
       else if (is_minus() && arg.is_plus())
         return std::strong_ordering::less;
       else
       {
-        return (cr_base_cthis() <=> arg.cr_base_cthis());
+        const base_t &cr_base_cthis{*static_cast<const base_t *const>(this)};
+        const base_t &cr_base_arg{*static_cast<const base_t *const>(&arg)};
+        // Para números negativos: mayor magnitud = menor número (invertir comparación)
+        // Para números positivos: mayor magnitud = mayor número (comparación normal)
+        if (is_minus())
+        {
+          // Para negativos: invertir orden
+          return (cr_base_arg <=> cr_base_cthis);
+        }
+        else
+        {
+          // Para positivos: orden normal
+          return (cr_base_cthis <=> cr_base_arg);
+        }
       }
     }
 
@@ -1046,6 +1089,7 @@ namespace NumRepr
       cp_arg[0] = arg;
       cp_arg.mC_B();
       cthis += cp_arg;
+      cthis.normalize_sign();
       return (cthis);
     }
 
@@ -1062,6 +1106,7 @@ namespace NumRepr
       {
         base_cthis *= arg;
       }
+      const_cast<int_reg_digs_t *>(this)->normalize_sign();
       return (*this);
     }
 
@@ -1380,6 +1425,153 @@ namespace NumRepr
     /// EXTENSIONES P-ADICAS              ***
     /// EXTENSIONES FRACCIONES CONTINUAS  ***
 
+    /***************************************/
+    /*								   	 */
+    /*  MÉTODOS MATEMÁTICOS ADICIONALES	 */
+    /*								   	 */
+    /***************************************/
+
+    /// VALOR ABSOLUTO - RETORNA UNA COPIA SIN SIGNO (SIEMPRE POSITIVA)
+    constexpr inline int_reg_digs_t abs() const noexcept
+    {
+      int_reg_digs_t result{*this};
+      if (result.is_minus())
+      {
+        result.set_plus();
+      }
+      return result;
+    }
+
+    /// VALOR ABSOLUTO EN LUGAR (MODIFICA EL OBJETO ACTUAL)
+    constexpr inline const int_reg_digs_t &abs_in_place() noexcept
+    {
+      if (is_minus())
+      {
+        set_plus();
+      }
+      return (*this);
+    }
+
+    /// SIGNO DEL NÚMERO (-1, 0, +1)
+    constexpr inline int sign() const noexcept
+    {
+      base_t r_base_cthis{*static_cast<const base_t *>(this)};
+      if (r_base_cthis.is_0())
+      {
+        return 0; // Cero
+      }
+      else if (is_minus())
+      {
+        return -1; // Negativo
+      }
+      else
+      {
+        return 1; // Positivo
+      }
+    }
+
+    /// VERIFICAR SI ES CERO
+    constexpr inline bool is_zero() const noexcept
+    {
+      base_t r_base_cthis{*static_cast<const base_t *>(this)};
+      return r_base_cthis.is_0();
+    }
+
+    /// VERIFICAR SI ES POSITIVO (MAYOR QUE CERO)
+    constexpr inline bool is_positive() const noexcept
+    {
+      return is_plus() && !is_zero();
+    }
+
+    /// VERIFICAR SI ES NEGATIVO (MENOR QUE CERO)
+    constexpr inline bool is_negative() const noexcept
+    {
+      return is_minus() && !is_zero();
+    }
+
+    /// MÁXIMO VALOR REPRESENTABLE PARA ESTA CONFIGURACIÓN
+    static consteval int_reg_digs_t max_value() noexcept
+    {
+      int_reg_digs_t result;
+      // Llenar todos los dígitos con el valor máximo (B-1)
+      for (std::size_t i = 0; i < R; ++i)
+      {
+        result[i] = dig_Bm1();
+      }
+      result.set_plus(); // Signo positivo
+      return result;
+    }
+
+    /// MÍNIMO VALOR REPRESENTABLE PARA ESTA CONFIGURACIÓN
+    static consteval int_reg_digs_t min_value() noexcept
+    {
+      int_reg_digs_t result;
+      // Llenar todos los dígitos con el valor máximo (B-1)
+      for (std::size_t i = 0; i < R; ++i)
+      {
+        result[i] = dig_Bm1();
+      }
+      result.set_minus(); // Signo negativo
+      return result;
+    }
+
+    /// INTERCAMBIAR CONTENIDO CON OTRO OBJETO
+    constexpr inline void swap(int_reg_digs_t &other) noexcept
+    {
+      base_t &this_base = *static_cast<base_t *>(this);
+      base_t &other_base = *static_cast<base_t *>(&other);
+
+      // Intercambiar todos los dígitos incluido el signo
+      for (std::size_t i = 0; i <= R; ++i)
+      {
+        auto temp = this_base[i];
+        this_base[i] = other_base[i];
+        other_base[i] = temp;
+      }
+    }
+
+    /***************************************/
+    /*								   	 */
+    /*  MÉTODOS DE CONVERSIÓN ADICIONALES  */
+    /*								   	 */
+    /***************************************/
+
+    /// CONVERSIÓN A STRING CON FORMATO PERSONALIZABLE
+    std::string to_string_formatted(const std::string &separator = ",",
+                                    bool show_sign = true,
+                                    bool show_base_info = false) const noexcept
+    {
+      std::stringstream sstr_os{};
+
+      if (show_sign)
+      {
+        sstr_os << (is_minus() ? "-" : "+");
+      }
+      else if (is_minus())
+      {
+        sstr_os << "-";
+      }
+
+      // Mostrar dígitos desde el más significativo
+      bool first = true;
+      for (int i = static_cast<int>(R) - 1; i >= 0; --i)
+      {
+        if (!first && !separator.empty())
+        {
+          sstr_os << separator;
+        }
+        sstr_os << (*this)[i].get();
+        first = false;
+      }
+
+      if (show_base_info)
+      {
+        sstr_os << "_B" << B;
+      }
+
+      return sstr_os.str();
+    }
+
     std::string to_string() const noexcept
     {
       std::stringstream sstr_os{};
@@ -1396,6 +1588,53 @@ namespace NumRepr
       sstr_os << static_cast<SIG_UINT_T>(B);
       return sstr_os.str();
     }
+
+    /***************************************/
+    /*								   	 */
+    /*  FUNCIONES FRIEND ADICIONALES      */
+    /*								   	 */
+    /***************************************/
+
+    /// FUNCIÓN abs() GLOBAL PARA COMPATIBILIDAD CON STD
+    friend constexpr int_reg_digs_t abs(const int_reg_digs_t &x) noexcept
+    {
+      return x.abs();
+    }
+
+    /// FUNCIÓN swap() GLOBAL PARA COMPATIBILIDAD CON STD
+    friend constexpr void swap(int_reg_digs_t &a, int_reg_digs_t &b) noexcept
+    {
+      a.swap(b);
+    }
+
+    /// FUNCIÓN min() PARA DOS NÚMEROS
+    friend constexpr const int_reg_digs_t &min(const int_reg_digs_t &a,
+                                               const int_reg_digs_t &b) noexcept
+    {
+      return (a < b) ? a : b;
+    }
+
+    /// FUNCIÓN max() PARA DOS NÚMEROS
+    friend constexpr const int_reg_digs_t &max(const int_reg_digs_t &a,
+                                               const int_reg_digs_t &b) noexcept
+    {
+      return (a > b) ? a : b;
+    }
+
+    /// FUNCIÓN clamp() - LIMITAR VALOR ENTRE MIN Y MAX
+    friend constexpr int_reg_digs_t clamp(const int_reg_digs_t &value,
+                                          const int_reg_digs_t &min_val,
+                                          const int_reg_digs_t &max_val) noexcept
+    {
+      return max(min_val, min(value, max_val));
+    }
+
+    /// FUNCIÓN sign() GLOBAL
+    friend constexpr int sign(const int_reg_digs_t &x) noexcept
+    {
+      return x.sign();
+    }
+
     // template<uint64_t Base,size_t LongSinSigno>
     // friend std::istream& operator>>(std::istream&,int_reg_digs_t<Base,LongSinSigno>&);
   };
@@ -1774,5 +2013,116 @@ namespace NumRepr
     os << arg.to_string();
     return (os);
   }
+
+  /***************************************/
+  /*								   	 */
+  /*  FUNCIONES UTILITARIAS GLOBALES     */
+  /*								   	 */
+  /***************************************/
+
+  /// FUNCIÓN GCD (MÁXIMO COMÚN DIVISOR) USANDO ALGORITMO DE EUCLIDES
+  template <std::uint64_t Base, std::size_t Length>
+  constexpr int_reg_digs_t<Base, Length> gcd(int_reg_digs_t<Base, Length> a,
+                                             int_reg_digs_t<Base, Length> b)
+  {
+    // Trabajar con valores absolutos
+    a = a.abs();
+    b = b.abs();
+
+    // Algoritmo de Euclides
+    while (!b.is_zero())
+    {
+      auto temp = b;
+      b = a % b;
+      a = temp;
+    }
+    return a;
+  }
+
+  /// FUNCIÓN LCM (MÍNIMO COMÚN MÚLTIPLO)
+  template <std::uint64_t Base, std::size_t Length>
+  constexpr int_reg_digs_t<Base, Length> lcm(const int_reg_digs_t<Base, Length> &a,
+                                             const int_reg_digs_t<Base, Length> &b)
+  {
+    if (a.is_zero() || b.is_zero())
+    {
+      return int_reg_digs_t<Base, Length>{}; // LCM(0, x) = 0
+    }
+
+    auto abs_a = a.abs();
+    auto abs_b = b.abs();
+    return (abs_a * abs_b) / gcd(abs_a, abs_b);
+  }
+
+  /// FUNCIÓN POWER (POTENCIACIÓN ENTERA)
+  template <std::uint64_t Base, std::size_t Length>
+  constexpr int_reg_digs_t<Base, Length> power(const int_reg_digs_t<Base, Length> &base,
+                                               std::size_t exponent)
+  {
+    if (exponent == 0)
+    {
+      return int_reg_digs_t<Base, Length>::sregd_1();
+    }
+
+    if (exponent == 1)
+    {
+      return base;
+    }
+
+    // Exponenciación por cuadrados
+    auto result = int_reg_digs_t<Base, Length>::sregd_1();
+    auto current_base = base;
+
+    while (exponent > 0)
+    {
+      if (exponent & 1)
+      {
+        result *= current_base;
+      }
+      current_base *= current_base;
+      exponent >>= 1;
+    }
+
+    return result;
+  }
+
+  /// FUNCIÓN PARA CREAR DESDE STRING
+  template <std::uint64_t Base, std::size_t Length>
+  int_reg_digs_t<Base, Length> from_string(const std::string &str)
+  {
+    int_reg_digs_t<Base, Length> result;
+    std::istringstream iss(str);
+    iss >> result;
+    return result;
+  }
+
+  /// FUNCIÓN PARA VERIFICAR SI ES POTENCIA DE LA BASE
+  template <std::uint64_t Base, std::size_t Length>
+  constexpr bool is_power_of_base(const int_reg_digs_t<Base, Length> &num)
+  {
+    if (num.is_zero() || num.is_negative())
+    {
+      return false;
+    }
+
+    // Verificar si exactamente un dígito es 1 y el resto son 0
+    bool found_one = false;
+    for (std::size_t i = 0; i < Length; ++i)
+    {
+      auto digit_val = num[i].get();
+      if (digit_val == 1)
+      {
+        if (found_one)
+          return false; // Más de un 1
+        found_one = true;
+      }
+      else if (digit_val != 0)
+      {
+        return false; // Dígito diferente de 0 o 1
+      }
+    }
+    return found_one;
+  }
+
 } // END OF NAMESPACE NUMREPR
 #endif
