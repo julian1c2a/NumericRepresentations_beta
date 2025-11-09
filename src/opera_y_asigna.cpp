@@ -1,0 +1,531 @@
+
+#include "../include/memory_handler.hpp"
+#include <variant>
+#include <utility>
+#include <ostream>
+#include <string>
+
+namespace NumRepr {
+namespace memory_handler {
+
+bool suma_y_asigna(
+	dig_var_list& cont,std::string nombre,std::string otronombre
+	) {
+	if ((!cont.contains(nombre)) || (!cont.contains(otronombre))) {
+		return false;
+	}
+	else if (cont(nombre).index() != cont(otronombre).index()) {
+		return false;
+	}
+	else {
+		const auto idx{cont(nombre).index()};
+		switch(idx) {
+			case   0 :
+				return false;
+			case   1 :
+				return false;
+			case   2 :
+			{
+				dig_t<2> var_nombre{std::get<2>(cont(nombre))};
+				const dig_t<2> var_otronombre{std::get<2>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   3 :
+			{
+				dig_t<3> var_nombre{std::get<3>(cont(nombre))};
+				const dig_t<3> var_otronombre{std::get<3>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   4 :
+			{
+				dig_t<4> var_nombre{std::get<4>(cont(nombre))};
+				const dig_t<4> var_otronombre{std::get<4>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   5 :
+			{
+				dig_t<5> var_nombre{std::get<5>(cont(nombre))};
+				const dig_t<5> var_otronombre{std::get<5>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   6 :
+			{
+				dig_t<6> var_nombre{std::get<6>(cont(nombre))};
+				const dig_t<6> var_otronombre{std::get<6>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   7 :
+			{
+				dig_t<7> var_nombre{std::get<7>(cont(nombre))};
+				const dig_t<7> var_otronombre{std::get<7>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   8 :
+			{
+				dig_t<8> var_nombre{std::get<8>(cont(nombre))};
+				const dig_t<8> var_otronombre{std::get<8>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   9 :
+			{
+				dig_t<9> var_nombre{std::get<9>(cont(nombre))};
+				const dig_t<9> var_otronombre{std::get<9>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   10 :
+			{
+				dig_t<10> var_nombre{std::get<10>(cont(nombre))};
+				const dig_t<10> var_otronombre{std::get<10>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   11 :
+			{
+				dig_t<11> var_nombre{std::get<11>(cont(nombre))};
+				const dig_t<11> var_otronombre{std::get<11>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   12 :
+			{
+				dig_t<12> var_nombre{std::get<12>(cont(nombre))};
+				const dig_t<12> var_otronombre{std::get<12>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   13 :
+			{
+				dig_t<13> var_nombre{std::get<13>(cont(nombre))};
+				const dig_t<13> var_otronombre{std::get<13>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   14 :
+			{
+				dig_t<14> var_nombre{std::get<14>(cont(nombre))};
+				const dig_t<14> var_otronombre{std::get<14>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   15 :
+			{
+				dig_t<15> var_nombre{std::get<15>(cont(nombre))};
+				const dig_t<15> var_otronombre{std::get<15>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   16 :
+			{
+				dig_t<16> var_nombre{std::get<16>(cont(nombre))};
+				const dig_t<16> var_otronombre{std::get<16>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   17 :
+			{
+				dig_t<17> var_nombre{std::get<17>(cont(nombre))};
+				const dig_t<17> var_otronombre{std::get<17>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   18 :
+			{
+				dig_t<18> var_nombre{std::get<18>(cont(nombre))};
+				const dig_t<18> var_otronombre{std::get<18>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   19 :
+			{
+				dig_t<19> var_nombre{std::get<19>(cont(nombre))};
+				const dig_t<19> var_otronombre{std::get<19>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   20 :
+			{
+				dig_t<20> var_nombre{std::get<20>(cont(nombre))};
+				const dig_t<20> var_otronombre{std::get<20>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   21 :
+			{
+				dig_t<21> var_nombre{std::get<21>(cont(nombre))};
+				const dig_t<21> var_otronombre{std::get<21>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   22 :
+			{
+				dig_t<22> var_nombre{std::get<22>(cont(nombre))};
+				const dig_t<22> var_otronombre{std::get<22>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   23 :
+			{
+				dig_t<23> var_nombre{std::get<23>(cont(nombre))};
+				const dig_t<23> var_otronombre{std::get<23>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   24 :
+			{
+				dig_t<24> var_nombre{std::get<24>(cont(nombre))};
+				const dig_t<24> var_otronombre{std::get<24>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   25 :
+			{
+				dig_t<25> var_nombre{std::get<25>(cont(nombre))};
+				const dig_t<25> var_otronombre{std::get<25>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   26 :
+			{
+				dig_t<26> var_nombre{std::get<26>(cont(nombre))};
+				const dig_t<26> var_otronombre{std::get<26>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   27 :
+			{
+				dig_t<27> var_nombre{std::get<27>(cont(nombre))};
+				const dig_t<27> var_otronombre{std::get<27>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   28 :
+			{
+				dig_t<28> var_nombre{std::get<28>(cont(nombre))};
+				const dig_t<28> var_otronombre{std::get<28>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   29 :
+			{
+				dig_t<29> var_nombre{std::get<29>(cont(nombre))};
+				const dig_t<29> var_otronombre{std::get<29>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   30 :
+			{
+				dig_t<30> var_nombre{std::get<30>(cont(nombre))};
+				const dig_t<30> var_otronombre{std::get<30>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   31 :
+			{
+				dig_t<31> var_nombre{std::get<31>(cont(nombre))};
+				const dig_t<31> var_otronombre{std::get<31>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   32 :
+			{
+				dig_t<32> var_nombre{std::get<32>(cont(nombre))};
+				const dig_t<32> var_otronombre{std::get<32>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   33 :
+			{
+				dig_t<33> var_nombre{std::get<33>(cont(nombre))};
+				const dig_t<33> var_otronombre{std::get<33>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   34 :
+			{
+				dig_t<34> var_nombre{std::get<34>(cont(nombre))};
+				const dig_t<34> var_otronombre{std::get<34>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   35 :
+			{
+				dig_t<35> var_nombre{std::get<35>(cont(nombre))};
+				const dig_t<35> var_otronombre{std::get<35>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   36 :
+			{
+				dig_t<36> var_nombre{std::get<36>(cont(nombre))};
+				const dig_t<36> var_otronombre{std::get<36>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   37 :
+			{
+				dig_t<37> var_nombre{std::get<37>(cont(nombre))};
+				const dig_t<37> var_otronombre{std::get<37>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   38 :
+			{
+				dig_t<38> var_nombre{std::get<38>(cont(nombre))};
+				const dig_t<38> var_otronombre{std::get<38>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   39 :
+			{
+				dig_t<39> var_nombre{std::get<39>(cont(nombre))};
+				const dig_t<39> var_otronombre{std::get<39>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   40 :
+			{
+				dig_t<40> var_nombre{std::get<40>(cont(nombre))};
+				const dig_t<40> var_otronombre{std::get<40>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   41 :
+			{
+				dig_t<41> var_nombre{std::get<41>(cont(nombre))};
+				const dig_t<41> var_otronombre{std::get<41>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   42 :
+			{
+				dig_t<42> var_nombre{std::get<42>(cont(nombre))};
+				const dig_t<42> var_otronombre{std::get<42>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   43 :
+			{
+				dig_t<43> var_nombre{std::get<43>(cont(nombre))};
+				const dig_t<43> var_otronombre{std::get<43>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   44 :
+			{
+				dig_t<44> var_nombre{std::get<44>(cont(nombre))};
+				const dig_t<44> var_otronombre{std::get<44>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   45 :
+			{
+				dig_t<45> var_nombre{std::get<45>(cont(nombre))};
+				const dig_t<45> var_otronombre{std::get<45>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   46 :
+			{
+				dig_t<46> var_nombre{std::get<46>(cont(nombre))};
+				const dig_t<46> var_otronombre{std::get<46>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   47 :
+			{
+				dig_t<47> var_nombre{std::get<47>(cont(nombre))};
+				const dig_t<47> var_otronombre{std::get<47>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   48 :
+			{
+				dig_t<48> var_nombre{std::get<48>(cont(nombre))};
+				const dig_t<48> var_otronombre{std::get<48>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   49 :
+			{
+				dig_t<49> var_nombre{std::get<49>(cont(nombre))};
+				const dig_t<49> var_otronombre{std::get<49>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   50 :
+			{
+				dig_t<50> var_nombre{std::get<50>(cont(nombre))};
+				const dig_t<50> var_otronombre{std::get<50>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   51 :
+			{
+				dig_t<51> var_nombre{std::get<51>(cont(nombre))};
+				const dig_t<51> var_otronombre{std::get<51>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   52 :
+			{
+				dig_t<52> var_nombre{std::get<52>(cont(nombre))};
+				const dig_t<52> var_otronombre{std::get<52>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   53 :
+			{
+				dig_t<53> var_nombre{std::get<53>(cont(nombre))};
+				const dig_t<53> var_otronombre{std::get<53>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   54 :
+			{
+				dig_t<54> var_nombre{std::get<54>(cont(nombre))};
+				const dig_t<54> var_otronombre{std::get<54>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   55 :
+			{
+				dig_t<55> var_nombre{std::get<55>(cont(nombre))};
+				const dig_t<55> var_otronombre{std::get<55>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   56 :
+			{
+				dig_t<56> var_nombre{std::get<56>(cont(nombre))};
+				const dig_t<56> var_otronombre{std::get<56>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   57 :
+			{
+				dig_t<57> var_nombre{std::get<57>(cont(nombre))};
+				const dig_t<57> var_otronombre{std::get<57>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   58 :
+			{
+				dig_t<58> var_nombre{std::get<58>(cont(nombre))};
+				const dig_t<58> var_otronombre{std::get<58>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   59 :
+			{
+				dig_t<59> var_nombre{std::get<59>(cont(nombre))};
+				const dig_t<59> var_otronombre{std::get<59>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   60 :
+			{
+				dig_t<60> var_nombre{std::get<60>(cont(nombre))};
+				const dig_t<60> var_otronombre{std::get<60>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   61 :
+			{
+				dig_t<61> var_nombre{std::get<61>(cont(nombre))};
+				const dig_t<61> var_otronombre{std::get<61>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   62 :
+			{
+				dig_t<62> var_nombre{std::get<62>(cont(nombre))};
+				const dig_t<62> var_otronombre{std::get<62>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			case   63 :
+			{
+				dig_t<63> var_nombre{std::get<63>(cont(nombre))};
+				const dig_t<63> var_otronombre{std::get<63>(cont(otronombre))};
+				var_nombre += var_otronombre;
+				cont(nombre,var_nombre);
+				return true;
+			}
+			default  :
+				return false;
+		}
+	}
+} /// END OF FUNCTIONS
+
+
+} /// END OF NAMESPACE MEMORY_HANDLER
+} /// END OF NAMESPACE NUMREPR

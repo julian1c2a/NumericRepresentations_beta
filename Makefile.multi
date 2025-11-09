@@ -1,0 +1,140 @@
+# Makefile universal para NumericRepresentations
+# Soporta MSVC (via cl), GCC, y Clang
+# Uso: 
+#   make all          - Compila con compilador por defecto
+#   make gcc          - Compila con GCC
+#   make clang        - Compila con Clang
+#   make msvc         - Compila con MSVC (requiere Developer Command Prompt)
+#   make run-gcc      - Compila y ejecuta con GCC
+#   make run-clang    - Compila y ejecuta con Clang
+#   make clean        - Limpia archivos generados
+
+# Directorios
+INCLUDE_DIR := include
+TESTS_DIR := tests
+BUILD_DIR := build
+
+# Archivos de test
+TESTS := test_dig_t_arithmetic test_dig_t_comparison test_dig_t_bitwise test_dig_t_io_simple test_dig_t_comprehensive
+
+# Compiladores y flags
+CXX_GCC := g++
+CXX_CLANG := clang++
+CXX_MSVC := cl
+
+FLAGS_GCC := -std=c++23 -Wall -Wextra -O2 -I$(INCLUDE_DIR)
+FLAGS_CLANG := -std=c++23 -Wall -Wextra -O2 -I$(INCLUDE_DIR)  
+FLAGS_MSVC := /EHsc /std:c++latest /I$(INCLUDE_DIR) /O2
+
+# Detección automática de compilador disponible
+ifeq ($(shell which g++ 2>/dev/null),)
+    ifeq ($(shell which clang++ 2>/dev/null),)
+        CXX := $(CXX_MSVC)
+        CXXFLAGS := $(FLAGS_MSVC)
+        EXT := .exe
+        COMPILE_CMD = $(CXX) $(CXXFLAGS) $(TESTS_DIR)/$<.cpp /Fe:$(BUILD_DIR)/$@$(EXT)
+    else
+        CXX := $(CXX_CLANG)  
+        CXXFLAGS := $(FLAGS_CLANG)
+        EXT := 
+        COMPILE_CMD = $(CXX) $(CXXFLAGS) $(TESTS_DIR)/$<.cpp -o $(BUILD_DIR)/$@$(EXT)
+    endif
+else
+    CXX := $(CXX_GCC)
+    CXXFLAGS := $(FLAGS_GCC)
+    EXT :=
+    COMPILE_CMD = $(CXX) $(CXXFLAGS) $(TESTS_DIR)/$<.cpp -o $(BUILD_DIR)/$@$(EXT)
+endif
+
+# Reglas por defecto
+.PHONY: all gcc clang msvc run-gcc run-clang run-msvc clean help
+
+all: setup-build $(TESTS)
+	@echo "🏆 Compilación completada con $(CXX)"
+
+# Configuración específica por compilador
+gcc: CXX := $(CXX_GCC)
+gcc: CXXFLAGS := $(FLAGS_GCC)
+gcc: setup-build $(TESTS:%=%_gcc)
+	@echo "🏆 Compilación GCC completada"
+
+clang: CXX := $(CXX_CLANG)  
+clang: CXXFLAGS := $(FLAGS_CLANG)
+clang: setup-build $(TESTS:%=%_clang)
+	@echo "🏆 Compilación Clang completada"
+
+msvc: CXX := $(CXX_MSVC)
+msvc: CXXFLAGS := $(FLAGS_MSVC)
+msvc: setup-build $(TESTS:%=%_msvc)
+	@echo "🏆 Compilación MSVC completada"
+
+# Reglas de compilación
+setup-build:
+	@mkdir -p $(BUILD_DIR)
+
+# Compilación individual
+$(TESTS): %: $(TESTS_DIR)/%.cpp
+	@echo "🔨 Compilando $@ con $(CXX)"
+	@$(COMPILE_CMD)
+
+# Compilación con sufijos específicos
+$(TESTS:%=%_gcc): %_gcc: $(TESTS_DIR)/$(patsubst %_gcc,%,$@).cpp
+	@echo "🔨 Compilando $@ con GCC"
+	@$(CXX_GCC) $(FLAGS_GCC) $< -o $(BUILD_DIR)/$@
+
+$(TESTS:%=%_clang): %_clang: $(TESTS_DIR)/$(patsubst %_clang,%,$@).cpp  
+	@echo "🔨 Compilando $@ con Clang"
+	@$(CXX_CLANG) $(FLAGS_CLANG) $< -o $(BUILD_DIR)/$@
+
+$(TESTS:%=%_msvc): %_msvc: $(TESTS_DIR)/$(patsubst %_msvc,%,$@).cpp
+	@echo "🔨 Compilando $@ con MSVC"
+	@$(CXX_MSVC) $(FLAGS_MSVC) $< /Fe:$(BUILD_DIR)/$@.exe
+
+# Ejecución de tests
+run-gcc: gcc
+	@echo "🚀 Ejecutando tests con GCC"
+	@for test in $(TESTS); do \
+		echo "▶️  Ejecutando $$test"; \
+		$(BUILD_DIR)/$${test}_gcc || true; \
+		echo; \
+	done
+
+run-clang: clang  
+	@echo "🚀 Ejecutando tests con Clang"
+	@for test in $(TESTS); do \
+		echo "▶️  Ejecutando $$test"; \
+		$(BUILD_DIR)/$${test}_clang || true; \
+		echo; \
+	done
+
+run-msvc: msvc
+	@echo "🚀 Ejecutando tests con MSVC" 
+	@for test in $(TESTS); do \
+		echo "▶️  Ejecutando $$test"; \
+		$(BUILD_DIR)/$${test}_msvc.exe || true; \
+		echo; \
+	done
+
+# Limpieza
+clean:
+	@echo "🧹 Limpiando archivos generados"
+	@rm -rf $(BUILD_DIR)
+	@rm -f *.obj *.exe *.o
+
+# Ayuda
+help:
+	@echo "NumericRepresentations - Sistema de compilación multi-compilador"
+	@echo
+	@echo "Objetivos disponibles:"
+	@echo "  all          - Compila con compilador por defecto"
+	@echo "  gcc          - Compila todos los tests con GCC"
+	@echo "  clang        - Compila todos los tests con Clang" 
+	@echo "  msvc         - Compila todos los tests con MSVC"
+	@echo "  run-gcc      - Compila y ejecuta tests con GCC"
+	@echo "  run-clang    - Compila y ejecuta tests con Clang"
+	@echo "  run-msvc     - Compila y ejecuta tests con MSVC"  
+	@echo "  clean        - Limpia archivos generados"
+	@echo "  help         - Muestra esta ayuda"
+	@echo
+	@echo "Tests disponibles:"
+	@for test in $(TESTS); do echo "  $$test"; done

@@ -1,0 +1,544 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>17.0</VCProjectVersion>
+    <ProjectGuid>{73516C94-7FC7-4696-B567-AA4CF3268A86}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="cmake-build-debug\cmakefiles\3.25.2\compileridcxx\CMakeCXXCompilerId.cpp" />
+    <ClCompile Include="cmake-build-debug\cmakefiles\3.25.2\compileridc\CMakeCCompilerId.c" />
+    <ClCompile Include="cmake-build-debug\numreprcodelite\cmakefiles\3.25.1\compileridcxx\CMakeCXXCompilerId.cpp" />
+    <ClCompile Include="cmake-build-debug\numreprcodelite\cmakefiles\3.25.1\compileridc\CMakeCCompilerId.c" />
+    <ClCompile Include="cmake-build-release\cmakefiles\3.25.2\compileridcxx\CMakeCXXCompilerId.cpp" />
+    <ClCompile Include="cmake-build-release\cmakefiles\3.25.2\compileridc\CMakeCCompilerId.c" />
+    <ClCompile Include="out\build\x64-debug\cmakefiles\3.25.1-msvc1\compileridcxx\CMakeCXXCompilerId.cpp" />
+    <ClCompile Include="out\build\x64-debug\cmakefiles\3.25.1-msvc1\compileridc\CMakeCCompilerId.c" />
+    <ClCompile Include="out\build\x64-debug\cmakefiles\showincludes\main.c" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\test_driver.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".vs\numericrepresentations\v17\workspaceFileList.bin" />
+    <None Include="cmake-build-debug\cmakefiles\3.25.2\CMakeDetermineCompilerABI_C.bin" />
+    <None Include="cmake-build-debug\cmakefiles\3.25.2\CMakeDetermineCompilerABI_CXX.bin" />
+    <None Include="cmake-build-debug\numreprcodelite\cmakefiles\3.25.1\CMakeDetermineCompilerABI_C.bin" />
+    <None Include="cmake-build-debug\numreprcodelite\cmakefiles\3.25.1\CMakeDetermineCompilerABI_CXX.bin" />
+    <None Include="cmake-build-release\cmakefiles\3.25.2\CMakeDetermineCompilerABI_C.bin" />
+    <None Include="cmake-build-release\cmakefiles\3.25.2\CMakeDetermineCompilerABI_CXX.bin" />
+    <None Include="doxygen\def\doxygen.def" />
+    <None Include="doxygen\html\annotated.html" />
+    <None Include="doxygen\html\auxiliary__functions_8hpp.html" />
+    <None Include="doxygen\html\auxiliary__functions_8hpp_source.html" />
+    <None Include="doxygen\html\auxiliary__types_8hpp.html" />
+    <None Include="doxygen\html\auxiliary__types_8hpp_source.html" />
+    <None Include="doxygen\html\base__num__t_8hpp.html" />
+    <None Include="doxygen\html\base__num__t_8hpp_source.html" />
+    <None Include="doxygen\html\basic__types_8hpp.html" />
+    <None Include="doxygen\html\basic__types_8hpp_source.html" />
+    <None Include="doxygen\html\classes.html" />
+    <None Include="doxygen\html\classfunc__refvar__t-members.html" />
+    <None Include="doxygen\html\classfunc__refvar__t.html" />
+    <None Include="doxygen\html\classfunc__refvar__t_3_01_i_n_t_01_5_5_00_01_i_n_t_01_5_00_01_i_n_t_01_4-members.html" />
+    <None Include="doxygen\html\classfunc__refvar__t_3_01_i_n_t_01_5_5_00_01_i_n_t_01_5_00_01_i_n_t_01_4.html" />
+    <None Include="doxygen\html\classfunc__refvar__t_3_01_u_i_n_t_01_5_5_00_01_u_i_n_t_01_5_00_01_u_i_n_t_01_4-members.html" />
+    <None Include="doxygen\html\classfunc__refvar__t_3_01_u_i_n_t_01_5_5_00_01_u_i_n_t_01_5_00_01_u_i_n_t_01_4.html" />
+    <None Include="doxygen\html\classnat__num__t-members.html" />
+    <None Include="doxygen\html\classnat__num__t.html" />
+    <None Include="doxygen\html\concepts.html" />
+    <None Include="doxygen\html\conceptutilities_1_1all__are__more__than__zero.html" />
+    <None Include="doxygen\html\conceptutilities_1_1all__are__the__same__type.html" />
+    <None Include="doxygen\html\conceptutilities_1_1all__are__the__same__type__c.html" />
+    <None Include="doxygen\html\conceptutilities_1_1there__is__one__or__more__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1arith__integral__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1arith__natural__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1char__type.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1allowable__base__type__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1allowable__signed__type__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1allowable__unsigned__type__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1arith__integral__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1arith__natural__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1char__type__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1integral__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1signed__integral__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1uint__type__for__radix__c.html" />
+    <None Include="doxygen\html\concept_num_repr_1_1type__traits_1_1unsigned__integral__c.html" />
+    <None Include="doxygen\html\dig__t_8hpp.html" />
+    <None Include="doxygen\html\dig__t_8hpp_source.html" />
+    <None Include="doxygen\html\dir_68267d1309a1af8e8297ef4c3efbcdba.html" />
+    <None Include="doxygen\html\files.html" />
+    <None Include="doxygen\html\functions.html" />
+    <None Include="doxygen\html\functions_b.html" />
+    <None Include="doxygen\html\functions_c.html" />
+    <None Include="doxygen\html\functions_d.html" />
+    <None Include="doxygen\html\functions_e.html" />
+    <None Include="doxygen\html\functions_f.html" />
+    <None Include="doxygen\html\functions_func.html" />
+    <None Include="doxygen\html\functions_func_b.html" />
+    <None Include="doxygen\html\functions_func_c.html" />
+    <None Include="doxygen\html\functions_func_d.html" />
+    <None Include="doxygen\html\functions_func_e.html" />
+    <None Include="doxygen\html\functions_func_f.html" />
+    <None Include="doxygen\html\functions_func_g.html" />
+    <None Include="doxygen\html\functions_func_i.html" />
+    <None Include="doxygen\html\functions_func_m.html" />
+    <None Include="doxygen\html\functions_func_n.html" />
+    <None Include="doxygen\html\functions_func_o.html" />
+    <None Include="doxygen\html\functions_func_p.html" />
+    <None Include="doxygen\html\functions_func_r.html" />
+    <None Include="doxygen\html\functions_func_s.html" />
+    <None Include="doxygen\html\functions_func_t.html" />
+    <None Include="doxygen\html\functions_func_u.html" />
+    <None Include="doxygen\html\functions_func_~.html" />
+    <None Include="doxygen\html\functions_g.html" />
+    <None Include="doxygen\html\functions_h.html" />
+    <None Include="doxygen\html\functions_i.html" />
+    <None Include="doxygen\html\functions_l.html" />
+    <None Include="doxygen\html\functions_m.html" />
+    <None Include="doxygen\html\functions_n.html" />
+    <None Include="doxygen\html\functions_o.html" />
+    <None Include="doxygen\html\functions_p.html" />
+    <None Include="doxygen\html\functions_q.html" />
+    <None Include="doxygen\html\functions_r.html" />
+    <None Include="doxygen\html\functions_rela.html" />
+    <None Include="doxygen\html\functions_s.html" />
+    <None Include="doxygen\html\functions_t.html" />
+    <None Include="doxygen\html\functions_type.html" />
+    <None Include="doxygen\html\functions_u.html" />
+    <None Include="doxygen\html\functions_v.html" />
+    <None Include="doxygen\html\functions_vars.html" />
+    <None Include="doxygen\html\functions_~.html" />
+    <None Include="doxygen\html\globals.html" />
+    <None Include="doxygen\html\globals_enum.html" />
+    <None Include="doxygen\html\globals_eval.html" />
+    <None Include="doxygen\html\globals_func.html" />
+    <None Include="doxygen\html\globals_type.html" />
+    <None Include="doxygen\html\graph_legend.html" />
+    <None Include="doxygen\html\hierarchy.html" />
+    <None Include="doxygen\html\html\defines.html" />
+    <None Include="doxygen\html\html\defines\index.html" />
+    <None Include="doxygen\html\html\d\index.html" />
+    <None Include="doxygen\html\html\files.html" />
+    <None Include="doxygen\html\html\files\index.html" />
+    <None Include="doxygen\html\html\help.html" />
+    <None Include="doxygen\html\html\index.html" />
+    <None Include="doxygen\html\html\i\index.html" />
+    <None Include="doxygen\html\html\j\index.html" />
+    <None Include="doxygen\html\html\mains.html" />
+    <None Include="doxygen\html\html\r\index.html" />
+    <None Include="doxygen\html\html\s\index.html" />
+    <None Include="doxygen\html\html\y\index.html" />
+    <None Include="doxygen\html\index.html" />
+    <None Include="doxygen\html\inherits.html" />
+    <None Include="doxygen\html\int__num__t_8hpp.html" />
+    <None Include="doxygen\html\int__num__t_8hpp_source.html" />
+    <None Include="doxygen\html\int__reg__digs__t_8hpp.html" />
+    <None Include="doxygen\html\int__reg__digs__t_8hpp_source.html" />
+    <None Include="doxygen\html\lexer__parser_8hpp.html" />
+    <None Include="doxygen\html\lexer__parser_8hpp_source.html" />
+    <None Include="doxygen\html\memory__handler_8hpp.html" />
+    <None Include="doxygen\html\memory__handler_8hpp_source.html" />
+    <None Include="doxygen\html\namespacedetails.html" />
+    <None Include="doxygen\html\namespacemembers.html" />
+    <None Include="doxygen\html\namespacemembers_b.html" />
+    <None Include="doxygen\html\namespacemembers_c.html" />
+    <None Include="doxygen\html\namespacemembers_d.html" />
+    <None Include="doxygen\html\namespacemembers_e.html" />
+    <None Include="doxygen\html\namespacemembers_enum.html" />
+    <None Include="doxygen\html\namespacemembers_f.html" />
+    <None Include="doxygen\html\namespacemembers_func.html" />
+    <None Include="doxygen\html\namespacemembers_g.html" />
+    <None Include="doxygen\html\namespacemembers_i.html" />
+    <None Include="doxygen\html\namespacemembers_l.html" />
+    <None Include="doxygen\html\namespacemembers_m.html" />
+    <None Include="doxygen\html\namespacemembers_n.html" />
+    <None Include="doxygen\html\namespacemembers_o.html" />
+    <None Include="doxygen\html\namespacemembers_p.html" />
+    <None Include="doxygen\html\namespacemembers_r.html" />
+    <None Include="doxygen\html\namespacemembers_s.html" />
+    <None Include="doxygen\html\namespacemembers_t.html" />
+    <None Include="doxygen\html\namespacemembers_type.html" />
+    <None Include="doxygen\html\namespacemembers_u.html" />
+    <None Include="doxygen\html\namespacemembers_vars.html" />
+    <None Include="doxygen\html\namespaces.html" />
+    <None Include="doxygen\html\namespaceutilities.html" />
+    <None Include="doxygen\html\namespaceutilities_1_1special.html" />
+    <None Include="doxygen\html\namespace_num_repr.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1auxiliary__functions.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1auxiliary__types.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1detail.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1lex.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1type__traits.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1type__traits_1_1detail.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1type__traits_1_1ugly__details__for__greater__suitable__type__deduction.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1type__traits_1_1ugly__details__for__suitable__type__deduction.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int.html" />
+    <None Include="doxygen\html\namespace_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int.html" />
+    <None Include="doxygen\html\nat__num__t_8hpp.html" />
+    <None Include="doxygen\html\nat__num__t_8hpp_source.html" />
+    <None Include="doxygen\html\nat__rat__fixed__reg__t_8hpp.html" />
+    <None Include="doxygen\html\nat__rat__fixed__reg__t_8hpp_source.html" />
+    <None Include="doxygen\html\nat__rat__num__t_8hpp.html" />
+    <None Include="doxygen\html\nat__rat__num__t_8hpp_source.html" />
+    <None Include="doxygen\html\nat__reg__digs__t_01_07_copia_01en_01conflicto_01de_01_m_s_i_012022-11-24_08_8hpp.html" />
+    <None Include="doxygen\html\nat__reg__digs__t_8hpp.html" />
+    <None Include="doxygen\html\nat__reg__digs__t_8hpp_source.html" />
+    <None Include="doxygen\html\pruebas__dig__t_8cpp.html" />
+    <None Include="doxygen\html\pruebas__dig__t_8cpp_source.html" />
+    <None Include="doxygen\html\rat__fixed__reg__t_8hpp.html" />
+    <None Include="doxygen\html\rat__fixed__reg__t_8hpp_source.html" />
+    <None Include="doxygen\html\rat__num__t_8hpp.html" />
+    <None Include="doxygen\html\rat__num__t_8hpp_source.html" />
+    <None Include="doxygen\html\reg__digs__t_8hpp.html" />
+    <None Include="doxygen\html\reg__digs__t_8hpp_source.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete_3_010u_01_4-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete_3_010u_01_4.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete_3_011u_01_4-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete_3_011u_01_4.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete_3_012u_01_4-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete_3_012u_01_4.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete_3_01a_t_00_01_t_00_01std_1_1numeric__limits_3_01uchint_01_4_1_1max_07_08_4-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__delete_3_01a_t_00_01_t_00_01std_1_1numeric__limits_3_01uchint_01_4_1_1max_07_08_4.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new_3_010u_01_4-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new_3_010u_01_4.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new_3_011u_01_4-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new_3_011u_01_4.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new_3_012_01_4-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new_3_012_01_4.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new_3_01a_t_00_01_t_00_01std_1_1numeric__limits_3_01uchint_01_4_1_1max_07_08_4-members.html" />
+    <None Include="doxygen\html\structdetails_1_1cp__new_3_01a_t_00_01_t_00_01std_1_1numeric__limits_3_01uchint_01_4_1_1max_07_08_4.html" />
+    <None Include="doxygen\html\structint__num__t-members.html" />
+    <None Include="doxygen\html\structint__num__t.html" />
+    <None Include="doxygen\html\structutilities_1_1for__each__same__type-members.html" />
+    <None Include="doxygen\html\structutilities_1_1for__each__same__type.html" />
+    <None Include="doxygen\html\structutilities_1_1for__each__same__type_3_01_head__t_01_4-members.html" />
+    <None Include="doxygen\html\structutilities_1_1for__each__same__type_3_01_head__t_01_4.html" />
+    <None Include="doxygen\html\structutilities_1_1local__void__t.html" />
+    <None Include="doxygen\html\structutilities_1_1pack2array-members.html" />
+    <None Include="doxygen\html\structutilities_1_1pack2array.html" />
+    <None Include="doxygen\html\structutilities_1_1pack2tuple-members.html" />
+    <None Include="doxygen\html\structutilities_1_1pack2tuple.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1pow___b__to___e__t-members.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1pow___b__to___e__t.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1pow___b__to___e__t_3_01_base_00_010_01_4-members.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1pow___b__to___e__t_3_01_base_00_010_01_4.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1pow___b__to___e__t_3_01_base_00_011_01_4-members.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1pow___b__to___e__t_3_01_base_00_011_01_4.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1pow___b__to___e__t_3_01_base_00_012_01_4-members.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1pow___b__to___e__t_3_01_base_00_012_01_4.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1tuple__builder__t-members.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1tuple__builder__t.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1tuple__builder__t_3_01_begin_int_obj__ct_00_01_begin_int_obj__ct_075ab8b7ccbc464f07cc1700d9177daf8.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1tuple__builder__t_3_01_begin_int_obj__ct_00_01_begin_int_obj__ct_0acf174306e1877482e57b362979e4e21.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1tuple__builder__t_3_01_end_int_obj__ct-1_00_01_begin_int_obj__ct_01ae97502988fe34143573e9497b77c52.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1tuple__builder__t_3_01_end_int_obj__ct-1_00_01_begin_int_obj__ct_0ca0ca34624b3cee9c3ca5b4040f52802.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1tuple__user__constructor__t-members.html" />
+    <None Include="doxygen\html\structutilities_1_1special_1_1tuple__user__constructor__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1add_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1add_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1div_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1div_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1fediv_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1fediv_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1mult_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1mult_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1rem_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1rem_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1sub_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1resbinop__t_3_01_t_00_01binop__e_1_1sub_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1add_00_01_n_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1add_00_01_n_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1div_00_01_n_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1div_00_01_n_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1fediv_00_01_n_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1fediv_00_01_n_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1mult_00_01_n_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1mult_00_01_n_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1rem_00_01_n_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1rem_00_01_n_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1sub_00_01_n_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1auxiliary__types_1_1result__operation__t_3_01_t_00_01binop__e_1_1sub_00_01_n_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1base__num__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1base__num__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1dig__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1dig__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1nat__rat__fixed__reg__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1nat__rat__fixed__reg__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1nat__reg__digs__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1nat__reg__digs__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1reg__digs__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1reg__digs__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01char_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01char_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01char_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01char_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01long_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01long_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01long_01long_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01long_01long_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01short_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___s_int__t_3_01signed_01short_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01char_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01char_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01long_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01long_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01long_01long_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01long_01long_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01short_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___s_int__for___u_int__t_3_01unsigned_01short_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01char_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01char_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01char_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01char_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01long_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01long_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01long_01long_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01long_01long_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01short_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01signed_01short_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01sint128__t_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___s_int__t_3_01sint128__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01char_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01char_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01long_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01long_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01long_01long_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01long_01long_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01short_01int_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1detail_1_1____sig___u_int__for___u_int__t_3_01unsigned_01short_01int_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1empty__type.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1is__signed__sz__gt-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1is__signed__sz__gt.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1is__unsigned__sz__gt-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1is__unsigned__sz__gt.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__for__greater__suitable__type__deduction_1_1_u_60d2a342195d2b1ee7c84987bb1f5aab.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__for__greater__suitable__type__deduction_1_1_u_e73c7ba18a323e7d8eda21299da56319.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__for__greater__suitable__type__deduction_1_1_u_e88b3502a0fe8dbb9cc27393bb43baef.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__for__suitable__type__deduction_1_1_u_int_type_3b69b34bf7723119f9a319c535d4b0ed.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__for__suitable__type__deduction_1_1_u_int_type_641af47b79e74c954aca912592d5c1e1.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__for__suitable__type__deduction_1_1_u_int_type_for_radix.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__f1de17c72dd53d5ef8b4bdefcc277f731.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__f44df898c0cdbcbdca98af184e5f2df61.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__f46050fea51a5d2f149b6f396e0da3a99.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__f48e06b11ea624d19af5fdc4633b523aa.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__f5c7e6520cd5a6a0cbb51fbfe418cdc8c.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__fb7b9ddbb25116fb4160715795227866f.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__ff1416f88b005f06eae8d4695658d20cf.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__for___u_int__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__for___u_int__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__for___u_int__t_3_01uint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__for___u_int__t_3_01ulint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details__sig___s_int__for___u_int_1_1____sig___s_int__for___u_int__t_3_01usint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___4191795b3d7046bdf2de4ea058697047.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___64759e0da22ca53f0d9e40769329b449.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___9ebfdc6834d2d181e88311d1d4bd1195.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___bd933b10e681b3b86a8302877326f16c.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___c28f80a8841a39db315cdb63fb61cbdd.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___s_int__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___s_int__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___s_int__t_3_01schint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___s_int__t_3_01sint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___s_int__t_3_01slint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___s_int__t_3_01sllint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___s_int__for___s_int_1_1____sig___s_int__for___s_int__t_3_01ssint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___13b0e978099b6c35db8919db6f48735a.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___80985591c359740f9629e875ceb4772b.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___aa897d6bca08934d4a7ae22625453315.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___d24621020530de939cff6c3f92b8f2a4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___eec093cc859ef80335d78eedc6162b8d.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___f1dc760468e4b5d8e07aea55ba313d5e.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___s_int__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___s_int__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___s_int__t_3_01schint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___s_int__t_3_01sint128__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___s_int__t_3_01sint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___s_int__t_3_01slint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___s_int__t_3_01sllint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___s_int_1_1____sig___u_int__for___s_int__t_3_01ssint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___1712fdec4bfd47442872317a11e1222e.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___3b98fcd090211e1a4bde900dc79f9b65.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___dabdcc46ef2016849a81d2124fa4d501.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___e4be38f04ed389f7fe9c9b68cdc3a0ba.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___ebaf7888ffb6a2bece28ee0211404938.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___u_int__t-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___u_int__t.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___u_int__t_3_01uchint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___u_int__t_3_01uint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___u_int__t_3_01ulint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___u_int__t_3_01ullint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1ugly__details___u_int__for___u_int_1_1____sig___u_int__for___u_int__t_3_01usint__t_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01int64__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01int64__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01sint16__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01sint16__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01sint32__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01sint32__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01sint8__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01sint8__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint128__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint128__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint16__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint16__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint32__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint32__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint64__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint64__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint8__t_00_01_radix_01_4-members.html" />
+    <None Include="doxygen\html\struct_num_repr_1_1type__traits_1_1_u_int_type_for_radix_3_01uint8__t_00_01_radix_01_4.html" />
+    <None Include="doxygen\html\test__dig__t_8hpp.html" />
+    <None Include="doxygen\html\test__dig__t_8hpp_source.html" />
+    <None Include="doxygen\html\utilities_8hpp.html" />
+    <None Include="doxygen\html\utilities_8hpp_source.html" />
+    <None Include="NumericRepresentations_build_log.html" />
+    <None Include="out\build\x64-debug\cmakefiles\3.25.1-msvc1\CMakeDetermineCompilerABI_C.bin" />
+    <None Include="out\build\x64-debug\cmakefiles\3.25.1-msvc1\CMakeDetermineCompilerABI_CXX.bin" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xsd Include="doxygen\xml\compound.xsd" />
+    <Xsd Include="doxygen\xml\doxyfile.xsd" />
+    <Xsd Include="doxygen\xml\index.xsd" />
+    <Xsd Include="doxygen\xml\xml.xsd" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="out\build\x64-debug\cmakefiles\showincludes\foo.h" />
+    <ClInclude Include="src\auxiliary_functions.hpp" />
+    <ClInclude Include="src\auxiliary_types.hpp" />
+    <ClInclude Include="src\base_num_t.hpp" />
+    <ClInclude Include="src\basic_types.hpp" />
+    <ClInclude Include="src\dig_t.hpp" />
+    <ClInclude Include="src\int_num_t.hpp" />
+    <ClInclude Include="src\int_reg_digs_t.hpp" />
+    <ClInclude Include="src\lexer_parser.hpp" />
+    <ClInclude Include="src\memory_handler.hpp" />
+    <ClInclude Include="src\nat_num_t.hpp" />
+    <ClInclude Include="src\nat_rat_fixed_reg_t.hpp" />
+    <ClInclude Include="src\nat_rat_num_t.hpp" />
+    <ClInclude Include="src\nat_reg_digs_t.hpp" />
+    <ClInclude Include="src\rat_fixed_reg_t.hpp" />
+    <ClInclude Include="src\rat_num_t.hpp" />
+    <ClInclude Include="src\reg_digs_t.hpp" />
+    <ClInclude Include="src\testunit.hpp" />
+    <ClInclude Include="src\utilities.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
