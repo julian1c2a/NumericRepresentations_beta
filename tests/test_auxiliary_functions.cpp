@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cassert>
-#include "core/internal/auxiliary_functions.hpp"
+#include "include/core/internal/auxiliary_functions.hpp"
 
 using namespace NumRepr::auxiliary_functions;
 
