@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cassert>
-#include "include/auxiliary_functions.hpp"
+#include "core/internal/auxiliary_functions.hpp"
 
 using namespace NumRepr::auxiliary_functions;
 
@@ -112,6 +112,20 @@ void test_int_pow()
     static_assert(int_pow(1, 100) == 1, "1^100 should be 1");
 
     std::cout << "✅ int_pow tests passed!" << std::endl;
+}
+
+
+void test_int_pow2ct()
+{
+    std::cout << "Testing int_pow..." << std::endl;
+
+    static_assert(int_pow2ct(0) == 1, "2^0 should be 1");
+    static_assert(int_pow2ct(1) == 2, "2^1 should be 2");
+    static_assert(int_pow2ct(3) == 8, "2^3 should be 8");
+    static_assert(int_pow2ct(5) == 32, "2^5 should be 32");
+    static_assert(int_pow2ct(32) == 4'294'967'296, "2^32 should be 4294967296");
+
+    std::cout << "✅ int_pow2ct tests passed!" << std::endl;
 }
 
 void test_digit_counting()

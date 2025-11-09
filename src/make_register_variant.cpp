@@ -1,8 +1,8 @@
 #include <cstdlib>
 #include <cstdint>
-#include "../include/util_functs.hpp"
-#include "../include/reg_digs_t.hpp"
-#include "../include/register_variant_t.hpp"
+#include "util_functs.hpp"
+#include "reg_digs_t.hpp"
+#include "register_variant_t.hpp"
 
 namespace NumRepr {
 
