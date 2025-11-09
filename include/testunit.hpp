@@ -2,7 +2,7 @@
 #define TESTUNIT_HPP_INCLUDED
 
 #include "int_reg_digs_t.hpp"
-#include "utilities.hpp"
+#include "core/internal/utilities.hpp"
 
 namespace NumRepr { /// BEGIN OF NAMESPACE NUMREPR
 namespace testing { /// BEGIN OF NAMESPACE TESTING

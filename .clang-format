@@ -1,0 +1,47 @@
+# Configuración de clang-format para VS Code
+# Estilo de llaves en la misma línea (K&R style)
+
+BasedOnStyle: Google
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ColumnLimit: 100
+
+# CONFIGURACIÓN DE LLAVES - TODAS EN LA MISMA LÍNEA
+BreakBeforeBraces: Attach
+
+# Configuraciones específicas de llaves
+Cpp11BracedListStyle: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+
+# Espacios y alineación
+SpaceBeforeParens: Never
+SpaceInEmptyParentheses: false
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+SpaceBeforeAssignmentOperators: true
+
+# Otras configuraciones útiles
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignTrailingComments: true
+AllowAllParametersOfDeclarationOnNextLine: true
+
+# Configuración de punteros y referencias
+PointerAlignment: Left
+DerivePointerAlignment: false
+
+# Configuración de includes
+SortIncludes: true
+IncludeBlocks: Merge
+
+# Configuración de namespaces
+NamespaceIndentation: None
+FixNamespaceComments: true
+
+# Configuración específica para C++
+Language: Cpp
+Standard: Cpp17

@@ -4,7 +4,7 @@
 #include <iostream>
 
 // Solo incluir los tipos básicos, no reg_digs_t completo
-#include "basic_types.hpp"
+#include "core/internal/basic_types.hpp"
 
 using namespace NumRepr;
 

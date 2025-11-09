@@ -19,7 +19,7 @@ std::cout << +d.get();                      // Promoción automática (más cort
 
 ### 2. **Helper Automático** (Método recomendado)
 ```cpp
-#include "include/dig_t_display_helpers.hpp"
+#include "core/dig_t_display_helpers.hpp"
 using namespace NumRepr;
 
 dig_t<10> d{5};
@@ -87,4 +87,4 @@ std::cout << "Base 1000 usa: " << type_name<1000>() << "\n"; // uint16_t
 
 ---
 
-**🎯 Recomendación Final**: Usar `#include "include/dig_t_display_helpers.hpp"` por defecto en nuevos proyectos para evitar completamente este problema.
+**🎯 Recomendación Final**: Usar `#include "core/dig_t_display_helpers.hpp"` por defecto en nuevos proyectos para evitar completamente este problema.

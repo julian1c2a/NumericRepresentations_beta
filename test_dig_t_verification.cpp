@@ -3,7 +3,7 @@
 //
 #include <iostream>
 
-#include "dig_t.hpp"
+#include "core/dig_t.hpp"
 
 using namespace NumRepr;
 

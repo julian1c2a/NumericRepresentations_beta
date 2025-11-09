@@ -4,7 +4,7 @@
 #include <variant>
 #include <string>
 #include <ostream>
-#include "dig_t.hpp"
+#include "core/dig_t.hpp"
 
 namespace NumRepr {
 namespace memory_handler {// tipos variant por ahora

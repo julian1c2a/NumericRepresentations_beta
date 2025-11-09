@@ -1,7 +1,7 @@
 #ifndef UTILITIES_HPP_INCLUDED
 #define UTILITIES_HPP_INCLUDED
 
-#include "basic_types.hpp"
+#include "core/internal/basic_types.hpp"
 
 #include <array>
 #include <tuple>

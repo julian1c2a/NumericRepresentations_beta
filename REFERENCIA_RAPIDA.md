@@ -94,7 +94,7 @@ std::cout << static_cast<unsigned>(d1.get());  // Para números sin signo
 std::cout << +d1.get();                        // Alternativa corta (promoción)
 
 // Método 2: Helper automático (recomendado)
-#include "include/dig_t_display_helpers.hpp"
+#include "core/dig_t_display_helpers.hpp"
 using namespace NumRepr;
 
 std::cout << display(d1);                      // Función helper

@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include "include/nat_reg_digs_t.hpp"
-#include "include/dig_t_display_helpers.hpp" // Para solucionar problemas de uint8_t
+#include "core/dig_t_display_helpers.hpp" // Para solucionar problemas de uint8_t
 
 using namespace NumRepr;
 

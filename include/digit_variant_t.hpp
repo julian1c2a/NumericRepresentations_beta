@@ -12,7 +12,7 @@
 #include <limits>
 #include <algorithm>
 
-#include "dig_t.hpp"
+#include "core/dig_t.hpp"
 
 namespace NumRepr
 {

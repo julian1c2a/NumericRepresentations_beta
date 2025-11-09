@@ -1,5 +1,5 @@
 #include <iostream>
-#include "dig_t.hpp"
+#include "core/dig_t.hpp"
 #include "base_num_t.hpp"
 #include "nat_num_t.hpp"
 #include "int_num_t.hpp"

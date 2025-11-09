@@ -22,7 +22,7 @@
 #define NAT_REG_DIGS_T__HPP__INCLUDED
 
 #include "reg_digs_t.hpp"
-#include "utilities.hpp"
+#include "core/internal/utilities.hpp"
 
 namespace NumRepr
 {

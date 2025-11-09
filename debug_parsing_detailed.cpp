@@ -1,6 +1,6 @@
 #include <iostream>
 #include <limits>
-#include "dig_t.hpp"
+#include "core/dig_t.hpp"
 
 using namespace NumRepr;
 

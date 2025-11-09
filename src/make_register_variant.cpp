@@ -28,7 +28,7 @@ namespace NumRepr {
 //		template<std::uint64_t ...Ixs>
 //		constexpr auto fn(std::index_sequence<Ixs...>) {
 //			const functsArray_t<bvar_sz,lvar_sz> result{
-//				(local_fn<(Ixs/lvar_sz)+2,util_functs::pow2ct<Ixs%lvar_sz>()>(std::int64_t)
+//				(local_fn<(Ixs/lvar_sz)+2,NumRepr::auxiliary_functions::int_pow2ct<Ixs%lvar_sz>()>(std::int64_t)
 //				...)
 //			};
 //			return result;
@@ -46,7 +46,7 @@ namespace NumRepr {
 //					)
 //				}
 //			;
-//
+//				NumRepr::auxiliary_functions::int_log2(longitud)
 //
 //
 //		public:

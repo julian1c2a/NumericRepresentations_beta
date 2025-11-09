@@ -1,3 +1,62 @@
 {
-    "FSharp.suggestGitignore": false
+    "FSharp.suggestGitignore": false,
+    "geminicodeassist.agentDebugMode": true,
+    "geminicodeassist.agentYoloMode": true,
+    "geminicodeassist.codeGenerationPaneViewEnabled": true,
+    "geminicodeassist.inlineSuggestions.suggestionSpeed": "Slow",
+    "geminicodeassist.languages": [
+        "*",
+        "c",
+        "cpp",
+        "git-commit",
+        "bat",
+        "makefile",
+        "markdown",
+        "powershell",
+        "shellscript"
+    ],
+    "geminicodeassist.updateChannel": "Insiders",
+    "geminicodeassist.verboseLogging": true,
+    // ===================================================================
+    // CONFIGURACIÓN DE FORMATEO C++ - LLAVES EN LA MISMA LÍNEA
+    // ===================================================================
+    // Configuración para archivos C/C++
+    "[cpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[c]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.formatOnSave": true,
+        "editor.formatOnType": true,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    "[hpp]": {
+        "editor.defaultFormatter": "ms-vscode.cpptools",
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+        "editor.insertSpaces": true
+    },
+    // Configuración del formateador C/C++
+    "C_Cpp.formatting": "clangFormat",
+    "C_Cpp.clang_format_style": "file",
+    "C_Cpp.intelliSenseEngine": "default",
+    // Configuración general del editor
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "editor.defaultFormatter": "ms-vscode.cpptools",
+    "notebook.defaultFormatter": "ms-vscode.cpptools",
+    "gemini-cli.debug.logging.enabled": true,
+    "geminicodeassist.inlineSuggestions.nextEditPredictions": true,
+    "copilot.vision.provider": "Gemini",
+    "geminicodeassist.project": "firstproject-451013",
+    "makefile.makePath": "c:\\msys64\\ucrt64\\bin\\mingw32-make.exe",
+    "makefile.buildLog": "/build"
 }
