@@ -4,7 +4,7 @@
  */
 
 #include <iostream>
-#include "include/dig_t.hpp"
+#include "dig_t.hpp"
 #include "core/dig_t_display_helpers.hpp"
 
 using namespace NumRepr;

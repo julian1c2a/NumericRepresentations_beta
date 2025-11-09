@@ -15,7 +15,16 @@ void test_is_power_of_2()
     static_assert(is_power_of_2(8), "8 should be power of 2");
     static_assert(is_power_of_2(16), "16 should be power of 2");
     static_assert(is_power_of_2(1024), "1024 should be power of 2");
-
+    static_assert(is_power_of_2(2048), "2048 should be power of 2");
+    static_assert(is_power_of_2(4096), "4096 should be power of 2");
+    static_assert(is_power_of_2(8192), "8192 should be power of 2");
+    static_assert(is_power_of_2(16394), "16384 should be power of 2");
+    static_assert(is_power_of_2(32768), "32768 should be power of 2");
+    static_assert(is_power_of_2(65536), "65536 should be power of 2");
+    static_assert(is_power_of_2(131072), "131072 should be power of 2");
+    static_assert(is_power_of_2(4294967296), "4294967296 should be power of 2");
+    static_assert(is_power_of_2(9223372036854775808), "9223372036854775808 should be power of 2");
+    
     // Test cases for non-powers of 2
     static_assert(!is_power_of_2(0), "0 should not be power of 2");
     static_assert(!is_power_of_2(3), "3 should not be power of 2");
@@ -24,6 +33,23 @@ void test_is_power_of_2()
     static_assert(!is_power_of_2(7), "7 should not be power of 2");
     static_assert(!is_power_of_2(9), "9 should not be power of 2");
     static_assert(!is_power_of_2(15), "15 should not be power of 2");
+    static_assert(!is_power_of_2(1023), "1023 should not be power of 2");
+    static_assert(!is_power_of_2(1025), "1025 should not be power of 2");
+    static_assert(!is_power_of_2(2047), "2047 should not be power of 2");
+    static_assert(!is_power_of_2(4095), "4095 should not be power of 2");
+    static_assert(!is_power_of_2(4097), "4097 should not be power of 2");
+    static_assert(!is_power_of_2(8191), "8191 should not be power of 2");
+    static_assert(!is_power_of_2(16393), "16383 should not be power of 2");
+    static_assert(!is_power_of_2(16395), "16385 should not be power of 2");
+    static_assert(!is_power_of_2(32767), "32767 should not be power of 2");
+    static_assert(!is_power_of_2(65535), "65535 should not be power of 2");
+    static_assert(!is_power_of_2(65537), "65537 should not be power of 2");
+    static_assert(!is_power_of_2(131071), "131071 should not be power of 2");
+    static_assert(!is_power_of_2(4294967295), "4294967295 should not be power of 2");
+    static_assert(!is_power_of_2(4294967297), "4294967297 should not be power of 2");
+    static_assert(!is_power_of_2(9223372036854775807), "9223372036854775807 should not be power of 2");
+    static_assert(!is_power_of_2(9223372036854775809), "9223372036854775809 should not be power of 2");
+    static_assert(!is_power_of_2(18446744073709551615), "18446744073709551615 should not be power of 2");
 
     std::cout << "✅ is_power_of_2 tests passed!" << std::endl;
 }
