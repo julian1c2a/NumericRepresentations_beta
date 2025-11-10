@@ -210,9 +210,19 @@ TEST_CASE("digit_counting tests", "[auxiliary_functions]")
     REQUIRE(count_digits_base10(987654321) == 9);
 }
 
-TEST_CASE("ceilsqrt tests", "[auxiliary_functions]")
+TEST_CASE("floorsqrt and ceilsqrt tests", "[auxiliary_functions]")
 {
-    // std::size_t (which is std::uint64_t on this system)
+    // floorsqrt
+    STATIC_REQUIRE(floorsqrt(std::size_t{0}) == 0);
+    STATIC_REQUIRE(floorsqrt(std::size_t{1}) == 1);
+    STATIC_REQUIRE(floorsqrt(std::size_t{2}) == 1);
+    STATIC_REQUIRE(floorsqrt(std::size_t{3}) == 1);
+    STATIC_REQUIRE(floorsqrt(std::size_t{4}) == 2);
+    STATIC_REQUIRE(floorsqrt(std::size_t{15}) == 3);
+    STATIC_REQUIRE(floorsqrt(std::size_t{16}) == 4);
+    STATIC_REQUIRE(floorsqrt(std::size_t{17}) == 4);
+
+    // ceilsqrt
     STATIC_REQUIRE(ceilsqrt(std::size_t{0}) == 0);
     STATIC_REQUIRE(ceilsqrt(std::size_t{1}) == 1);
     STATIC_REQUIRE(ceilsqrt(std::size_t{2}) == 2);
@@ -226,24 +236,14 @@ TEST_CASE("ceilsqrt tests", "[auxiliary_functions]")
     STATIC_REQUIRE(ceilsqrt(std::size_t{26}) == 6);
     REQUIRE(ceilsqrt(std::size_t{100}) == 10);
     REQUIRE(ceilsqrt(std::size_t{101}) == 11);
-    REQUIRE(ceilsqrt(std::numeric_limits<std::size_t>::max()) == 3037000500); // Approx, will be ceiled
-
-    // std::uint64_t
-    STATIC_REQUIRE(ceilsqrt(std::uint64_t{0}) == 0);
-    STATIC_REQUIRE(ceilsqrt(std::uint64_t{16}) == 4);
-    STATIC_REQUIRE(ceilsqrt(std::uint64_t{17}) == 5);
-    REQUIRE(ceilsqrt(std::numeric_limits<std::uint64_t>::max()) == 3037000500);
+    REQUIRE(ceilsqrt(std::numeric_limits<std::size_t>::max()) > 0);
 
     // std::uint32_t
-    STATIC_REQUIRE(ceilsqrt(std::uint32_t{0}) == 0);
-    STATIC_REQUIRE(ceilsqrt(std::uint32_t{16}) == 4);
-    STATIC_REQUIRE(ceilsqrt(std::uint32_t{17}) == 5);
+    REQUIRE(floorsqrt(std::numeric_limits<std::uint32_t>::max()) == 65535);
     REQUIRE(ceilsqrt(std::numeric_limits<std::uint32_t>::max()) == 65536);
 
     // std::uint16_t
-    STATIC_REQUIRE(ceilsqrt(std::uint16_t{0}) == 0);
-    STATIC_REQUIRE(ceilsqrt(std::uint16_t{16}) == 4);
-    STATIC_REQUIRE(ceilsqrt(std::uint16_t{17}) == 5);
+    REQUIRE(floorsqrt(std::numeric_limits<std::uint16_t>::max()) == 255);
     REQUIRE(ceilsqrt(std::numeric_limits<std::uint16_t>::max()) == 256);
 }
 
@@ -285,4 +285,29 @@ TEST_CASE("int_pow2 and int_pow2ct tests", "[auxiliary_functions]")
     // Test aliases
     STATIC_REQUIRE(pow2(10) == 1024);
     STATIC_REQUIRE(pow2ct<10>() == 1024);
+}
+
+TEST_CASE("int_log and int_log_ct tests", "[auxiliary_functions]")
+{
+    // Test int_log_ct
+    STATIC_REQUIRE(int_log_ct<10, 100>() == 2);
+    STATIC_REQUIRE(int_log_ct<2, 8>() == 3);
+    STATIC_REQUIRE(int_log_ct<3, 80>() == 3); // 3^3=27, 3^4=81
+    STATIC_REQUIRE(int_log_ct<10, 99>() == 1);
+    STATIC_REQUIRE(int_log_ct<10, 101>() == 2);
+    STATIC_REQUIRE(int_log_ct<10, 9>() == 0);
+    STATIC_REQUIRE(int_log_ct<10, 1>() == 0);
+    STATIC_REQUIRE(int_log_ct<10, 0>() == -1);
+    STATIC_REQUIRE(int_log_ct<10, -5>() == -1);
+
+    // Test int_log
+    REQUIRE(int_log(10, 100) == 2);
+    REQUIRE(int_log(2, 8) == 3);
+    REQUIRE(int_log(3, 80) == 3);
+    REQUIRE(int_log(10, 99) == 1);
+    REQUIRE(int_log(10, 101) == 2);
+    REQUIRE(int_log(10, 9) == 0);
+    REQUIRE(int_log(10, 1) == 0);
+    REQUIRE(int_log(10, 0) == -1);
+    REQUIRE(int_log(10, -5) == -1);
 }

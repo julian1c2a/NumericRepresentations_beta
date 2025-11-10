@@ -1,32 +1,58 @@
 #ifndef NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
 #define NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
 
-#include <concepts>
+#include <bit>
+#include <cstddef>
+#include <cstdint>
 #include <cmath>
 #include <type_traits>
-#include <bit>
 #include "auxiliary_types.hpp"
 
 namespace NumRepr {
-
   namespace auxiliary_functions {
-
-  template <typename T>
-  constexpr T ceilsqrt(T n) noexcept {
-      static_assert(std::is_unsigned_v<T>&&std::is_integral_v<T>, 
-                    "ceilsqrt can only be used with unsigned integral types"
-                   );
-      if (n < 2) { return n; }
-      // Use a robust iterative method (based on Newton's method)
-      T x0 = n;
+  /// TENEMOS UN NÚMERO N, ENTERO NO NEGATIVO,
+  /// QUITADOS LOS CASOS TRIVIALES, COMO N==0 => 0, N==1 || N==2 || N==3 => 1
+  /// QUEREMOS CALCULAR LA RAÍZ CUADRADA ENTERA MÁXIMA DE N
+  /// TAL QUE R*R <= N < (R+1)*(R+1)
+  template <typename T> constexpr
+  T floorsqrt(T n) noexcept {
+      if (n == 0) return 0;
+      
+      // std::bit_width requiere un tipo sin signo.
+      using UnsignedT = std::make_unsigned_t<T>;
+      T x0 = T(1) << (std::bit_width(static_cast<UnsignedT>(n)) / 2);
+      
+      // La iteración de Newton-Raphson converge desde arriba si la conjetura es >= sqrt(n).
+      // Si nuestra conjetura x0 es una subestimación, la primera iteración x1 será mayor.
+      // Nos aseguramos de que la conjetura inicial sea siempre una sobreestimación o igual.
+      if (x0 * x0 < n) {
+          x0 = x0 * 2;
+      }
+      
       T x1 = (x0 + n / x0) / 2;
       while (x1 < x0) {
           x0 = x1;
           x1 = (x0 + n / x0) / 2;
       }
-      // At this point, x0 is floor(sqrt(n)).
-      // We need ceil(sqrt(n)), so if x0*x0 is not n and the square is smaller, we add 1.
-      return (x0 * x0 >= n) ? x0 : x0 + 1;
+      
+      // La iteración se detiene cuando x0 <= sqrt(n).
+      // x0 es el resultado correcto.
+      return x0;
+  }
+
+  template <typename T>
+  constexpr T ceilsqrt(T n) noexcept {
+      if (n == 0) return 0;
+      T root = floorsqrt(n);
+      // Si n no es un cuadrado perfecto, la raíz cuadrada entera superior es root + 1.
+      return (root * root == n) ? root : root + 1;
+  }
+
+  template<typename T>
+  constexpr bool is_perfect_square(T n) noexcept {
+    if (n == 0) return true;
+    T root = floorsqrt(n);
+    return root * root == n;
   }
 
   // --- Backward compatibility wrappers for std::size_t ---
@@ -240,7 +266,7 @@ namespace NumRepr {
     }
   }  // END FUNCTION INT_LOG_CT
 
-  std::int64_t int_log(std::uint64_t base, std::int64_t n) noexcept {
+  constexpr std::int64_t int_log(std::uint64_t base, std::int64_t n) noexcept {
     if (n <= 0) {
       return -1; // Not in domain of the function log_base(n)
                  // Domain(log_base) = ]0, +infinity[ = [1, +infinity[
@@ -249,7 +275,7 @@ namespace NumRepr {
     } else {
       return 1 + int_log(base, n / base);
     }
-  }  // END FUNCTION INT_LOG_CT
+  }  // END FUNCTION INT_LOG
 
   constexpr inline
   std::size_t count_digits_base10(std::uint64_t n) noexcept { 

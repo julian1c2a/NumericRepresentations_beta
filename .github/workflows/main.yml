@@ -1,0 +1,48 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ "main", "revisada" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        compiler: [gcc, clang, msvc]
+        exclude:
+          - os: ubuntu-latest
+            compiler: msvc
+          - os: macos-latest
+            compiler: msvc
+          - os: windows-latest
+            compiler: gcc # MinGW can be tricky, focusing on MSVC for Windows first
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up MSVC
+      if: matrix.compiler == 'msvc'
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Configure CMake (GCC)
+      if: matrix.compiler == 'gcc'
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
+
+    - name: Configure CMake (Clang)
+      if: matrix.compiler == 'clang'
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+
+    - name: Configure CMake (MSVC)
+      if: matrix.compiler == 'msvc'
+      run: cmake -B ${{github.workspace}}/build
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C Release --output-on-failure
