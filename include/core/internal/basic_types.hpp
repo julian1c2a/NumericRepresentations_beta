@@ -424,8 +424,10 @@ namespace NumRepr {
       template <>
       struct __sig_UInt_for_SInt_t<sint_t> { using type = uint_t; };
 
+#if !defined(__GNUC__) || (defined(__GNUC__) && !std::is_same_v<slint_t, sint64_t>)
       template <>
       struct __sig_UInt_for_SInt_t<slint_t> { using type = ulint_t; };
+#endif
 
     } // namespace ugly_details_UInt_for_SInt
 
