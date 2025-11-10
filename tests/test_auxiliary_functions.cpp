@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include "catch2/catch.hpp"
-#include "include/core/internal/auxiliary_functions.hpp"
+#include "core/internal/auxiliary_functions.hpp"
+#include <limits>
 
 using namespace NumRepr::auxiliary_functions;
 
@@ -212,19 +213,39 @@ TEST_CASE("digit_counting tests", "[auxiliary_functions]")
 
 TEST_CASE("ceilsqrt tests", "[auxiliary_functions]")
 {
-    STATIC_REQUIRE(ceilsqrt(0) == 0);
-    STATIC_REQUIRE(ceilsqrt(1) == 1);
-    STATIC_REQUIRE(ceilsqrt(2) == 2);
-    STATIC_REQUIRE(ceilsqrt(3) == 2);
-    STATIC_REQUIRE(ceilsqrt(4) == 2);
-    STATIC_REQUIRE(ceilsqrt(15) == 4);
-    STATIC_REQUIRE(ceilsqrt(16) == 4);
-    STATIC_REQUIRE(ceilsqrt(17) == 5);
-    STATIC_REQUIRE(ceilsqrt(24) == 5);
-    STATIC_REQUIRE(ceilsqrt(25) == 5);
-    STATIC_REQUIRE(ceilsqrt(26) == 6);
-    REQUIRE(ceilsqrt(100) == 10);
-    REQUIRE(ceilsqrt(101) == 11);
+    // std::size_t (which is std::uint64_t on this system)
+    STATIC_REQUIRE(ceilsqrt(std::size_t{0}) == 0);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{1}) == 1);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{2}) == 2);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{3}) == 2);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{4}) == 2);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{15}) == 4);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{16}) == 4);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{17}) == 5);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{24}) == 5);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{25}) == 5);
+    STATIC_REQUIRE(ceilsqrt(std::size_t{26}) == 6);
+    REQUIRE(ceilsqrt(std::size_t{100}) == 10);
+    REQUIRE(ceilsqrt(std::size_t{101}) == 11);
+    REQUIRE(ceilsqrt(std::numeric_limits<std::size_t>::max()) == 3037000500); // Approx, will be ceiled
+
+    // std::uint64_t
+    STATIC_REQUIRE(ceilsqrt(std::uint64_t{0}) == 0);
+    STATIC_REQUIRE(ceilsqrt(std::uint64_t{16}) == 4);
+    STATIC_REQUIRE(ceilsqrt(std::uint64_t{17}) == 5);
+    REQUIRE(ceilsqrt(std::numeric_limits<std::uint64_t>::max()) == 3037000500);
+
+    // std::uint32_t
+    STATIC_REQUIRE(ceilsqrt(std::uint32_t{0}) == 0);
+    STATIC_REQUIRE(ceilsqrt(std::uint32_t{16}) == 4);
+    STATIC_REQUIRE(ceilsqrt(std::uint32_t{17}) == 5);
+    REQUIRE(ceilsqrt(std::numeric_limits<std::uint32_t>::max()) == 65536);
+
+    // std::uint16_t
+    STATIC_REQUIRE(ceilsqrt(std::uint16_t{0}) == 0);
+    STATIC_REQUIRE(ceilsqrt(std::uint16_t{16}) == 4);
+    STATIC_REQUIRE(ceilsqrt(std::uint16_t{17}) == 5);
+    REQUIRE(ceilsqrt(std::numeric_limits<std::uint16_t>::max()) == 256);
 }
 
 TEST_CASE("int_log2 and int_log2ct tests", "[auxiliary_functions]")

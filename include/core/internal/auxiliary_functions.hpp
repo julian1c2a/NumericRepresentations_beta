@@ -1,41 +1,45 @@
 #ifndef NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
 #define NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
 
+#include <concepts>
 #include <cmath>
-#include <cstddef>
-#include <cstdint>
-#include <limits>
-#include <numeric>
-
-#include "core/internal/auxiliary_types.hpp"
+#include <type_traits>
+// ... existing code ...
+#include "auxiliary_types.hpp"
 
 namespace NumRepr {
 
   namespace auxiliary_functions {
 
+  template <typename T>
+  concept UnsignedIntegral = std::is_integral_v<T> && !std::is_signed_v<T>;
+
+  template <UnsignedIntegral T>
+  constexpr T ceilsqrt(T n) noexcept {
+      if (n < 2) {
+          return n;
+      }
+      T x0 = n;
+      T x1 = (x0 + n / x0) / 2;
+      while (x1 < x0) {
+          x0 = x1;
+          x1 = (x0 + n / x0) / 2;
+      }
+      // At this point, x0 is floor(sqrt(n)).
+      // We need ceil(sqrt(n)), so if x0*x0 is not n, we add 1.
+      return (x0 * x0 == n) ? x0 : x0 + 1;
+  }
+
+  // --- Backward compatibility wrappers for std::size_t ---
   constexpr inline
-  std::size_t ceilsqrt(std::size_t n, std::size_t low, std::size_t high) noexcept {
-    const auto mid{std::midpoint(low, high)};
-    const auto sqmid{mid * mid};
-    return ((low + 1 >= high) ? high
-            : (sqmid == n)    ? mid
-            : (sqmid < n)     ? ceilsqrt(n, mid, high)
-                              : ceilsqrt(n, low, mid));
-  } // END FUNCTION CEILSQRT
+  std::size_t ceilsqrt(std::size_t n, std::size_t, std::size_t) noexcept {
+    return ceilsqrt<std::size_t>(n);
+  }
 
   constexpr inline
   std::size_t ceilsqrt(std::size_t n) noexcept {
-    const auto num_max_dig{std::numeric_limits<std::size_t>::digits};
-    return (
-        (n < 3)     ? 
-            n       :   // n <  3
-            ceilsqrt(   // n >= 3
-                n, 
-                1, 
-                std::size_t(1) << (num_max_dig / 2)
-            )
-    );
-  }  // END FUNCTION CEILSQRT
+    return ceilsqrt<std::size_t>(n);
+  }
 
   constexpr inline
   bool find_factor(std::size_t n, std::size_t low, std::size_t high) noexcept {
@@ -108,7 +112,7 @@ namespace NumRepr {
 
   template <std::uint64_t base>
   consteval std::size_t max_exponent_for_base_ct() noexcept {
-      if constexpr (base < 2) return std::numexpr_limits<std::uint64_t>::max();
+      if constexpr (base < 2) return std::numeric_limits<std::uint64_t>::max();
       else if constexpr (base == 2) return 63;
       else if constexpr (base == 3) return 40;
       else if constexpr (base == 4) return 31;
