@@ -1,5 +1,4 @@
-#define CATCH_CONFIG_MAIN
-#include "catch2/catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 #include "core/internal/auxiliary_functions.hpp"
 #include <limits>
 
@@ -267,7 +266,7 @@ TEST_CASE("int_log2 and int_log2ct tests", "[auxiliary_functions]")
     STATIC_REQUIRE(int_log2ct<1025>() == 10);
 
     // Test aliases
-    STATIC_REQUIRE(log2(1024) == 10);
+    STATIC_REQUIRE(NumRepr::auxiliary_functions::log2(1024) == 10);
     STATIC_REQUIRE(log2ct<1024>() == 10);
 }
 

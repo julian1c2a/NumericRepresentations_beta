@@ -4,7 +4,7 @@
 #include <concepts>
 #include <cmath>
 #include <type_traits>
-// ... existing code ...
+#include <bit>
 #include "auxiliary_types.hpp"
 
 namespace NumRepr {
@@ -12,13 +12,12 @@ namespace NumRepr {
   namespace auxiliary_functions {
 
   template <typename T>
-  concept UnsignedIntegral = std::is_integral_v<T> && !std::is_signed_v<T>;
-
-  template <UnsignedIntegral T>
   constexpr T ceilsqrt(T n) noexcept {
-      if (n < 2) {
-          return n;
-      }
+      static_assert(std::is_unsigned_v<T>&&std::is_integral_v<T>, 
+                    "ceilsqrt can only be used with unsigned integral types"
+                   );
+      if (n < 2) { return n; }
+      // Use a robust iterative method (based on Newton's method)
       T x0 = n;
       T x1 = (x0 + n / x0) / 2;
       while (x1 < x0) {
@@ -26,11 +25,12 @@ namespace NumRepr {
           x1 = (x0 + n / x0) / 2;
       }
       // At this point, x0 is floor(sqrt(n)).
-      // We need ceil(sqrt(n)), so if x0*x0 is not n, we add 1.
-      return (x0 * x0 == n) ? x0 : x0 + 1;
+      // We need ceil(sqrt(n)), so if x0*x0 is not n and the square is smaller, we add 1.
+      return (x0 * x0 >= n) ? x0 : x0 + 1;
   }
 
   // --- Backward compatibility wrappers for std::size_t ---
+  // This overload is kept for compatibility with code that might call it with 3 arguments.
   constexpr inline
   std::size_t ceilsqrt(std::size_t n, std::size_t, std::size_t) noexcept {
     return ceilsqrt<std::size_t>(n);
@@ -228,6 +228,29 @@ namespace NumRepr {
   // forward declaration for count_digits_base (defined below)
   constexpr std::size_t count_digits_base(std::uint64_t n, std::uint64_t base) noexcept;
 
+  template <std::uint64_t base, std::int64_t n> consteval
+  std::int64_t int_log_ct() noexcept {
+    if constexpr (n <= 0) {
+      return -1; // Not in domain of the function log_base(n)
+                 // Domain(log_base) = ]0, +infinity[ = [1, +infinity[
+    } else if constexpr (n < base) {
+      return 0;
+    } else {
+      return 1 + int_log_ct<base, n / base>();
+    }
+  }  // END FUNCTION INT_LOG_CT
+
+  std::int64_t int_log(std::uint64_t base, std::int64_t n) noexcept {
+    if (n <= 0) {
+      return -1; // Not in domain of the function log_base(n)
+                 // Domain(log_base) = ]0, +infinity[ = [1, +infinity[
+    } else if (n < base) {
+      return 0;
+    } else {
+      return 1 + int_log(base, n / base);
+    }
+  }  // END FUNCTION INT_LOG_CT
+
   constexpr inline
   std::size_t count_digits_base10(std::uint64_t n) noexcept { 
     // (forward declarations for functions defined later are placed at
@@ -327,46 +350,13 @@ namespace NumRepr {
     requires (n>0)
   consteval
   std::uint64_t int_log2ct() noexcept {
-    if constexpr (n == 1) { return 0ull; }
-    else if constexpr (n == 2) { return 1ull; }
-    else if constexpr (n <= 4) { return 2ull; }
-    else if constexpr (n <= 8) { return 3ull; }
-    else if constexpr (n <= 16) { return 4ull; }
-    else if constexpr (n <= 32) { return 5ull; }
-    else if constexpr (n <= 64) { return 6ull; }
-    else if constexpr (n <= 128) { return 7ull; }
-    else if constexpr (n <= 256) { return 8ull; }
-    else if constexpr (n <= 512) { return 9ull; }
-    else if constexpr (n <= 1024) { return 10ull; }
-    else if constexpr (n <= 2048) { return 11ull; }
-    else if constexpr (n <= 4096) { return 12ull; }
-    else if constexpr (n <= 8192) { return 13ull; }
-    else if constexpr (n <= 16384) { return 14ull; }
-    else if constexpr (n <= 32768) { return 15ull; }
-    else if constexpr (n <= 65536) { return 16ull; }
-    else { return (1+int_log2ct<n/2>()); }
+    return std::bit_width(n) - 1;
   }  // END FUNCTION INT_LOG2CT
 
   constexpr
   std::uint64_t int_log2(std::uint64_t n) noexcept {
-    if (n <= 1) { return 0ull; }
-    else if (n <= 2) { return 1ull; }
-    else if (n <= 4) { return 2ull; }
-    else if (n <= 8) { return 3ull; }
-    else if (n <= 16) { return 4ull; }
-    else if (n <= 32) { return 5ull; }
-    else if (n <= 64) { return 6ull; }
-    else if (n <= 128) { return 7ull; }
-    else if (n <= 256) { return 8ull; }
-    else if (n <= 512) { return 9ull; }
-    else if (n <= 1024) { return 10ull; }
-    else if (n <= 2048) { return 11ull; }
-    else if (n <= 4096) { return 12ull; }
-    else if (n <= 8192) { return 13ull; }
-    else if (n <= 16384) { return 14ull; }
-    else if (n <= 32768) { return 15ull; }
-    else if (n <= 65536) { return 16ull; }
-    else { return (1+int_log2(n/2)); }
+    if (n == 0) return 0; // Or handle as an error, though std::bit_width(0) is 0.
+    return std::bit_width(n) - 1;
   } // END FUNCTION INT_LOG2
 
     // Backwards-compatible aliases for log2/log2ct that forward to the
