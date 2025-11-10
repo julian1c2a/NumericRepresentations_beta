@@ -201,8 +201,10 @@ namespace NumRepr {
       return std::expected<ullint_t, atoull_err_t>(i);
     }
 
-    inline std::expected<ullint_t, atoull_err_t> atoull_checked(std::string_view sv) noexcept {
-      if (sv.data() == nullptr || sv.size() == 0) return std::unexpected(atoull_err_t::empty_str);
+    inline 
+    std::expected<ullint_t, atoull_err_t> atoull_checked(std::string_view sv) noexcept {
+      if (sv.data() == nullptr || sv.size() == 0) 
+            return std::unexpected(atoull_err_t::empty_str);
       ullint_t i = 0;
       bool any = false;
       constexpr ullint_t maxv = std::numeric_limits<ullint_t>::max();
@@ -217,7 +219,9 @@ namespace NumRepr {
       return std::expected<ullint_t, atoull_err_t>(i);
     }
 
-    inline std::expected<std::pair<ullint_t, size_t>, atoull_err_t> atoull_consume(const char *text) noexcept {
+    inline 
+    std::expected<std::pair<ullint_t, size_t>, atoull_err_t> 
+    atoull_consume(const char *text) noexcept {
       if (text == nullptr) return std::unexpected(atoull_err_t::empty_str);
       ullint_t i = 0;
       size_t idx = 0;
@@ -231,11 +235,18 @@ namespace NumRepr {
         ++idx;
       }
       if (idx == 0) return std::unexpected(atoull_err_t::no_digit);
-      return std::expected<std::pair<ullint_t, size_t>, atoull_err_t>(std::pair<ullint_t, size_t>{i, idx});
+      return 
+        std::expected<std::pair<ullint_t, size_t>, atoull_err_t>
+        (
+            std::pair<ullint_t, size_t>{i, idx}
+        );
     }
 
-    inline std::expected<std::pair<ullint_t, size_t>, atoull_err_t> atoull_consume(std::string_view sv) noexcept {
-      if (sv.data() == nullptr || sv.size() == 0) return std::unexpected(atoull_err_t::empty_str);
+    inline 
+    std::expected<std::pair<ullint_t, size_t>, atoull_err_t> 
+    atoull_consume(std::string_view sv) noexcept {
+      if (sv.data() == nullptr || sv.size() == 0) 
+            return std::unexpected(atoull_err_t::empty_str);
       ullint_t i = 0;
       size_t idx = 0;
       constexpr ullint_t maxv = std::numeric_limits<ullint_t>::max();
@@ -248,12 +259,16 @@ namespace NumRepr {
         ++idx;
       }
       if (idx == 0) return std::unexpected(atoull_err_t::no_digit);
-      return std::expected<std::pair<ullint_t, size_t>, atoull_err_t>(std::pair<ullint_t, size_t>{i, idx});
+      return std::expected<std::pair<ullint_t, size_t>, atoull_err_t>
+        (
+            std::pair<ullint_t, size_t>{i, idx}
+        );
     }
 
     template <typename UINT_T>
-    constexpr bool is_uint_type_for_radix_v =
-        std::is_unsigned_v<UINT_T> && (!std::is_same_v<UINT_T, uint64_t>);
+    constexpr 
+    bool is_uint_type_for_radix_v =
+            std::is_unsigned_v<UINT_T> && (!std::is_same_v<UINT_T, uint64_t>);
 
     template <typename UINT_T>
     concept uint_type_for_radix_c = is_uint_type_for_radix_v<UINT_T>;
@@ -526,7 +541,10 @@ namespace NumRepr {
   consteval bool base_leqt_max() { return (B <= maxbase<UINT_T>()); }
 
   template <typename UINT_T, UINT_T B>
-  consteval bool suitable_base() { return (base_geqt_2<UINT_T, B>() && base_leqt_max<UINT_T, B>()); }
+  consteval 
+  bool suitable_base() { 
+    return (base_geqt_2<UINT_T, B>() && base_leqt_max<UINT_T, B>()); 
+  }
 
     template <typename UINT_T>
     consteval UINT_T middle_max() {
@@ -578,12 +596,18 @@ namespace NumRepr {
       template <integral_c T, T Radix>
       requires(Radix > 1)
       struct UIntTypeForRadixContainsMultResult<T, Radix> {
-        static constexpr ullint_t uint_value_0_max = static_cast<ullint_t>(sqrt_max<uchint_t>());
-        static constexpr ullint_t uint_value_1_max = static_cast<ullint_t>(sqrt_max<usint_t>());
-        static constexpr ullint_t uint_value_2_max = static_cast<ullint_t>(sqrt_max<uint_t>());
-        static constexpr ullint_t uint_value_3_max = static_cast<ullint_t>(sqrt_max<ulint_t>());
-        static constexpr ullint_t uint_value_4_max = static_cast<ullint_t>(sqrt_max<ullint_t>());
-        static constexpr ullint_t uint_value = static_cast<ullint_t>(Radix);
+        static constexpr 
+        ullint_t uint_value_0_max = static_cast<ullint_t>(sqrt_max<uchint_t>());
+        static constexpr 
+        ullint_t uint_value_1_max = static_cast<ullint_t>(sqrt_max<usint_t>());
+        static constexpr 
+        ullint_t uint_value_2_max = static_cast<ullint_t>(sqrt_max<uint_t>());
+        static constexpr 
+        ullint_t uint_value_3_max = static_cast<ullint_t>(sqrt_max<ulint_t>());
+        static constexpr 
+        ullint_t uint_value_4_max = static_cast<ullint_t>(sqrt_max<ullint_t>());
+        static constexpr 
+        ullint_t uint_value = static_cast<ullint_t>(Radix);
         using UIntType = std::conditional_t<
             uint_value <= uint_value_0_max, uchint_t,
             std::conditional_t<
@@ -592,8 +616,10 @@ namespace NumRepr {
                     uint_value <= uint_value_2_max, uint_t,
                     std::conditional_t<
                         uint_value <= uint_value_3_max, ulint_t,
-                        std::conditional_t<uint_value <= uint_value_4_max, ullint_t,
-                                           uint64_t>>>>>;
+                        std::conditional_t<
+                            uint_value <= uint_value_4_max, 
+                                ullint_t,
+                                uint64_t>>>>>;
       };
     }
     using namespace ugly_details_for_greater_suitable_type_deduction;
