@@ -50,6 +50,33 @@ TEST_CASE("is_power_of_2 tests", "[auxiliary_functions]")
     STATIC_REQUIRE_FALSE(is_power_of_2(18446744073709551615ULL));
 }
 
+TEST_CASE( "max_exponent_for_base_ct", "[auxiliary_functions]")
+{
+    STATIC_REQUIRE(max_exponent_for_base_ct<2>() == 63);
+    STATIC_REQUIRE(max_exponent_for_base_ct<3>() == 40);
+    STATIC_REQUIRE(max_exponent_for_base_ct<4>() == 31);
+    STATIC_REQUIRE(max_exponent_for_base_ct<5>() == 27);
+    STATIC_REQUIRE(max_exponent_for_base_ct<10>() == 19);
+    STATIC_REQUIRE(max_exponent_for_base_ct<16>() == 15);
+    STATIC_REQUIRE(max_exponent_for_base_ct<256>() == 7);
+    STATIC_REQUIRE(max_exponent_for_base_ct<65536>() == 3);
+    STATIC_REQUIRE(max_exponent_for_base_ct<4294967296>() == 1);
+}
+
+TEST_CASE( "max_exponent_for_base", "[auxiliary_functions]")
+{
+    STATIC_REQUIRE(max_exponent_for_base(2) == 63);
+    STATIC_REQUIRE(max_exponent_for_base(3) == 40);
+    STATIC_REQUIRE(max_exponent_for_base(4) == 31);
+    STATIC_REQUIRE(max_exponent_for_base(5) == 27);
+    STATIC_REQUIRE(max_exponent_for_base(10) == 19);
+    STATIC_REQUIRE(max_exponent_for_base(16) == 15);
+    STATIC_REQUIRE(max_exponent_for_base(256) == 7);
+    STATIC_REQUIRE(max_exponent_for_base(65536) == 3);
+    STATIC_REQUIRE(max_exponent_for_base(4294967296) == 1);
+}
+
+
 TEST_CASE("is_prime tests", "[auxiliary_functions]")
 {
     // Test small primes
@@ -109,6 +136,53 @@ TEST_CASE("int_pow tests", "[auxiliary_functions]")
     REQUIRE(int_pow(2, 10) == 1024);
 }
 
+TEST_CASE("int_pow_ct tests", "[auxiliary_functions]")
+{
+    STATIC_REQUIRE(int_pow_ct<2, 0>() == 1);
+    STATIC_REQUIRE(int_pow_ct<2, 1>() == 2);
+    STATIC_REQUIRE(int_pow_ct<2, 3>() == 8);
+    STATIC_REQUIRE(int_pow_ct<3, 4>() == 81);
+    STATIC_REQUIRE(int_pow_ct<5, 3>() == 125);
+    STATIC_REQUIRE(int_pow_ct<0, 5>() == 0);
+    STATIC_REQUIRE(int_pow_ct<1, 100>() == 1);
+}
+
+TEST_CASE("is_perfect_square tests", "[auxiliary_functions]")
+{
+    STATIC_REQUIRE(is_perfect_square(0));
+    STATIC_REQUIRE(is_perfect_square(1));
+    STATIC_REQUIRE(is_perfect_square(4));
+    STATIC_REQUIRE(is_perfect_square(9));
+    STATIC_REQUIRE(is_perfect_square(16));
+    STATIC_REQUIRE(is_perfect_square(25));
+    STATIC_REQUIRE(is_perfect_square(36));
+    STATIC_REQUIRE(is_perfect_square(49));
+    STATIC_REQUIRE(is_perfect_square(64));
+    STATIC_REQUIRE(is_perfect_square(81));
+    STATIC_REQUIRE(is_perfect_square(100));
+    STATIC_REQUIRE(is_perfect_square(144));
+    STATIC_REQUIRE(is_perfect_square(169));
+    STATIC_REQUIRE(is_perfect_square(196));
+    STATIC_REQUIRE(is_perfect_square(225));
+    STATIC_REQUIRE(is_perfect_square(256));
+    STATIC_REQUIRE(is_perfect_square(289));
+    STATIC_REQUIRE(is_perfect_square(324));
+    STATIC_REQUIRE(is_perfect_square(361));
+    STATIC_REQUIRE(is_perfect_square(400));
+
+    STATIC_REQUIRE_FALSE(is_perfect_square(2));
+    STATIC_REQUIRE_FALSE(is_perfect_square(3));
+    STATIC_REQUIRE_FALSE(is_perfect_square(5));
+    STATIC_REQUIRE_FALSE(is_perfect_square(6));
+    STATIC_REQUIRE_FALSE(is_perfect_square(7));
+    STATIC_REQUIRE_FALSE(is_perfect_square(8));
+    STATIC_REQUIRE_FALSE(is_perfect_square(10));
+
+    // Runtime test
+    REQUIRE(is_perfect_square(625));
+    REQUIRE_FALSE(is_perfect_square(626));
+}
+
 TEST_CASE("int_pow2ct tests", "[auxiliary_functions]")
 {
     STATIC_REQUIRE(int_pow2ct<0>() == 1);
@@ -134,4 +208,61 @@ TEST_CASE("digit_counting tests", "[auxiliary_functions]")
 
     // Runtime test
     REQUIRE(count_digits_base10(987654321) == 9);
+}
+
+TEST_CASE("ceilsqrt tests", "[auxiliary_functions]")
+{
+    STATIC_REQUIRE(ceilsqrt(0) == 0);
+    STATIC_REQUIRE(ceilsqrt(1) == 1);
+    STATIC_REQUIRE(ceilsqrt(2) == 2);
+    STATIC_REQUIRE(ceilsqrt(3) == 2);
+    STATIC_REQUIRE(ceilsqrt(4) == 2);
+    STATIC_REQUIRE(ceilsqrt(15) == 4);
+    STATIC_REQUIRE(ceilsqrt(16) == 4);
+    STATIC_REQUIRE(ceilsqrt(17) == 5);
+    STATIC_REQUIRE(ceilsqrt(24) == 5);
+    STATIC_REQUIRE(ceilsqrt(25) == 5);
+    STATIC_REQUIRE(ceilsqrt(26) == 6);
+    REQUIRE(ceilsqrt(100) == 10);
+    REQUIRE(ceilsqrt(101) == 11);
+}
+
+TEST_CASE("int_log2 and int_log2ct tests", "[auxiliary_functions]")
+{
+    STATIC_REQUIRE(int_log2(1) == 0);
+    STATIC_REQUIRE(int_log2(2) == 1);
+    STATIC_REQUIRE(int_log2(3) == 1);
+    STATIC_REQUIRE(int_log2(4) == 2);
+    STATIC_REQUIRE(int_log2(1023) == 9);
+    STATIC_REQUIRE(int_log2(1024) == 10);
+    STATIC_REQUIRE(int_log2(1025) == 10);
+
+    STATIC_REQUIRE(int_log2ct<1>() == 0);
+    STATIC_REQUIRE(int_log2ct<2>() == 1);
+    STATIC_REQUIRE(int_log2ct<3>() == 1);
+    STATIC_REQUIRE(int_log2ct<4>() == 2);
+    STATIC_REQUIRE(int_log2ct<1023>() == 9);
+    STATIC_REQUIRE(int_log2ct<1024>() == 10);
+    STATIC_REQUIRE(int_log2ct<1025>() == 10);
+
+    // Test aliases
+    STATIC_REQUIRE(log2(1024) == 10);
+    STATIC_REQUIRE(log2ct<1024>() == 10);
+}
+
+TEST_CASE("int_pow2 and int_pow2ct tests", "[auxiliary_functions]")
+{
+    STATIC_REQUIRE(int_pow2(0) == 1);
+    STATIC_REQUIRE(int_pow2(1) == 2);
+    STATIC_REQUIRE(int_pow2(10) == 1024);
+    STATIC_REQUIRE(int_pow2(16) == 65536);
+
+    STATIC_REQUIRE(int_pow2ct<0>() == 1);
+    STATIC_REQUIRE(int_pow2ct<1>() == 2);
+    STATIC_REQUIRE(int_pow2ct<10>() == 1024);
+    STATIC_REQUIRE(int_pow2ct<16>() == 65536);
+
+    // Test aliases
+    STATIC_REQUIRE(pow2(10) == 1024);
+    STATIC_REQUIRE(pow2ct<10>() == 1024);
 }

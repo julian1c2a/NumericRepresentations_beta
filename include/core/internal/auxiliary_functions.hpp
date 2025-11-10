@@ -72,23 +72,144 @@ namespace NumRepr {
 
   constexpr inline
   std::uint64_t lcm(std::uint64_t a, std::uint64_t b) noexcept { 
-    return (a == 0 || b == 0) ? 0 : (a / gcd(a, b)) * b; 
+    return (a == 0 || b == 0) ? 0 : (a / gcd(a, b)) * b;
   } // END FUNCTION LCM
 
-  constexpr inline
-  std::uint64_t int_pow(std::uint64_t base, std::uint32_t exponent) noexcept {
-    if (exponent == 0) return 1;
-    if (exponent == 1) return base;
-    if (base == 0) return 0;
-    if (base == 1) return 1;
-    std::uint64_t result = 1;
-    std::uint64_t current_base = base;
-    while (exponent > 0) {
-      if (exponent & 1) { result *= current_base; }
-      current_base *= current_base;
-      exponent >>= 1;
+  /// Máximo exponente para cada base que cabe en uint64_t
+  /// Obtenida con Maxima CAS (cada lista es [base, max_exponent])
+  /// Solo se imprimen las primeras bases que tienen exponente máximo
+  /// diferente a la base anterior
+  /// [2,63]
+  /// [3,40]
+  /// [4,31]
+  /// [5,27]
+  /// [6,24]
+  /// [7,22]
+  /// [8,21]
+  /// [9,20]
+  /// [10,19]
+  /// [11,18]
+  /// [12,17]
+  /// [14,16]
+  /// [16,15]
+  /// [20,14]
+  /// [24,13]
+  /// [31,12]
+  /// [41,11]
+  /// [57,10]
+  /// [85,9]
+  /// [139,8]
+  /// [256,7]
+  /// [566,6]
+  /// [1626,5]
+  /// [7132,4]
+  /// [65536,3]
+  /// [2642246,2]
+
+  template <std::uint64_t base>
+  consteval std::size_t max_exponent_for_base_ct() noexcept {
+      if constexpr (base < 2) return std::numexpr_limits<std::uint64_t>::max();
+      else if constexpr (base == 2) return 63;
+      else if constexpr (base == 3) return 40;
+      else if constexpr (base == 4) return 31;
+      else if constexpr (base == 5) return 27;
+      else if constexpr (base == 6) return 24;
+      else if constexpr (base == 7) return 22;
+      else if constexpr (base == 8) return 21;
+      else if constexpr (base == 9) return 20;
+      else if constexpr (base == 10) return 19;
+      else if constexpr (base == 11) return 18;
+      else if constexpr (base >= 12 && base < 14) return 17;
+      else if constexpr (base >= 14 && base < 16) return 16;
+      else if constexpr (base >= 16 && base < 20) return 15;
+      else if constexpr (base >= 20 && base < 24) return 14;
+      else if constexpr (base >= 24 && base < 31) return 13;
+      else if constexpr (base >= 31 && base < 41) return 12;
+      else if constexpr (base >= 41 && base < 57) return 11;
+      else if constexpr (base >= 57 && base < 85) return 10;
+      else if constexpr (base >= 85 && base < 139) return 9;
+      else if constexpr (base >= 139 && base < 256) return 8;
+      else if constexpr (base >= 256ull && base < 566ull) return 7;
+      else if constexpr (base >= 566ull && base < 1626ull) return 6;
+      else if constexpr (base >= 1626ull && base < 7132ull) return 5;
+      else if constexpr (base >= 7132ull && base < 65536ull) return 4;
+      else if constexpr (base >= 65536ull && base < 2642246ull) return 3;
+      else if constexpr (base >= 2642246ull && base < 4294967296ull) return 2;
+      else return 1;
+  }
+
+  constexpr std::size_t max_exponent_for_base(std::uint64_t base) noexcept {
+      if (base < 2) return std::numeric_limits<std::uint64_t>::max();
+      else if (base == 2) return 63;
+      else if (base == 3) return 40;
+      else if (base == 4) return 31;
+      else if (base == 5) return 27;
+      else if (base == 6) return 24;
+      else if (base == 7) return 22;
+      else if (base == 8) return 21;
+      else if (base == 9) return 20;
+      else if (base == 10) return 19;
+      else if (base == 11) return 18;
+      else if (base >= 12 && base < 14) return 17;
+      else if (base >= 14 && base < 16) return 16;
+      else if (base >= 16 && base < 20) return 15;
+      else if (base >= 20 && base < 24) return 14;
+      else if (base >= 24 && base < 31) return 13;
+      else if (base >= 31 && base < 41) return 12;
+      else if (base >= 41 && base < 57) return 11;
+      else if (base >= 57 && base < 85) return 10;
+      else if (base >= 85 && base < 139) return 9;
+      else if (base >= 139 && base < 256) return 8;
+      else if (base >= 256 && base < 566) return 7;
+      else if (base >= 566 && base < 1626) return 6;
+      else if (base >= 1626 && base < 7132) return 5;
+      else if (base >= 7132 && base < 65536) return 4;
+      else if (base >= 65536 && base < 2642246) return 3;
+      else if (base >= 2642246 && base < 4294967296) return 2;
+      else return 1;
+  }
+
+  template <std::uint64_t base, std::size_t exponent>
+    requires (exponent <= max_exponent_for_base_ct<base>())
+  consteval
+  std::uint64_t int_pow_ct() noexcept {
+    if constexpr (exponent == 0) { return 1; }
+    else if constexpr (exponent == 1) { return base; }
+    else if constexpr (base == 0) { return 0; }
+    else if constexpr (base == 1) { return 1; }
+    else {
+      std::uint64_t result = 1;
+      std::uint64_t current_base = base;
+      std::uint32_t exp = exponent;
+      while (exp > 0) {
+        if (exp & 1) { result *= current_base; }
+        current_base *= current_base;
+        exp >>= 1;
+      }
+      return result;
     }
-    return result;
+  } // END FUNCTION INT_POW_CT
+
+  constexpr inline std::uint64_t int_pow(std::uint64_t base,
+                                         std::uint32_t exponent) noexcept {
+    if (exponent <= max_exponent_for_base(base)) {
+      // safe to compute
+      if (exponent == 0) return 1;
+      if (exponent == 1) return base;
+      if (base == 0) return 0;
+      if (base == 1) return 1;
+      std::uint64_t result = 1;
+      std::uint64_t current_base = base;
+      while (exponent > 0) {
+        if (exponent & 1) { result *= current_base; }
+        current_base *= current_base;
+        exponent >>= 1;
+      }
+      return result;
+    } else {
+      return 0; // overflow case
+    }
+    
   } // END FUNCTION INT_POW
 
   constexpr inline
@@ -113,11 +234,12 @@ namespace NumRepr {
 
   constexpr inline
   std::size_t count_digits_base(std::uint64_t n, std::uint64_t base) noexcept { 
-    if (base < 2) return 0;
-    if (n == 0) return 1;
+    if (base < 2) return 0; // invalid base
+    if (n == 0) return 1; // zero has one digit in any base
 
     // Fast path for base 2 using int_log2
     if (base == 2) {
+      // 2^k has k+1 digits => k = floor(log2(n)) => digits = floor(log2(n)) + 1
       return static_cast<std::size_t>(int_log2(n)) + 1u;
     }
 
