@@ -17,8 +17,32 @@ namespace NumRepr {
   /// TAL QUE R*R <= N < (R+1)*(R+1)
   template <typename T> constexpr
   T floorsqrt(T n) noexcept {
-      if (n == 0) return 0;
-      
+      /// VALORES PREESTABLECIDO COMO EN UNA TABLA
+      /// AL MODO LOOKUP TABLES
+      if (n == 0)                  return 0;
+      if (n >= 1 && n < 4)         return 1;
+      if (n >= 4 && n < 9)         return 2;
+      if (n >= 9 && n < 16)        return 3;
+      if (n >= 16 && n < 25)       return 4;
+      if (n >= 25 && n < 36)       return 5;
+      if (n >= 36 && n < 49)       return 6;
+      if (n >= 49 && n < 64)       return 7;
+      if (n >= 64 && n < 81)       return 8;
+      if (n >= 81 && n < 100)      return 9;
+      if (n >= 100 && n < 121)     return 10;
+      if (n >= 121 && n < 144)     return 11;
+      if (n >= 144 && n < 169)     return 12;
+      if (n >= 169 && n < 196)     return 13;
+      if (n >= 196 && n < 225)     return 14;
+      if (n >= 225 && n < 256)     return 15;
+      if (n >= 256 && n < 289)     return 16;
+      if (n >= 289 && n < 324)     return 17;
+      if (n >= 324 && n < 361)     return 18;
+      if (n >= 361 && n < 400)     return 19;
+      if (n >= 400 && n < 441)     return 20;
+      if (n >= 441 && n < 484)     return 21;
+      if (n >= 484 && n < 529)     return 22;
+
       // std::bit_width requiere un tipo sin signo.
       using UnsignedT = std::make_unsigned_t<T>;
       T x0 = T(1) << (std::bit_width(static_cast<UnsignedT>(n)) / 2);
