@@ -11,10 +11,15 @@
 
 namespace NumRepr {
   namespace auxiliary_functions {
-  /// TENEMOS UN NÚMERO N, ENTERO NO NEGATIVO,
-  /// QUITADOS LOS CASOS TRIVIALES, COMO N==0 => 0, N==1 || N==2 || N==3 => 1
-  /// QUEREMOS CALCULAR LA RAÍZ CUADRADA ENTERA MÁXIMA DE N
-  /// TAL QUE R*R <= N < (R+1)*(R+1)
+  /**
+   * @brief Calcula la raíz cuadrada entera por defecto de un número.
+   * @details Encuentra el número entero más grande R tal que R*R <= n.
+   * Utiliza una combinación de tablas de búsqueda para valores pequeños y el método
+   * de Newton-Raphson para valores más grandes.
+   * @tparam T El tipo de dato del número, debe ser un tipo integral.
+   * @param n El número no negativo del que se calculará la raíz.
+   * @return La raíz cuadrada entera por defecto de n.
+   */
   template <typename T> constexpr
   T floorsqrt(T n) noexcept {
       /// VALORES PREESTABLECIDO COMO EN UNA TABLA
@@ -65,6 +70,12 @@ namespace NumRepr {
       return x0;
   }
 
+  /**
+   * @brief Calcula la raíz cuadrada entera por exceso (techo) de un número.
+   * @tparam T El tipo de dato del número, debe ser un tipo integral.
+   * @param n El número no negativo del que se calculará la raíz.
+   * @return La raíz cuadrada entera por exceso de n.
+   */
   template <typename T>
   constexpr T ceilsqrt(T n) noexcept {
       if (n == 0) return 0;
@@ -73,6 +84,12 @@ namespace NumRepr {
       return (root * root == n) ? root : root + 1;
   }
 
+  /**
+   * @brief Comprueba si un número es un cuadrado perfecto.
+   * @tparam T El tipo de dato del número, debe ser un tipo integral.
+   * @param n El número a comprobar.
+   * @return true si n es un cuadrado perfecto, false en caso contrario.
+   */
   template<typename T>
   constexpr bool is_perfect_square(T n) noexcept {
     if (n == 0) return true;
@@ -92,6 +109,13 @@ namespace NumRepr {
     return ceilsqrt<std::size_t>(n);
   }
 
+  /**
+   * @brief Función auxiliar recursiva para encontrar factores de un número.
+   * @param n El número a factorizar.
+   * @param low Límite inferior de la búsqueda.
+   * @param high Límite superior de la búsqueda.
+   * @return true si se encuentra un factor en el rango, false en caso contrario.
+   */
   constexpr inline
   bool find_factor(std::size_t n, std::size_t low, std::size_t high) noexcept {
     const auto mid{std::midpoint(low, high)};
@@ -99,13 +123,23 @@ namespace NumRepr {
               (n % (2 * low + 1)) == 0 : 
               (find_factor(n, low, mid) || find_factor(n, mid, high))
            );
-  } // END FUNCTION FIND_FACTOR
+  }
 
+  /**
+   * @brief Comprueba si un número es una potencia de 2.
+   * @param num El número a comprobar.
+   * @return true si el número es una potencia de 2, false en caso contrario.
+   */
   constexpr inline
   bool is_power_of_2(std::uint64_t num) noexcept { 
     return num > 0 && (num & (num - 1)) == 0; 
-  } // END FUNCTION IS_POWER_OF_2
+  }
 
+  /**
+   * @brief Comprueba si un número es primo.
+   * @param n El número a comprobar.
+   * @return true si n es primo, false en caso contrario.
+   */
   constexpr inline
   bool is_prime(std::size_t n) noexcept {
     if (n < 2) return false;
@@ -113,8 +147,14 @@ namespace NumRepr {
     else if (n % 2 == 0 || n % 3 == 0) return false;
     else 
       return (!find_factor(n, 1, (ceilsqrt(n) + 1) / 2));
-  } // END FUNCTION IS_PRIME
+  }
 
+  /**
+   * @brief Calcula el máximo común divisor (MCD) de dos números.
+   * @param a El primer número.
+   * @param b El segundo número.
+   * @return El MCD de a y b.
+   */
   constexpr inline
   std::uint64_t gcd(std::uint64_t a, std::uint64_t b) noexcept {
     while (b != 0) { 
@@ -123,44 +163,27 @@ namespace NumRepr {
       a = temp; 
     }
     return a;
-  } // END FUNCTION GCD
+  }
 
+  /**
+   * @brief Calcula el mínimo común múltiplo (mcm) de dos números.
+   * @param a El primer número.
+   * @param b El segundo número.
+   * @return El mcm de a y b.
+   */
   constexpr inline
   std::uint64_t lcm(std::uint64_t a, std::uint64_t b) noexcept { 
     return (a == 0 || b == 0) ? 0 : (a / gcd(a, b)) * b;
-  } // END FUNCTION LCM
+  }
 
-  /// Máximo exponente para cada base que cabe en uint64_t
-  /// Obtenida con Maxima CAS (cada lista es [base, max_exponent])
-  /// Solo se imprimen las primeras bases que tienen exponente máximo
-  /// diferente a la base anterior
-  /// [2,63]
-  /// [3,40]
-  /// [4,31]
-  /// [5,27]
-  /// [6,24]
-  /// [7,22]
-  /// [8,21]
-  /// [9,20]
-  /// [10,19]
-  /// [11,18]
-  /// [12,17]
-  /// [14,16]
-  /// [16,15]
-  /// [20,14]
-  /// [24,13]
-  /// [31,12]
-  /// [41,11]
-  /// [57,10]
-  /// [85,9]
-  /// [139,8]
-  /// [256,7]
-  /// [566,6]
-  /// [1626,5]
-  /// [7132,4]
-  /// [65536,3]
-  /// [2642246,2]
-
+  /**
+   * @brief Calcula en tiempo de compilación el exponente máximo para una base dada que no desborda un uint64_t.
+   * @details El valor se determina a partir de una tabla precalculada de valores.
+   * @tparam base La base para la cual calcular el exponente máximo.
+   * @return El exponente máximo seguro.
+   * @note La tabla de valores fue obtenida con Maxima CAS. Ejemplos:
+   * - [2, 63], [3, 40], [10, 19], [16, 15]
+   */
   template <std::uint64_t base>
   consteval std::size_t max_exponent_for_base_ct() noexcept {
       if constexpr (base < 2) return std::numeric_limits<std::uint64_t>::max();
@@ -193,6 +216,11 @@ namespace NumRepr {
       else return 1;
   }
 
+  /**
+   * @brief Calcula en tiempo de ejecución el exponente máximo para una base dada que no desborda un uint64_t.
+   * @param base La base para la cual calcular el exponente máximo.
+   * @return El exponente máximo seguro.
+   */
   constexpr std::size_t max_exponent_for_base(std::uint64_t base) noexcept {
       if (base < 2) return std::numeric_limits<std::uint64_t>::max();
       else if (base == 2) return 63;
@@ -224,6 +252,12 @@ namespace NumRepr {
       else return 1;
   }
 
+  /**
+   * @brief Calcula la potencia de un número en tiempo de compilación.
+   * @tparam base La base.
+   * @tparam exponent El exponente.
+   * @return base elevado al exponente.
+   */
   template <std::uint64_t base, std::size_t exponent>
     requires (exponent <= max_exponent_for_base_ct<base>())
   consteval
@@ -243,8 +277,14 @@ namespace NumRepr {
       }
       return result;
     }
-  } // END FUNCTION INT_POW_CT
+  }
 
+  /**
+   * @brief Calcula la potencia de un número en tiempo de ejecución.
+   * @param base La base.
+   * @param exponent El exponente.
+   * @return base elevado al exponente, o 0 si ocurre un desbordamiento.
+   */
   constexpr inline std::uint64_t int_pow(std::uint64_t base,
                                          std::uint32_t exponent) noexcept {
     if (exponent <= max_exponent_for_base(base)) {
@@ -265,20 +305,31 @@ namespace NumRepr {
       return 0; // overflow case
     }
     
-  } // END FUNCTION INT_POW
+  }
 
+  /**
+   * @brief Comprueba si un número es un cuadrado perfecto (sobrecarga para uint64_t).
+   * @param n El número a comprobar.
+   * @return true si n es un cuadrado perfecto, false en caso contrario.
+   */
   constexpr inline
   bool is_perfect_square(std::uint64_t n) noexcept {
     if (n == 0 || n == 1) { return true; }
     const auto root = ceilsqrt(n);
     return root * root == n;
-  } // END FUNCTION IS_PERFECT_SQUARE
+  }
 
   // forward declaration for integer log2 (definition appears below)
   constexpr std::uint64_t int_log2(std::uint64_t n) noexcept;
   // forward declaration for count_digits_base (defined below)
   constexpr std::size_t count_digits_base(std::uint64_t n, std::uint64_t base) noexcept;
 
+  /**
+   * @brief Calcula el logaritmo entero en tiempo de compilación.
+   * @tparam base La base del logaritmo.
+   * @tparam n El número del que se calcula el logaritmo.
+   * @return El logaritmo entero de n en base `base`.
+   */
   template <std::uint64_t base, std::int64_t n> consteval
   std::int64_t int_log_ct() noexcept {
     if constexpr (n <= 0) {
@@ -289,8 +340,14 @@ namespace NumRepr {
     } else {
       return 1 + int_log_ct<base, n / base>();
     }
-  }  // END FUNCTION INT_LOG_CT
+  }
 
+  /**
+   * @brief Calcula el logaritmo entero en tiempo de ejecución.
+   * @param base La base del logaritmo.
+   * @param n El número del que se calcula el logaritmo.
+   * @return El logaritmo entero de n en base `base`.
+   */
   constexpr std::int64_t int_log(std::uint64_t base, std::int64_t n) noexcept {
     if (n <= 0) {
       return -1; // Not in domain of the function log_base(n)
@@ -300,16 +357,24 @@ namespace NumRepr {
     } else {
       return 1 + int_log(base, n / base);
     }
-  }  // END FUNCTION INT_LOG
+  }
 
+  /**
+   * @brief Cuenta el número de dígitos de un número en base 10.
+   * @param n El número.
+   * @return El número de dígitos en base 10.
+   */
   constexpr inline
   std::size_t count_digits_base10(std::uint64_t n) noexcept { 
-    // (forward declarations for functions defined later are placed at
-    // namespace scope; here we can call the generic implementation.)
-    // implement via generic count_digits_base to keep a single implementation
     return count_digits_base(n, 10);
-  }  // END FUNCTION COUNT_DIGITS_BASE10
+  }
 
+  /**
+   * @brief Cuenta el número de dígitos de un número en una base dada.
+   * @param n El número.
+   * @param base La base.
+   * @return El número de dígitos de n en la base dada.
+   */
   constexpr inline
   std::size_t count_digits_base(std::uint64_t n, std::uint64_t base) noexcept { 
     if (base < 2) return 0; // invalid base
@@ -317,11 +382,9 @@ namespace NumRepr {
 
     // Fast path for base 2 using int_log2
     if (base == 2) {
-      // 2^k has k+1 digits => k = floor(log2(n)) => digits = floor(log2(n)) + 1
       return static_cast<std::size_t>(int_log2(n)) + 1u;
     }
 
-    // Helper: test whether base^exp <= limit without overflow
     auto pow_leq = 
       [](std::uint64_t b, std::uint32_t exp, std::uint64_t limit) noexcept {
         std::uint64_t result = 1;
@@ -343,7 +406,6 @@ namespace NumRepr {
         return result <= limit;
     };
 
-    // Exponential search for an upper bound for the exponent
     std::uint32_t lo = 0u;
     std::uint32_t hi = 1u;
     while (pow_leq(base, hi, n)) {
@@ -352,19 +414,16 @@ namespace NumRepr {
       if (hi == 0u) break; // overflow guard
     }
 
-    // binary search for the largest e such that base^e <= n
     while (lo + 1u < hi) {
       std::uint32_t mid = lo + (hi - lo) / 2u;
       if (pow_leq(base, mid, n)) lo = mid;
       else hi = mid;
     }
 
-    // number of digits = exponent + 1
     return static_cast<std::size_t>(lo) + 1u;
-  } // END FUNCTION COUNT_DIGITS_BASE
+  }
 
   // ---- util_functs moved here ----
-  // potencia de 2 (consteval template)
   template<std::uint64_t>
   consteval std::uint64_t int_pow2ct() noexcept;
   template<std::uint64_t>
@@ -375,51 +434,69 @@ namespace NumRepr {
   constexpr
   std::uint64_t int_log2(std::uint64_t) noexcept;
 
+  /**
+   * @brief Calcula la potencia de 2 en tiempo de compilación.
+   * @tparam n El exponente.
+   * @return 2 elevado a n.
+   */
   template<std::uint64_t n>
   consteval
   std::uint64_t int_pow2ct() noexcept {
     if constexpr (n == 0) { return 1ull; }
     else if constexpr (n == 1) { return 2ull; }
     else { return (2ull*int_pow2ct<n-1ull>()); }
-  } // END FUNCTION INT_POW2CT
+  }
 
+  /**
+   * @brief Calcula la potencia de 2 en tiempo de ejecución.
+   * @param n El exponente.
+   * @return 2 elevado a n.
+   */
   constexpr
   std::uint64_t int_pow2(std::uint64_t n) noexcept {
     if (n == 0) { return 1ull; }
     else if (n == 1) { return 2ull; }
     else { return (2ull*int_pow2(n-1ull)); }
-  } // END FUNCTION INT_POW2
+  }
 
-  // Backwards-compatible aliases: keep the old names while the codebase
-  // migrates to int_* names. These simply forward to the new functions.
+  // Backwards-compatible aliases
   template<std::uint64_t N>
   consteval std::uint64_t pow2ct() noexcept { return int_pow2ct<N>(); }
-
   constexpr std::uint64_t pow2(std::uint64_t n) noexcept { return int_pow2(n); }
 
+  /**
+   * @brief Calcula el logaritmo en base 2 en tiempo de compilación.
+   * @tparam n El número.
+   * @return El logaritmo entero en base 2 de n.
+   */
   template<std::uint64_t n>
     requires (n>0)
   consteval
   std::uint64_t int_log2ct() noexcept {
     return std::bit_width(n) - 1;
-  }  // END FUNCTION INT_LOG2CT
+  }
 
+  /**
+   * @brief Calcula el logaritmo entero en base 2 en tiempo de ejecución.
+   * @param n El número.
+   * @return El logaritmo entero en base 2 de n.
+   */
   constexpr
   std::uint64_t int_log2(std::uint64_t n) noexcept {
     if (n == 0) return 0; // Or handle as an error, though std::bit_width(0) is 0.
     return std::bit_width(n) - 1;
-  } // END FUNCTION INT_LOG2
+  }
 
-    // Backwards-compatible aliases for log2/log2ct that forward to the
-    // new int_log2/int_log2ct implementations. This allows an incremental
-    // migration of the codebase while keeping old names working.
+    // Backwards-compatible aliases
     template<std::uint64_t N>
     consteval std::uint64_t log2ct() noexcept { return int_log2ct<N>(); }
-
     constexpr std::uint64_t log2(std::uint64_t n) noexcept { return int_log2(n); }
 
     namespace special
     {
+        // NOTE: The following metaprogramming utilities are complex and lack documentation and tests.
+        // This section should be reviewed for clarity, purpose, and correctness.
+
         template <usint_t B, usint_t L>
         consteval inline uint64_t Base_pow_to_Size() noexcept
         {
