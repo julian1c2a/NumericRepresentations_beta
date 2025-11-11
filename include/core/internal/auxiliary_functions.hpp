@@ -13,6 +13,7 @@
 
 namespace NumRepr {
   namespace auxiliary_functions {
+  
   /**
    * @brief Calcula la raíz cuadrada entera por defecto de un número entero no negativo.
    * @details Esta función calcula la parte entera de la raíz cuadrada de un número no negativo `n` dado.
