@@ -11,7 +11,7 @@
 #include <stdexcept>
 
 #include "internal/basic_types.hpp"
-#include "internal/auxiliary_types.hpp"
+#include "internal/basic_types.hpp"
 #include "internal/auxiliary_functions.hpp"
 
 namespace NumRepr {

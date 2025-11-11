@@ -6,7 +6,8 @@
 #include <cstdint>
 #include <cmath>
 #include <type_traits>
-#include "auxiliary_types.hpp"
+#include <tuple>
+#include "basic_types.hpp"
 
 namespace NumRepr {
   namespace auxiliary_functions {
@@ -393,6 +394,129 @@ namespace NumRepr {
 
     constexpr std::uint64_t log2(std::uint64_t n) noexcept { return int_log2(n); }
 
+    namespace special
+    {
+        template <usint_t B, usint_t L>
+        consteval inline uint64_t Base_pow_to_Size() noexcept
+        {
+            constexpr uint64_t Bc{B};
+            if constexpr (L == 0)
+                return static_cast<uint64_t>(1);
+            else if constexpr (L == 1)
+                return static_cast<uint64_t>(Bc);
+            else if constexpr (L == 2)
+                return static_cast<uint64_t>(Bc * Bc);
+            else
+                return static_cast<uint64_t>(Bc * Base_pow_to_Size<B, L - 1>());
+        }
+
+        template <usint_t Base, usint_t Exp>
+        struct pow_B_to_E_t
+        {
+            static constexpr uint64_t base = static_cast<uint64_t>(Base);
+            static constexpr uint64_t exponent = static_cast<uint64_t>(Exp);
+            static constexpr uint64_t value = base * (pow_B_to_E_t<base, exponent - 1>::value);
+        };
+
+        template <usint_t Base>
+        struct pow_B_to_E_t<Base, 2>
+        {
+            static constexpr uint64_t base = static_cast<uint64_t>(Base);
+            static constexpr uint64_t exponent = static_cast<uint64_t>(2);
+            static constexpr uint64_t value = base * base;
+        };
+
+        template <usint_t Base>
+        struct pow_B_to_E_t<Base, 1>
+        {
+            static constexpr uint64_t base = static_cast<uint64_t>(Base);
+            static constexpr uint64_t exponent = static_cast<uint64_t>(1);
+            static constexpr uint64_t value = base;
+        };
+
+        template <usint_t Base>
+        struct pow_B_to_E_t<Base, 0>
+        {
+            static constexpr uint64_t base = static_cast<uint64_t>(Base);
+            static constexpr uint64_t exponent = static_cast<uint64_t>(0);
+            static constexpr uint64_t value = static_cast<uint64_t>(1);
+        };
+
+        template <usint_t Base, usint_t Exp>
+        constexpr uint64_t Pow_B2L_v = pow_B_to_E_t<Base, Exp>::value;
+
+        template <std::int64_t IntObj_ct, std::int64_t BeginIntObj_ct,
+                  std::int64_t EndIntObj_ct, std::int64_t Base,
+                  template <std::int64_t, std::int64_t> class Funct_tt>
+        requires((BeginIntObj_ct >= EndIntObj_ct) && (IntObj_ct >= BeginIntObj_ct))
+        struct tuple_builder_t
+        {
+            using type = std::int64_t;
+            static constexpr std::int64_t unit = static_cast<std::int64_t>(1);
+            static constexpr std::int64_t value{IntObj_ct};
+            static constexpr std::int64_t begin_value{BeginIntObj_ct};
+            static constexpr std::int64_t end_value{EndIntObj_ct};
+            static consteval decltype(auto) build() noexcept { return std::tuple_cat(std::make_tuple(std::make_tuple(value, Funct_tt<Base, value>{}())), tuple_builder_t<value + unit, begin_value, end_value, Base, Funct_tt>::build()); }
+        };
+
+        template <std::int64_t BeginIntObj_ct, std::int64_t EndIntObj_ct,
+                  std::int64_t Base,
+                  template <std::int64_t, std::int64_t> class Funct_tt>
+        struct tuple_builder_t<EndIntObj_ct - 1, BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>
+        {
+            using type = std::int64_t;
+            static constexpr std::int64_t unit = static_cast<std::int64_t>(1);
+            static constexpr std::int64_t value{EndIntObj_ct - unit};
+            static constexpr std::int64_t begin_value{BeginIntObj_ct};
+            static constexpr std::int64_t end_value{EndIntObj_ct};
+            static consteval decltype(auto) build() noexcept { return std::make_tuple(std::make_tuple(value, Funct_tt<Base, value>{}())); }
+        };
+
+        template <std::int64_t BeginIntObj_ct, std::int64_t EndIntObj_ct,
+                  std::int64_t Base,
+                  template <std::int64_t, std::int64_t> class Funct_tt>
+        requires(BeginIntObj_ct <= EndIntObj_ct)
+        struct tuple_builder_t<BeginIntObj_ct, BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>
+        {
+            using type = std::int64_t;
+            static constexpr type unit = 1;
+            static constexpr type value{BeginIntObj_ct};
+            static constexpr type begin_value{BeginIntObj_ct};
+            static constexpr type end_value{EndIntObj_ct};
+            static consteval decltype(auto) build() noexcept { return std::tuple_cat(std::make_tuple(std::make_tuple(value, Funct_tt<Base, value>{}())), tuple_builder_t<begin_value + unit, begin_value, end_value, Base, Funct_tt>::build()); }
+        };
+
+        template <std::int64_t BeginIntObj_ct, std::int64_t EndIntObj_ct,
+                  std::int64_t Base,
+                  template <std::int64_t, std::int64_t> class Funct_tt>
+        requires(BeginIntObj_ct < EndIntObj_ct)
+        struct tuple_user_constructor_t
+        {
+            static constexpr auto value = tuple_builder_t<BeginIntObj_ct, BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>::build();
+        };
+
+        template <std::int64_t BeginIntObj_ct, std::int64_t EndIntObj_ct,
+                  std::int64_t Base,
+                  template <std::int64_t, std::int64_t> class Funct_tt>
+        requires(BeginIntObj_ct < EndIntObj_ct)
+        constexpr auto tuple_constr_v = tuple_user_constructor_t<BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>::build();
+
+        template <auto B, auto L, typename A>
+        constexpr inline uint64_t conversion_to_int(const A &arg) noexcept
+        {
+            using sint64_t;
+            using uint64_t;
+            constexpr uint64_t base{static_cast<uint64_t>(B)};
+            uint64_t acc{arg[L - 1]()};
+            for (sint64_t ix{L - 2}; ix > -1; --ix)
+            {
+                acc *= base;
+                acc += static_cast<uint64_t>(arg[ix]());
+            };
+            return acc;
+        }
+
+    } /// END OF NAMESPACE SPECIAL
   } // CLOSE NAMESPACE auxiliary_functions
 } // CLOSE NAMESPACE NumRepr
 

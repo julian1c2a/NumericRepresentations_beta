@@ -1,4 +1,4 @@
-#ifndef BASIC_TYPES_HPP_INCLUDED
+P#ifndef BASIC_TYPES_HPP_INCLUDED
 #define BASIC_TYPES_HPP_INCLUDED
 
 #include <cstdint>
@@ -56,6 +56,7 @@ namespace std {
 #include <list>
 #include <map>
 #include <vector>
+#include <tuple>
 
 #include <climits>
 #include <cmath>
@@ -144,6 +145,69 @@ namespace NumRepr {
   using uleast64_t = std::uint_least64_t;
   using intmax_t = std::intmax_t;
   using uintmax_t = std::uintmax_t;
+
+  enum class sign_funct_e : char
+  {
+    vzero = 0,
+    vminus = -1,
+    vplus = +1
+  };
+
+  enum class dig_format_e : unsigned char
+  {
+    BINnat = 0,
+    BCDnat = 1,
+    BCDexc3 = 2,
+    BCDaitk = 3,
+    johnson_n = 4,
+    biquinario = 5
+  };
+
+  enum class num_type_e : unsigned char
+  {
+    natural = 0,
+    entero = 1,
+    racional = 2,
+    real = 3
+  };
+
+  enum class nat_num_format_e : bool
+  {
+    natural = false,
+    exc_n = true
+  };
+
+  enum class int_num_format_e : unsigned char
+  {
+    int_CB = 0,
+    int_CBm1 = 1,
+    int_MS = 2,
+    int_EXC_n = 3
+  };
+
+  enum class rat_num_format_e : unsigned char
+  {
+    pair_num_den = 0,
+    fxd_pt = 1,
+    flt_pt = 2
+  };
+
+  enum class binop_e : unsigned char
+  {
+    add = 0,
+    sub = 1,
+    mult = 2,
+    div = 3,
+    rem = 4,
+    fediv = 5,
+    other = 6
+  };
+
+  constexpr inline int to_int(sign_funct_e sign) noexcept { return static_cast<int>(sign); }
+  constexpr inline bool is_positive(sign_funct_e sign) noexcept { return sign == sign_funct_e::vplus; }
+  constexpr inline bool is_negative(sign_funct_e sign) noexcept { return sign == sign_funct_e::vminus; }
+  constexpr inline bool is_zero(sign_funct_e sign) noexcept { return sign == sign_funct_e::vzero; }
+  constexpr inline sign_funct_e opposite_sign(sign_funct_e sign) noexcept { return (sign == sign_funct_e::vplus) ? sign_funct_e::vminus : (sign == sign_funct_e::vminus) ? sign_funct_e::vplus : sign_funct_e::vzero; }
 
   namespace type_traits {
 
@@ -625,6 +689,35 @@ namespace NumRepr {
     using namespace ugly_details_for_greater_suitable_type_deduction;
 
   } // namespace type_traits
+
+  template <type_traits::unsigned_integral_c UINT_T>
+  using uintspair = typename std::array<UINT_T, 2>;
+  template <type_traits::unsigned_integral_c UINT_T, UINT_T B>
+  using uintspairlist = typename std::array<uintspair<UINT_T>, B>;
+  template <type_traits::unsigned_integral_c UINT_T, UINT_T B>
+  using uintspairtbl = typename std::array<uintspairlist<UINT_T, B>, B>;
+
+  namespace ugly_pack2tuple_details { /* simplified in new location */ }
+
+  namespace ugly_details { struct local_void_t {}; template <class Head_t, class... Tail_t> struct for_each_same_type { using second_t = typename std::tuple_element<0, std::tuple<Tail_t...>>::type; constexpr static bool are_same_type_v = ((std::is_same_v<Head_t, second_t>) && (for_each_same_type<Tail_t...>::are_same_type_v)); }; template <class Head_t> struct for_each_same_type<Head_t> { constexpr static bool are_same_type_v = true; }; }
+
+  template <typename... Ts>
+  concept all_are_the_same_type_c = requires(Ts...) { ugly_details::for_each_same_type<Ts...>::are_same_type_v; };
+
+  template <typename... Ts>
+  concept there_is_one_or_more_c = requires(Ts...) { ((sizeof...(Ts)) > 0); };
+
+  namespace ugly_pack_details { template <typename... Ts> requires(all_are_the_same_type_c<Ts...> && there_is_one_or_more_c<Ts...>) struct pack2array { static constexpr std::size_t size = sizeof...(Ts); using inner_type = std::common_type_t<Ts...>; using array_type = std::array<inner_type, size>; using elem_type = inner_type; constexpr array_type operator()(Ts... args) const noexcept { return array_type{static_cast<inner_type>(args)...}; } template <std::size_t J> static constexpr elem_type get(Ts... args) noexcept { array_type content{static_cast<inner_type>(args)...}; return content[J]; } template <std::size_t... I> static constexpr void for_each_impl(array_type &iarray, const Ts... args, std::index_sequence<I...>) noexcept { ((iarray[I] = static_cast<inner_type>(args)), ...); } static constexpr void for_each(array_type &iarray, const Ts... args) noexcept { for_each_impl(iarray, args..., std::make_index_sequence<sizeof...(args)>{}); } }; }
+
+  template <class... Ts>
+    requires(all_are_the_same_type_c<Ts...> && there_is_one_or_more_c<Ts...>)
+  void assign_with_order(auto &dest, const Ts &...args) noexcept
+  {
+    using type = typename ugly_pack_details::pack2array<Ts...>;
+    type::for_each(dest, args...);
+    return;
+  }
+
 } // namespace NumRepr
 
 #endif // BASIC_TYPES_HPP_INCLUDED

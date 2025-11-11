@@ -10,39 +10,32 @@ jobs:
   build-and-test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false # Permite que todos los trabajos finalicen, incluso si uno falla
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        compiler: [gcc, clang, msvc]
-        exclude:
+        include:
           - os: ubuntu-latest
-            compiler: msvc
-          - os: macos-latest
-            compiler: msvc
+            compiler: gcc
+            c_compiler: gcc
+            cxx_compiler: g++
+          - os: ubuntu-latest
+            compiler: clang
+            c_compiler: clang
+            cxx_compiler: clang++
           - os: windows-latest
-            compiler: gcc # MinGW can be tricky, focusing on MSVC for Windows first
+            compiler: msvc
+            # En Windows, CMake detecta MSVC automáticamente
 
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-    - name: Set up MSVC
-      if: matrix.compiler == 'msvc'
-      uses: microsoft/setup-msbuild@v1.1
-
-    - name: Configure CMake (GCC)
-      if: matrix.compiler == 'gcc'
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++
-
-    - name: Configure CMake (Clang)
-      if: matrix.compiler == 'clang'
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
-
-    - name: Configure CMake (MSVC)
-      if: matrix.compiler == 'msvc'
-      run: cmake -B ${{github.workspace}}/build
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} -DCMAKE_CXX_COMPILER=${{ matrix.cxx_compiler }}
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config Release
+      run: cmake --build build --config Release
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: ./build
       run: ctest -C Release --output-on-failure

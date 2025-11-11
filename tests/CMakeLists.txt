@@ -1,5 +1,19 @@
 # CMakeLists.txt para el directorio 'tests'
 
+# Determinar el directorio de salida específico del compilador
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+    set(COMPILER_DIR "gcc")
+elseif(CMAKE_CXX_COMPiler_ID MATCHES "Clang")
+    set(COMPILER_DIR "clang")
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+    set(COMPILER_DIR "msvc")
+else()
+    set(COMPILER_DIR "unknown")
+endif()
+
+# Establecer el directorio de salida para los ejecutables de prueba en un subdirectorio de la carpeta de compilación
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build_tests/${COMPILER_DIR}")
+
 # Encontrar el paquete Catch2, que ahora está instalado localmente
 find_package(Catch2 3.6.0 REQUIRED)
 
