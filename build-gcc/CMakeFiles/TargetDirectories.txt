@@ -1,0 +1,15 @@
+D:/GDrive/NumericRepresentations/build-gcc/CMakeFiles/test.dir
+D:/GDrive/NumericRepresentations/build-gcc/CMakeFiles/edit_cache.dir
+D:/GDrive/NumericRepresentations/build-gcc/CMakeFiles/rebuild_cache.dir
+D:/GDrive/NumericRepresentations/build-gcc/tests/CMakeFiles/AuxiliaryFunctionsTest.dir
+D:/GDrive/NumericRepresentations/build-gcc/tests/CMakeFiles/test.dir
+D:/GDrive/NumericRepresentations/build-gcc/tests/CMakeFiles/edit_cache.dir
+D:/GDrive/NumericRepresentations/build-gcc/tests/CMakeFiles/rebuild_cache.dir
+D:/GDrive/NumericRepresentations/build-gcc/_deps/catch2-build/CMakeFiles/test.dir
+D:/GDrive/NumericRepresentations/build-gcc/_deps/catch2-build/CMakeFiles/edit_cache.dir
+D:/GDrive/NumericRepresentations/build-gcc/_deps/catch2-build/CMakeFiles/rebuild_cache.dir
+D:/GDrive/NumericRepresentations/build-gcc/_deps/catch2-build/src/CMakeFiles/Catch2.dir
+D:/GDrive/NumericRepresentations/build-gcc/_deps/catch2-build/src/CMakeFiles/Catch2WithMain.dir
+D:/GDrive/NumericRepresentations/build-gcc/_deps/catch2-build/src/CMakeFiles/test.dir
+D:/GDrive/NumericRepresentations/build-gcc/_deps/catch2-build/src/CMakeFiles/edit_cache.dir
+D:/GDrive/NumericRepresentations/build-gcc/_deps/catch2-build/src/CMakeFiles/rebuild_cache.dir

@@ -1,11 +1,12 @@
 # CMakeLists.txt para el directorio 'tests'
 
-# Determinar el directorio de salida específico del compilador
-if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+# Determinar el directorio de salida específico del compilador (insensible a mayúsculas)
+string(TOLOWER "${CMAKE_CXX_COMPILER_ID}" COMPILER_ID_LOWER)
+if(COMPILER_ID_LOWER MATCHES "gnu")
     set(COMPILER_DIR "gcc")
-elseif(CMAKE_CXX_COMPiler_ID MATCHES "Clang")
+elseif(COMPILER_ID_LOWER MATCHES "clang")
     set(COMPILER_DIR "clang")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+elseif(COMPILER_ID_LOWER MATCHES "msvc")
     set(COMPILER_DIR "msvc")
 else()
     set(COMPILER_DIR "unknown")

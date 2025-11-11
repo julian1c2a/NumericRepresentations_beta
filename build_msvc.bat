@@ -25,8 +25,8 @@ IF NOT EXIST %VCVARS_PATH% (
 ECHO --- Preparando la cadena de comandos para MSVC (x64) con Ninja... ---
 SET BUILD_DIR=build-msvc
 
-REM Encadenar todos los comandos. Se añade "-G Ninja" para coincidir con CMakeSettings.json
-cmd /c "%VCVARS_PATH% x64 && echo. && echo --- Limpiando y Configurando con Ninja --- && rmdir /s /q %BUILD_DIR% 2>nul & cmake -B %BUILD_DIR% -S . -G Ninja && echo. && echo --- Compilando --- && cmake --build %BUILD_DIR% --config Release && echo. && echo --- Probando --- && cd %BUILD_DIR% && ctest -C Release --output-on-failure"
+REM Encadenar todos los comandos. La configuración solo se ejecuta si el directorio no existe.
+cmd /c "%VCVARS_PATH% x64 && echo. && (if not exist %BUILD_DIR% (echo --- Configurando para Ninja por primera vez --- && cmake -B %BUILD_DIR% -S . -G Ninja)) && echo. && echo --- Compilando (solo los archivos modificados) --- && cmake --build %BUILD_DIR% --config Release && echo. && echo --- Probando --- && cd %BUILD_DIR% && ctest -C Release --output-on-failure"
 
 ECHO.
 ECHO Proceso completado.

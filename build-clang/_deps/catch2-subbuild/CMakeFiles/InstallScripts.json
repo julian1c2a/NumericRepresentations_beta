@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/GDrive/NumericRepresentations/build-clang/_deps/catch2-subbuild/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

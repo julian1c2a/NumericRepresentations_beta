@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"D:/GDrive/NumericRepresentations/build_tests/gcc/cmake_install.cmake",
-		"D:/GDrive/NumericRepresentations/build_tests/gcc/tests/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
