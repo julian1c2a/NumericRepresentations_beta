@@ -4,21 +4,42 @@
 #include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <cmath>
+// #include <cmath>
 #include <type_traits>
 #include <tuple>
+#include <expected>
+#include <concepts>
 #include "basic_types.hpp"
 
 namespace NumRepr {
   namespace auxiliary_functions {
   /**
-   * @brief Calcula la raíz cuadrada entera por defecto de un número.
-   * @details Encuentra el número entero más grande R tal que R*R <= n.
-   * Utiliza una combinación de tablas de búsqueda para valores pequeños y el método
+   * @brief Calcula la raíz cuadrada entera por defecto de un número entero no negativo.
+   * @details Esta función calcula la parte entera de la raíz cuadrada de un número no negativo `n` dado.
+   * Encuentra el entero más grande `r` tal que `r*r <= n`.
+   * Para mayor eficiencia, utiliza una combinación de una tabla de búsqueda para valores pequeños y el método
    * de Newton-Raphson para valores más grandes.
-   * @tparam T El tipo de dato del número, debe ser un tipo integral.
-   * @param n El número no negativo del que se calculará la raíz.
-   * @return La raíz cuadrada entera por defecto de n.
+   *
+   * @tparam T El tipo del entero, que debe ser un tipo integral.
+   * @param n El entero no negativo cuya raíz cuadrada se va a calcular.
+   * @return La raíz cuadrada entera por defecto de `n`.
+   *
+   * @pre `n` debe ser no negativo.
+   * @post El valor devuelto `r` satisface `r*r <= n` y `(r+1)*(r+1) > n`.
+   *
+   * @par Properties
+   * - Para `n = 0`, el resultado es `0`.
+   * - Para `n = 1`, el resultado es `1`.
+   * - La función es monotónicamente creciente: si `a > b`, entonces `floorsqrt(a) >= floorsqrt(b)`.
+   * - `floorsqrt(n*n) == n` para cualquier `n` no negativo.
+   *
+   * @par Invariants
+   * - Para la iteración de Newton-Raphson, la secuencia de estimaciones `x_k` converge monotónicamente desde arriba hacia la verdadera raíz cuadrada.
+   *
+   * @par Things that should never happen
+   * - La función no debe entrar en un bucle infinito.
+   * - La función no debe devolver un valor `r` tal que `r*r > n`.
+   * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
    */
   template <typename T> constexpr
   T floorsqrt(T n) noexcept {
@@ -75,6 +96,25 @@ namespace NumRepr {
    * @tparam T El tipo de dato del número, debe ser un tipo integral.
    * @param n El número no negativo del que se calculará la raíz.
    * @return La raíz cuadrada entera por exceso de n.
+   *
+   * @pre `n` debe ser no negativo.
+   * @post El valor devuelto `r` satisface `r*r >= n` y `(r-1)*(r-1) < n`.
+   *
+   * @par Properties
+   * - Para `n = 0`, el resultado es `0`.
+   * - Para `n = 1`, el resultado es `1`.
+   * - Para `n` tal que `is_perfect_square(n)` es true, el resultado es `ceilsqrt(n)`.
+   * - Para `n` tal que `is_perfect_square(n)` es true, `ceilsqrt(n)*ceilsqrt(n) == n`.
+   * - La función es monotónicamente creciente: si `a > b`, entonces `ceilsqrt(a) >= ceilsqrt(b)`.
+   * - `ceilsqrt(n*n) == n` para cualquier `n` no negativo.
+   *
+   * @par Invariants
+   * 
+   *
+   * @par Things that should never happen
+   * - La función no debe entrar en un bucle infinito.
+   * - La función no debe devolver un valor `r` tal que `r*r < n`.
+   * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
    */
   template <typename T>
   constexpr T ceilsqrt(T n) noexcept {
@@ -89,10 +129,50 @@ namespace NumRepr {
    * @tparam T El tipo de dato del número, debe ser un tipo integral.
    * @param n El número a comprobar.
    * @return true si n es un cuadrado perfecto, false en caso contrario.
+   *
+   * @pre `n` negativo daría necesariamente false.
+   * @post 'Existe un entero r tal que r*r == n, r == ceilsqrt(n) == floorsqrt(n)'.
+   *
+   * @par Properties
+   * - Para `n = 0`, el resultado es `true`.
+   * - Para `n = 1`, el resultado es `true`.
+   * - Para `n = 2`, el resultado es `false`.
+   * - Para `n = 3`, el resultado es `false`.
+   * - Para `n = 4`, el resultado es `true`.
+   * - Para `n = 5`, el resultado es `false`.
+   * - Para `n = 6`, el resultado es `false`.
+   * - Para `n = 7`, el resultado es `false`.
+   * - Para `n = 8`, el resultado es `false`.
+   * - Para `n = 9`, el resultado es `true`.
+   * - Para `n = 10`, el resultado es `false`.
+   * - Para `n = 11`, el resultado es `false`.
+   * - Para `n = 12`, el resultado es `false`.
+   * - Para `n = 13`, el resultado es `false`.
+   * - Para `n = 14`, el resultado es `false`.
+   * - Para `n = 15`, el resultado es `false`.
+   * - Para `n = 16`, el resultado es `true`.
+   * - Para `n = 25`, el resultado es `true`.
+   * - Para `n = 36`, el resultado es `true`.
+   * - Para `n = 49`, el resultado es `true`.
+   * - Para `n = 64`, el resultado es `true`.
+   * - Para `n = 81`, el resultado es `true`.
+   * - Para `n = 100`, el resultado es `true`.
+   * - Para `n` tal que `is_perfect_square(n)` es true, `ceilsqrt(n) == floorsqrt(n)`.
+   * - Si `r^2 == n`, entonces `(r+1)^2 == n + (2r + 1)`.
+   * - Si `n` y `m` son cuadrados perfectos consecutivos, entonces para todo 'k' en el rango (n, m), `is_perfect_square(k)` es false.
+   * no puede ser cuadrado perfecto.
+   * - Si `n,m,l` son cuadrados perfectos, tales que `n < m < l`, entonces `l-m > m-n.
+   *
+   * @par Invariants
+   * 
+   *
+   * @par Things that should never happen
+   * - La función no debe entrar en un bucle infinito.
+   * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
    */
   template<typename T>
   constexpr bool is_perfect_square(T n) noexcept {
-    if (n == 0) return true;
+    if ((n == 0)||(n == 1)) return true;
     T root = floorsqrt(n);
     return root * root == n;
   }
@@ -110,29 +190,136 @@ namespace NumRepr {
   }
 
   /**
-   * @brief Función auxiliar recursiva para encontrar factores de un número.
-   * @param n El número a factorizar.
-   * @param low Límite inferior de la búsqueda.
-   * @param high Límite superior de la búsqueda.
-   * @return true si se encuentra un factor en el rango, false en caso contrario.
+   * @brief Comprueba si un número es una potencia de 2 en tiempo de compilación.
+   * @tparam num El número a comprobar.
+   * @return true si el número es una potencia de 2, false en caso contrario.
    */
-  constexpr inline
-  bool find_factor(std::size_t n, std::size_t low, std::size_t high) noexcept {
-    const auto mid{std::midpoint(low, high)};
-    return ((low + 1 >= high) ? 
-              (n % (2 * low + 1)) == 0 : 
-              (find_factor(n, low, mid) || find_factor(n, mid, high))
-           );
+  template <std::uint64_t num>
+  consteval
+  bool is_power_of_2_ct() noexcept { 
+    return num > 0 && (num & (num - 1)) == 0; 
   }
 
   /**
    * @brief Comprueba si un número es una potencia de 2.
    * @param num El número a comprobar.
    * @return true si el número es una potencia de 2, false en caso contrario.
+   *
+   * @pre `n` no será negativo ni `0`.
+   *
+   * @post 
+   *
+   * @par Properties
+   * - `is_prime(n) and is_power_of_2(n)` entonces `n == 2`.
+   * - Existen exactamente 64 potencias de 2 en el rango de uint64_t: 2^0, 2^1, 2^2, ..., 2^63.
+   * 
+   * @par Invariants
+   * - Si `n` es una potencia de 2, entonces, siempre que el cociente sea distinto de 1
+   * el resto de dividir por 2 será 0, en las sucesivas divisiones del cociente.
+   * - Si `n` no es una potencia de 2, entonces, en algún momento, el resto de dividir por 2 será 1,
+   * sin ser el cociente 1.
+   * - La única potencia de 2 que es impar es 2^0 == 1.
+   * - Si `n` es potencia de 2, entonces `n & (n - 1) == 0`.
+   * 
+   * @par Things that should never happen
+   * - La función no debe entrar en un bucle infinito.
+   * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
    */
+  template <std::integral T>
   constexpr inline
-  bool is_power_of_2(std::uint64_t num) noexcept { 
+  bool is_power_of_2(T num) noexcept { 
     return num > 0 && (num & (num - 1)) == 0; 
+  }
+
+  enum class factor_error {
+    invalid_range,
+    domain_error
+  };
+
+  /**
+   * @brief Busca recursivamente un factor impar de un número en un rango en tiempo de compilación.
+   * @details Esta es una función auxiliar para `is_prime`. Realiza una búsqueda
+   * recursiva en el rango de enteros `[low, high)` para encontrar un entero `k`
+   * tal que `2*k + 1` es un factor de `n`.
+   *
+   * @tparam T El tipo integral.
+   * @tparam n El número a factorizar.
+   * @tparam low El límite inferior (inclusivo) del rango de búsqueda para `k`.
+   * @tparam high El límite superior (exclusivo) del rango de búsqueda para `k`.
+   * @return `true` si se encuentra un `k` en `[low, high)` tal que `(2*k + 1)` divide a `n`.
+   *         `false` en caso contrario.
+   *
+   * @pre `n > high`, `high > low` y `low > 1`.
+   *
+   * @post `find_factor_ct` es true si se encuentra un factor en el rango, false en caso contrario.
+   */
+  template <std::integral T, T n, T low, T high>
+    requires ( (low > 1) && (high > low) && (n > high) )
+  consteval bool find_factor_ct() noexcept {
+    if constexpr (low + 1 >= high) {
+        return (n % (2 * low + 1)) == 0;
+    } else {
+        constexpr auto mid = std::midpoint(low, high);
+        return find_factor_ct<T, n, low, mid>() || find_factor_ct<T, n, mid, high>();
+    }
+  }
+
+  /**
+   * @brief Busca recursivamente un factor impar de un número en un rango.
+   * @details Esta es una función auxiliar para `is_prime`. Realiza una búsqueda
+   * recursiva en el rango de enteros `[low, high)` para encontrar un entero `k`
+   * tal que `2*k + 1` es un factor de `n`.
+   *
+   * @param n El número a factorizar.
+   * @param low El límite inferior (inclusivo) del rango de búsqueda para `k`.
+   * @param high El límite superior (exclusivo) del rango de búsqueda para `k`.
+   * @return Un `std::expected<bool, factor_error>`. Contiene `true` si se encuentra un factor,
+   *         `false` si no se encuentra. Contiene un error si los parámetros de entrada son inválidos.
+   *
+   * @pre `n > high`, `high > low` y `low > 1`.
+   *
+   * @post Si el valor es `true`, existe un entero `k` con `low <= k < high` tal que `n % (2*k + 1) == 0`.
+   * @post Si el valor es `false`, para todo `k` con `low <= k < high`, `n % (2*k + 1) != 0`.
+   */
+  template <std::integral T>
+  constexpr inline
+  std::expected<bool, factor_error> find_factor(T n, T low, T high) noexcept {
+    if (low <= 1) return std::unexpected(factor_error::domain_error);
+    if (n <= high) return std::unexpected(factor_error::domain_error);
+    if (high <= low) return false; // Empty range, no factor found.
+
+    const auto mid{std::midpoint(low, high)};
+    if (low + 1 >= high) {
+        return (n % (2 * low + 1)) == 0;
+    }
+
+    auto res_low = find_factor(n, low, mid);
+    if (!res_low) return res_low; // propagate error
+    if (*res_low) return true; // found
+
+    return find_factor(n, mid, high);
+  }
+  
+  /**
+   * @brief Comprueba si un número es primo en tiempo de compilación.
+   * @tparam n El número a comprobar.
+   * @return true si n es primo, false en caso contrario.
+   */
+  template <std::uint64_t n>
+  consteval
+  bool is_prime_ct() noexcept {
+    if constexpr (n < 2) return false;
+    else if constexpr (n == 2 || n == 3) return true;
+    else if constexpr (n % 2 == 0 || n % 3 == 0) return false;
+    else {
+      constexpr std::uint64_t high = (ceilsqrt(n) + 1) / 2;
+      constexpr std::uint64_t low = 2;
+      if constexpr (high <= low) { // if range is invalid or empty
+          return true; // No factors to check
+      } else {
+          return !find_factor_ct<std::uint64_t, n, low, high>();
+      }
+    }
   }
 
   /**
@@ -140,13 +327,19 @@ namespace NumRepr {
    * @param n El número a comprobar.
    * @return true si n es primo, false en caso contrario.
    */
+  template <std::integral T>
   constexpr inline
-  bool is_prime(std::size_t n) noexcept {
+  bool is_prime(T n) noexcept {
     if (n < 2) return false;
     else if (n == 2 || n == 3) return true;
     else if (n % 2 == 0 || n % 3 == 0) return false;
-    else 
-      return (!find_factor(n, 1, (ceilsqrt(n) + 1) / 2));
+    else {
+      auto result = find_factor(n, static_cast<T>(2), (ceilsqrt(n) + 1) / 2);
+      // If find_factor returns an error (e.g. invalid range for small n),
+      // it means no odd factors were checked, so the number is prime in this context.
+      // value_or(false) means if error, no factor was found.
+      return !result.value_or(false);
+    }
   }
 
   /**
@@ -492,14 +685,12 @@ namespace NumRepr {
     consteval std::uint64_t log2ct() noexcept { return int_log2ct<N>(); }
     constexpr std::uint64_t log2(std::uint64_t n) noexcept { return int_log2(n); }
 
-    namespace special
-    {
+    namespace special {
         // NOTE: The following metaprogramming utilities are complex and lack documentation and tests.
         // This section should be reviewed for clarity, purpose, and correctness.
 
         template <usint_t B, usint_t L>
-        consteval inline uint64_t Base_pow_to_Size() noexcept
-        {
+        consteval inline uint64_t Base_pow_to_Size() noexcept {
             constexpr uint64_t Bc{B};
             if constexpr (L == 0)
                 return static_cast<uint64_t>(1);
@@ -512,32 +703,28 @@ namespace NumRepr {
         }
 
         template <usint_t Base, usint_t Exp>
-        struct pow_B_to_E_t
-        {
+        struct pow_B_to_E_t {
             static constexpr uint64_t base = static_cast<uint64_t>(Base);
             static constexpr uint64_t exponent = static_cast<uint64_t>(Exp);
             static constexpr uint64_t value = base * (pow_B_to_E_t<base, exponent - 1>::value);
         };
 
         template <usint_t Base>
-        struct pow_B_to_E_t<Base, 2>
-        {
+        struct pow_B_to_E_t<Base, 2> {
             static constexpr uint64_t base = static_cast<uint64_t>(Base);
             static constexpr uint64_t exponent = static_cast<uint64_t>(2);
             static constexpr uint64_t value = base * base;
         };
 
         template <usint_t Base>
-        struct pow_B_to_E_t<Base, 1>
-        {
+        struct pow_B_to_E_t<Base, 1> {
             static constexpr uint64_t base = static_cast<uint64_t>(Base);
             static constexpr uint64_t exponent = static_cast<uint64_t>(1);
             static constexpr uint64_t value = base;
         };
 
         template <usint_t Base>
-        struct pow_B_to_E_t<Base, 0>
-        {
+        struct pow_B_to_E_t<Base, 0> {
             static constexpr uint64_t base = static_cast<uint64_t>(Base);
             static constexpr uint64_t exponent = static_cast<uint64_t>(0);
             static constexpr uint64_t value = static_cast<uint64_t>(1);
@@ -549,9 +736,11 @@ namespace NumRepr {
         template <std::int64_t IntObj_ct, std::int64_t BeginIntObj_ct,
                   std::int64_t EndIntObj_ct, std::int64_t Base,
                   template <std::int64_t, std::int64_t> class Funct_tt>
-        requires((BeginIntObj_ct >= EndIntObj_ct) && (IntObj_ct >= BeginIntObj_ct))
-        struct tuple_builder_t
-        {
+            requires(
+                (BeginIntObj_ct >= EndIntObj_ct) && 
+                (IntObj_ct >= BeginIntObj_ct)
+            )
+        struct tuple_builder_t {
             using type = std::int64_t;
             static constexpr std::int64_t unit = static_cast<std::int64_t>(1);
             static constexpr std::int64_t value{IntObj_ct};
@@ -563,8 +752,7 @@ namespace NumRepr {
         template <std::int64_t BeginIntObj_ct, std::int64_t EndIntObj_ct,
                   std::int64_t Base,
                   template <std::int64_t, std::int64_t> class Funct_tt>
-        struct tuple_builder_t<EndIntObj_ct - 1, BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>
-        {
+        struct tuple_builder_t<EndIntObj_ct - 1, BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt> {
             using type = std::int64_t;
             static constexpr std::int64_t unit = static_cast<std::int64_t>(1);
             static constexpr std::int64_t value{EndIntObj_ct - unit};
@@ -576,46 +764,72 @@ namespace NumRepr {
         template <std::int64_t BeginIntObj_ct, std::int64_t EndIntObj_ct,
                   std::int64_t Base,
                   template <std::int64_t, std::int64_t> class Funct_tt>
-        requires(BeginIntObj_ct <= EndIntObj_ct)
-        struct tuple_builder_t<BeginIntObj_ct, BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>
-        {
+            requires(BeginIntObj_ct <= EndIntObj_ct)
+        struct tuple_builder_t<BeginIntObj_ct, BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt> {
             using type = std::int64_t;
             static constexpr type unit = 1;
             static constexpr type value{BeginIntObj_ct};
             static constexpr type begin_value{BeginIntObj_ct};
             static constexpr type end_value{EndIntObj_ct};
-            static consteval decltype(auto) build() noexcept { return std::tuple_cat(std::make_tuple(std::make_tuple(value, Funct_tt<Base, value>{}())), tuple_builder_t<begin_value + unit, begin_value, end_value, Base, Funct_tt>::build()); }
+            static consteval decltype(auto) build() noexcept { 
+                return std::tuple_cat(
+                    std::make_tuple(
+                        std::make_tuple(
+                            value, 
+                            Funct_tt<Base, value>{}()
+                        )
+                    ), 
+                    tuple_builder_t<
+                        begin_value + unit, 
+                        begin_value, 
+                        end_value, 
+                        Base, 
+                        Funct_tt
+                    >::build()
+                ); 
+            }
         };
 
         template <std::int64_t BeginIntObj_ct, std::int64_t EndIntObj_ct,
                   std::int64_t Base,
                   template <std::int64_t, std::int64_t> class Funct_tt>
-        requires(BeginIntObj_ct < EndIntObj_ct)
-        struct tuple_user_constructor_t
-        {
-            static constexpr auto value = tuple_builder_t<BeginIntObj_ct, BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>::build();
+            requires(BeginIntObj_ct < EndIntObj_ct)
+        struct tuple_user_constructor_t {
+            static constexpr auto value {
+                tuple_builder_t<
+                    BeginIntObj_ct, 
+                    BeginIntObj_ct, 
+                    EndIntObj_ct, 
+                    Base, 
+                    Funct_tt
+                >::build()
+            };
         };
 
         template <std::int64_t BeginIntObj_ct, std::int64_t EndIntObj_ct,
                   std::int64_t Base,
                   template <std::int64_t, std::int64_t> class Funct_tt>
-        requires(BeginIntObj_ct < EndIntObj_ct)
-        constexpr auto tuple_constr_v = tuple_user_constructor_t<BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>::build();
+            requires(BeginIntObj_ct < EndIntObj_ct)
+        constexpr auto tuple_constr_v = 
+            tuple_user_constructor_t<
+                BeginIntObj_ct, 
+                EndIntObj_ct, 
+                Base, 
+                Funct_tt
+            >::build();
 
         template <auto B, auto L, typename A>
-        constexpr inline uint64_t conversion_to_int(const A &arg) noexcept
-        {
+        constexpr inline uint64_t conversion_to_int(const A &arg) noexcept {
             constexpr uint64_t base{static_cast<uint64_t>(B)};
             uint64_t acc{arg[L - 1]()};
-            for (sint64_t ix{L - 2}; ix > -1; --ix)
-            {
+            for (sint64_t ix{L - 2}; ix > -1; --ix) {
                 acc *= base;
                 acc += static_cast<uint64_t>(arg[ix]());
             };
             return acc;
         }
 
-    } /// END OF NAMESPACE SPECIAL
+    } /// CLOSE NAMESPACE special
   } // CLOSE NAMESPACE auxiliary_functions
 } // CLOSE NAMESPACE NumRepr
 
