@@ -14,8 +14,14 @@ endif()
 # Establecer el directorio de salida para los ejecutables de prueba en un subdirectorio de la carpeta de compilación
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/build_tests/${COMPILER_DIR}")
 
-# Encontrar el paquete Catch2, que ahora está instalado localmente
-find_package(Catch2 3.6.0 REQUIRED)
+# Descargar y configurar Catch2 automáticamente usando FetchContent
+include(FetchContent)
+FetchContent_Declare(
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG        v3.6.0
+)
+FetchContent_MakeAvailable(Catch2)
 
 # Añadir un ejecutable para las pruebas de auxiliary_functions
 add_executable(AuxiliaryFunctionsTest test_auxiliary_functions.cpp)

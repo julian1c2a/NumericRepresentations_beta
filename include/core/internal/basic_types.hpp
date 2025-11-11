@@ -1,4 +1,4 @@
-P#ifndef BASIC_TYPES_HPP_INCLUDED
+#ifndef BASIC_TYPES_HPP_INCLUDED
 #define BASIC_TYPES_HPP_INCLUDED
 
 #include <cstdint>
@@ -503,7 +503,7 @@ namespace NumRepr {
       template <>
       struct __sig_UInt_for_SInt_t<sint_t> { using type = uint_t; };
 
-#if !defined(__GNUC__) || (defined(__GNUC__) && !std::is_same_v<slint_t, sint64_t>)
+#if LONG_MAX < LLONG_MAX
       template <>
       struct __sig_UInt_for_SInt_t<slint_t> { using type = ulint_t; };
 #endif
@@ -526,7 +526,6 @@ namespace NumRepr {
       struct __sig_SInt_for_SInt_t<slint_t> {
         template <signed_integral_c SINT_T>
         static inline constexpr bool signed_gt_signed_v = gt_sz_v<SINT_T, slint_t>;
-
         using type = std::conditional_t<
                         signed_gt_signed_v<sllint_t>, 
                             sllint_t,

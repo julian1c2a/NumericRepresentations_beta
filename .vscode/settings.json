@@ -58,5 +58,6 @@
     "copilot.vision.provider": "Gemini",
     "geminicodeassist.project": "firstproject-451013",
     "makefile.makePath": "c:\\msys64\\ucrt64\\bin\\mingw32-make.exe",
-    "makefile.buildLog": "/build"
+    "makefile.buildLog": "/build",
+    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
 }

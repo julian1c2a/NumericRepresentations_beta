@@ -528,8 +528,6 @@ namespace NumRepr {
         template <auto B, auto L, typename A>
         constexpr inline uint64_t conversion_to_int(const A &arg) noexcept
         {
-            using sint64_t;
-            using uint64_t;
             constexpr uint64_t base{static_cast<uint64_t>(B)};
             uint64_t acc{arg[L - 1]()};
             for (sint64_t ix{L - 2}; ix > -1; --ix)
