@@ -191,17 +191,6 @@ namespace NumRepr {
   }
 
   /**
-   * @brief Comprueba si un número es una potencia de 2 en tiempo de compilación.
-   * @tparam num El número a comprobar.
-   * @return true si el número es una potencia de 2, false en caso contrario.
-   */
-  template <std::uint64_t num>
-  consteval
-  bool is_power_of_2_ct() noexcept { 
-    return num > 0 && (num & (num - 1)) == 0; 
-  }
-
-  /**
    * @brief Comprueba si un número es una potencia de 2.
    * @param num El número a comprobar.
    * @return true si el número es una potencia de 2, false en caso contrario.
@@ -224,7 +213,18 @@ namespace NumRepr {
    * 
    * @par Things that should never happen
    * - La función no debe entrar en un bucle infinito.
-   * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
+   * - La función no debe desbordarse durante los cálculos intermedios si `n` 
+   * está dentro del rango del tipo `T`.
+   */
+  template <std::uint64_t num>
+  consteval
+  bool is_power_of_2_ct() noexcept { 
+    return num > 0 && (num & (num - 1)) == 0; 
+  }
+  /**
+   * @brief Comprueba si un número es una potencia de 2, 
+   * pero nos aseguramos que sea en tiempo de compilación. 
+   * `_ct` es compile time
    */
   template <std::integral T>
   constexpr inline
@@ -254,9 +254,9 @@ namespace NumRepr {
    *
    * @post `find_factor_ct` es true si se encuentra un factor en el rango, false en caso contrario.
    */
-  template <std::integral T, T n, T low, T high>
-    requires ( (low > 1) && (high > low) && (n > high) )
-  consteval bool find_factor_ct() noexcept {
+   template <std::integral T, T n, T low, T high>
+        requires ( (low > 1) && (high > low) && (n > high) )
+   consteval bool find_factor_ct() noexcept {
     if constexpr (low + 1 >= high) {
         return (n % (2 * low + 1)) == 0;
     } else {
@@ -305,6 +305,58 @@ namespace NumRepr {
    * @brief Comprueba si un número es primo en tiempo de compilación.
    * @tparam n El número a comprobar.
    * @return true si n es primo, false en caso contrario.
+  *
+   * @pre `n` debe ser no negativo.
+   * @post El valor devuelto `r` satisface `r*r <= n` y `(r+1)*(r+1) > n`.
+   *
+   * @invariant
+   * - La función siempre termina (los naturales tienen una buena ordenación, el mínimo es 1).
+   * - Los valores intermedios no causan desbordamiento (serán menores que el que se le pasa).
+   * - Para todo `k en [2, ceilsqrt_ct<n>()]`, si `n % k != 0`, entonces `n` no es primo.
+   * Se puede comprobar sacando el primer factor `f` y verificando que `n % f != 0`. 
+   * - Si `is_prime_ct<n>()` entonces `para todo k en [2, ceilsqrt_ct<n>()], n % k == 0`.
+   * Esto se puede testear con números aleatorios una vez sabemos que `is_prime_ct<n>()` es true.
+   *
+   * @par Properties
+   * - Para `n = 0`, no se compila.
+   * - Para `n = 1`, no se compila.
+   * - Para `n = 2`, el resultado es `true`.
+   * - Para `n = 3`, el resultado es `true`.
+   * - Para `n = 4`, el resultado es `false`.
+   * - Para `n = 5`, el resultado es `true`.
+   * - Para `n = 6`, el resultado es `false`.
+   * - Para `n = 7`, el resultado es `true`.
+   * - Para `n = 8`, el resultado es `false`.
+   * - Para `n = 9`, el resultado es `false`.
+   * - Para `n = 10`, el resultado es `false`.
+   * - Para `n = 11`, el resultado es `true`.
+   * - Para `n = 12`, el resultado es `false`.
+   * - Para `n = 13`, el resultado es `true`.
+   * - Para `n = 14`, el resultado es `false`.
+   * - Para `n = 15`, el resultado es `false`.
+   * - Para `n = 16`, el resultado es `false`.
+   * - Para `n = 17`, el resultado es `true`.
+   * - Para `n = 18`, el resultado es `false`.
+   * - Para `n = 19`, el resultado es `true`.
+   * - Para `n = 20`, el resultado es `false`.
+   * - Para `n = 21`, el resultado es `false`.
+   * - Para `n = 22`, el resultado es `false`.
+   * - Para `n = 23`, el resultado es `true`.
+   * - Para `n = 24`, el resultado es `false`.
+   * - Para `n = 25`, el resultado es `false`.
+   * - Para `n = 36`, el resultado es `false`.
+   * - Para `n = std::numeric_limits<std::uint64_t>::max()`, el resultado es `true`.
+   * - Hay grandes tablas para probar aleatoriamente.
+   *
+   * @par Invariants
+   * 
+   *
+   * @par Things that should never happen
+   * - La función no debe entrar en un bucle infinito.
+   * - Si `n != 2`, entonces no se puede dar que `is_prime_ct<n>() && is_prime_ct<n+1>()`.
+   * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
+   *
+   * @note
    */
   template <std::uint64_t n>
   consteval
@@ -312,7 +364,13 @@ namespace NumRepr {
     if constexpr (n < 2) return false;
     else if constexpr (n == 2 || n == 3) return true;
     else if constexpr (n % 2 == 0 || n % 3 == 0) return false;
+    else if constexpr (n % 5 == 0 || n % 7 == 0 || n % 11 == 0) return false;
+    else if constexpr (n % 13 == 0 || n % 17 == 0 || n % 19 == 0 || n % 23 == 0) return false;
+    else if constexpr (n % 29 == 0 || n % 31 == 0 || n % 37 == 0 || n % 41 == 0) return false;
+    else if constexpr (n % 43 == 0 || n % 47 == 0 || n % 53 == 0 || n % 59 == 0) return false;
+    else if constexpr ( n < 3600) return true; 
     else {
+      // sabemos que si n es primo es mayor que 3600
       constexpr std::uint64_t high = (ceilsqrt(n) + 1) / 2;
       constexpr std::uint64_t low = 2;
       if constexpr (high <= low) { // if range is invalid or empty
@@ -334,6 +392,11 @@ namespace NumRepr {
     if (n < 2) return false;
     else if (n == 2 || n == 3) return true;
     else if (n % 2 == 0 || n % 3 == 0) return false;
+    else if (n % 5 == 0 || n % 7 == 0 || n % 11 == 0) return false;
+    else if (n % 13 == 0 || n % 17 == 0 || n % 19 == 0 || n % 23 == 0) return false;
+    else if (n % 29 == 0 || n % 31 == 0 || n % 37 == 0 || n % 41 == 0 || n % 43 == 0 ) return false;
+    else if (n % 47 == 0 || n % 53 == 0 || n % 59 == 0 || n % 67 == 0 || n % 71 == 0 || n % 73 == 0) return false;
+    else if ( n < 3600) return true; 
     else {
       auto result = find_factor(n, static_cast<T>(2), (ceilsqrt(n) + 1) / 2);
       // If find_factor returns an error (e.g. invalid range for small n),
@@ -345,12 +408,18 @@ namespace NumRepr {
 
   /**
    * @brief Calcula el máximo común divisor (MCD) de dos números.
+   * Algoritmo de Euclides.
    * @param a El primer número.
    * @param b El segundo número.
    * @return El MCD de a y b.
    */
   constexpr inline
   std::uint64_t gcd(std::uint64_t a, std::uint64_t b) noexcept {
+    if (a == 0) return b;
+    if (b == 0) return a;
+    if (a == 1) return 1;
+    if (b == 1) return 1;
+    if (a == b) return a;
     while (b != 0) { 
       const auto temp = b; 
       b = a % b; 
@@ -360,14 +429,15 @@ namespace NumRepr {
   }
 
   /**
-   * @brief Calcula el mínimo común múltiplo (mcm) de dos números.
+   * @brief Calcula el mínimo común múltiplo (mcm) de dos números, 
+   * sabiendo que `lcm(a,b)*gcd(a,b) == a*b.`
    * @param a El primer número.
    * @param b El segundo número.
    * @return El mcm de a y b.
    */
   constexpr inline
   std::uint64_t lcm(std::uint64_t a, std::uint64_t b) noexcept { 
-    return (a == 0 || b == 0) ? 0 : (a / gcd(a, b)) * b;
+    return (a == 0 || b == 0) ? 0 : (std::min(a, b) / gcd(a, b)) * std::max(a, b);
   }
 
   /**
@@ -498,7 +568,6 @@ namespace NumRepr {
     } else {
       return 0; // overflow case
     }
-    
   }
 
   /**
