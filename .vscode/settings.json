@@ -59,5 +59,6 @@
     "geminicodeassist.project": "firstproject-451013",
     "makefile.makePath": "c:\\msys64\\ucrt64\\bin\\mingw32-make.exe",
     "makefile.buildLog": "/build",
-    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild"
+    "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
+    "C_Cpp.default.compileCommands": "d:\\GDrive\\NumericRepresentations\\tmp\\Catch2\\builddir/compile_commands.json"
 }
