@@ -633,6 +633,38 @@ namespace NumRepr {
   }
 
   /**
+   * @brief Checks if base^exponent is less than or equal to a limit using exponentiation by squaring.
+   * @param b The base.
+   * @param exp The exponent.
+   * @param limit The limit to check against.
+   * @return True if b^exp <= limit, false otherwise. This function is overflow-safe.
+   */
+  constexpr inline bool pow_leq_limit(std::uint64_t b, std::uint32_t exp, std::uint64_t limit) noexcept {
+    if (b == 0) return 0 <= limit;
+    if (b == 1) return 1 <= limit;
+    
+    std::uint64_t result = 1;
+    std::uint64_t cur = b;
+    std::uint32_t e = exp;
+
+    while (e > 0) {
+      if (e & 1u) {
+        if (result > limit / cur) return false; // would exceed limit
+        result *= cur;
+      }
+      e >>= 1u;
+      if (e > 0) {
+        if (cur > std::numeric_limits<std::uint64_t>::max() / cur) {
+            // cur * cur would overflow, so the mathematical result is definitely > limit.
+            return false;
+        }
+        cur *= cur;
+      }
+    }
+    return result <= limit;
+  }
+
+  /**
    * @brief Cuenta el número de dígitos de un número en una base dada.
    * @param n El número.
    * @param base La base.
@@ -648,30 +680,9 @@ namespace NumRepr {
       return static_cast<std::size_t>(int_log2(n)) + 1u;
     }
 
-    auto pow_leq = 
-      [](std::uint64_t b, std::uint32_t exp, std::uint64_t limit) noexcept {
-        std::uint64_t result = 1;
-        std::uint64_t cur = b;
-        std::uint32_t e = exp;
-        while (e > 0) {
-          if (e & 1u) {
-            if (cur == 0) return result <= limit;
-            if (result > limit / cur) return false; // would overflow
-            result *= cur;
-          }
-          e >>= 1u;
-          if (e > 0) {
-            if (cur > 0 && cur > limit / cur) 
-                cur = limit + 1; // make cur > limit to short-circuit
-            else cur *= cur;
-          }
-        }
-        return result <= limit;
-    };
-
     std::uint32_t lo = 0u;
     std::uint32_t hi = 1u;
-    while (pow_leq(base, hi, n)) {
+    while (pow_leq_limit(base, hi, n)) {
       lo = hi;
       hi = hi * 2u;
       if (hi == 0u) break; // overflow guard
@@ -679,7 +690,7 @@ namespace NumRepr {
 
     while (lo + 1u < hi) {
       std::uint32_t mid = lo + (hi - lo) / 2u;
-      if (pow_leq(base, mid, n)) lo = mid;
+      if (pow_leq_limit(base, mid, n)) lo = mid;
       else hi = mid;
     }
 
