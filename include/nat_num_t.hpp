@@ -1,1667 +1,318 @@
-#ifndef NAT_NUM_T_HPP_INCLUDED#ifndef NAT_NUM_T_HPP_INCLUDED#ifndef NAT_NUM_T_HPP_INCLUDED
-
+// Restored from include/nat_num_t.hpp.old
+#ifndef NAT_NUM_T_HPP_INCLUDED
 #define NAT_NUM_T_HPP_INCLUDED
 
-#define NAT_NUM_T_HPP_INCLUDED#define NAT_NUM_T_HPP_INCLUDED
-
 #include "base_num_t.hpp"
-
 #include "nat_reg_digs_t.hpp"
-#include "base_num_t.hpp"
 
+namespace NumRepr {
 
-
-
-namespace NumRepr {#include "nat_reg_digs_t.hpp"#include "nat_reg_digs_t.hpp"
-
-
-
-template <std::uint64_t B>namespace NumRepr {namespace NumRepr {
-
+template <std::uint64_t B>
   requires(B > 1)
-
 class nat_num_t : public base_num_t<B> {
-
-public:template <std::uint64_t B>template <std::uint64_t B>
-
+public:
   using dig_t = dig_t<B>;
-
-  using UINT_T = typename dig_t::UINT_T;  requires(B > 1)  requires(B > 1)
-
+  using UINT_T = typename dig_t::UINT_T;
   using base_num_t = base_num_t<B>;
-
-  using SIG_UINT_T = typename dig_t::SIG_UINT_T;class nat_num_t : public base_num_t<B> {class nat_num_t : public base_num_t<B> {
-
+  using SIG_UINT_T = typename dig_t::SIG_UINT_T;
   using SIG_SINT_T = typename dig_t::SIG_SINT_T;
 
-public:public:
-
   // Iterator types from base class
-
-  using str_iterator = typename base_num_t::str_iterator;  using dig_t = dig_t<B>;
-
+  using str_iterator = typename base_num_t::str_iterator;
   using c_str_iterator = typename base_num_t::c_str_iterator;
-
-  using r_str_iterator = typename base_num_t::r_str_iterator;  using UINT_T = typename dig_t::UINT_T;
-
+  using r_str_iterator = typename base_num_t::r_str_iterator;
   using cr_str_iterator = typename base_num_t::cr_str_iterator;
 
-    using base_num_t = base_num_t<B>;
-
   // Register types for arithmetic operations
-
-  template <std::size_t N>  using SIG_UINT_T = typename dig_t::SIG_UINT_T;
-
+  template <std::size_t N>
   using nat_reg_N_digs_t = nat_reg_digs_t<B, N>;
-
-  using nat_reg_digs_t = nat_reg_N_digs_t<2>;  using SIG_SINT_T = typename dig_t::SIG_SINT_T;
-
-
-
+  using nat_reg_digs_t = nat_reg_N_digs_t<2>;
+  
 private:
-
   nat_reg_digs_t aux; // Auxiliary variable for operations
 
-  // Iterator types from base class  // Iterator types from base class
-
+  /****************************/
+  /*				  */
+  /*		CONSTRUCTORES	  */
+  /*				  */
+  /****************************/
 public:
-
-  /************************************/  using str_iterator = typename base_num_t::str_iterator;
-
-  /*                                  */
-
-  /*           CONSTRUCTORS           */  using const_str_iterator = typename base_num_t::const_str_iterator;
-
-  /*                                  */
-
-  /************************************/  using c_str_iterator = typename base_num_t::c_str_iterator;
-
-
-
-  /// Default constructor - creates zero  using r_str_iterator = typename base_num_t::r_str_iterator;
-
-  constexpr nat_num_t() noexcept {
-
-    base_num_t &cthis = (*this);  using cr_str_iterator = typename base_num_t::cr_str_iterator;  
-
-    aux = nat_reg_digs_t{};  
-
-    cthis.resize(1);  // Register types for arithmetic operations  // Register types for arithmetic operations
-
-    cthis[0] = dig_t{0};
-
-  }  template <std::size_t N>  template <std::size_t N>
-
-
-
-  /// Copy constructor  using nat_reg_N_digs_t = nat_reg_digs_t<B, N>;  
-
-  constexpr nat_num_t(const nat_num_t &other) noexcept = default;  
-
-  using nat_reg_digs_t = nat_reg_N_digs_t<2>;
-
-  /// Move constructor
-
-  constexpr nat_num_t(nat_num_t &&other) noexcept = default;private:
-
-
-
-  /// Constructor from register pair  nat_reg_digs_t aux; // Auxiliary variable for operations  nat_reg_digs_t aux;
-
-  constexpr nat_num_t(const nat_reg_digs_t &a) noexcept {
-
-    base_num_t &cthis = (*this);
-
-    aux = nat_reg_digs_t{};
-
-    cthis.resize(2);public:  /****************************/
-
-    cthis[0] = a[0];
-
-    cthis[1] = a[1];  /************************************/  /*						              */
-
-    reduce();
-
-  }  /*                                  */  /*		CONSTRUCTORES	        */
-
-
-
-  /// Constructor from single digit  /*           CONSTRUCTORS           */  /*						              */
-
-  template <type_traits::integral_c Int_t>
-
-  constexpr nat_num_t(Int_t value) noexcept {  /*                                  */  /****************************/
-
-    base_num_t &cthis = (*this);
-
-    aux = nat_reg_digs_t{};  /************************************/public:
-
-    
-
-    if (value == 0) {  inline size_t size() const {
-
-      cthis.resize(1);
-
-      cthis[0] = dig_t{0};  /// Default constructor - creates zero    const dig_string_t &cthis = (*this);
-
-      return;
-
-    }  constexpr nat_num_t() noexcept {    return cthis.dig_string_t::size();
-
-
-
-    // Convert integer to digits in base B    base_num_t &cthis = (*this);  }
-
-    std::vector<dig_t> digits;
-
-    Int_t temp = (value < 0) ? -value : value;    aux = nat_reg_digs_t{};
-
-    
-
-    while (temp > 0) {    cthis.resize(1);private:
-
-      digits.push_back(dig_t{static_cast<UINT_T>(temp % B)});
-
-      temp /= B;    cthis[0] = dig_t{0};  inline void resize(size_t arg) {
-
-    }
-
-      }    dig_string_t &cthis = (*this);
-
-    cthis.resize(digits.size());
-
-    for (std::size_t i = 0; i < digits.size(); ++i) {    cthis.dig_string_t::resize(arg);
-
-      cthis[i] = digits[i];
-
-    }  /// Copy constructor    return;
-
-    reduce();
-
-  }  constexpr nat_num_t(const nat_num_t &other) noexcept = default;  }
-
-
-
-  /// Constructor from character
-
-  constexpr nat_num_t(char ch) noexcept {
-
-    base_num_t &cthis = (*this);  /// Move constructorpublic:
-
-    cthis.clear();
-
-    aux = nat_reg_digs_t{};  constexpr nat_num_t(nat_num_t &&other) noexcept = default;  inline void push_front(dig_t parg) {
-
-    cthis.resize(1);
-
-        dig_string_t &cthis = (*this);
-
-    if (ch >= '0' && ch <= '9') {
-
-      UINT_T digit_val = static_cast<UINT_T>(ch - '0');  /// Constructor from register pair    cthis.dig_string_t::push_front(parg);
-
-      if (digit_val < B) {
-
-        cthis[0] = dig_t{digit_val};  constexpr nat_num_t(const nat_reg_digs_t &a) noexcept {    return;
-
-      } else {
-
-        cthis[0] = dig_t{0};    base_num_t &cthis = (*this);  }
-
-      }
-
-    } else {    aux = nat_reg_digs_t{};
-
-      cthis[0] = dig_t{0};
-
-    }    cthis.resize(2);private:
-
+  inline size_t size() const {
+    const dig_string_t &cthis = (*this);
+    return cthis.dig_string_t::size();
   }
 
-    cthis[0] = a[0];  inline nat_num_t &insert(size_t pos1, const dig_t chardig) {
 
-  /// Constructor from two digits
-
-  constexpr nat_num_t(const dig_t &a1, const dig_t &a0) noexcept {    cthis[1] = a[1];    dig_string_t &cthis = (*this);
-
-    base_num_t &cthis = (*this);
-
-    aux = nat_reg_digs_t{};    reduce();    cthis.dig_string_t::insert(pos1, 1, chardig);
-
-    cthis.clear();
-
-    cthis.resize(2);  }    return (*this);
-
-    cthis[0] = a1;  // Most significant digit first (little-endian storage)
-
-    cthis[1] = a0;  // Least significant digit  }
-
-    reduce();
-
-  }  /// Constructor from single digit  inline nat_num_t &insert(size_t pos1, size_t n, dig_t c) {
-
-
-
-  /// Constructor from three digits  template <type_traits::integral_c Int_t>    dig_string_t &cthis = (*this);
-
-  constexpr nat_num_t(const dig_t &a2, const dig_t &a1, const dig_t &a0) noexcept {
-
-    base_num_t &cthis = (*this);  constexpr nat_num_t(Int_t value) noexcept {    cthis.dig_string_t::insert(pos1, n, c);
-
-    aux = nat_reg_digs_t{};
-
-    cthis.clear();    base_num_t &cthis = (*this);    return (*this);
-
-    cthis.resize(3);
-
-    cthis[0] = a2;  // Most significant    aux = nat_reg_digs_t{};  }
-
-    cthis[1] = a1;  // Middle
-
-    cthis[2] = a0;  // Least significant    
-
-    reduce();
-
-  }    if (value == 0) {  inline const nat_num_t &operator&=(const nat_num_t &arg) {
-
-
-
-  /************************************/      cthis.resize(1);    dig_string_t &cthis = (*this);
-
-  /*                                  */
-
-  /*        ASSIGNMENT OPERATORS     */      cthis[0] = dig_t{0};    cthis.dig_string_t::operator+=(arg);
-
-  /*                                  */
-
-  /************************************/      return;    return (*this);
-
-
-
-  /// Copy assignment    }  }
-
-  constexpr nat_num_t &operator=(const nat_num_t &other) noexcept {
-
-    if (this != &other) {
-
-      base_num_t &cthis = (*this);
-
-      cthis.clear();    // Convert integer to digits in base B  // string& erase ( size_t pos = 0, size_t n = npos );
-
-      aux = other.aux;
-
-      const std::size_t sz = other.size();    std::vector<dig_t> digits;
-
-      cthis.resize(sz);
-
-      for (std::size_t k = 0; k < sz; ++k) {    Int_t temp = (value < 0) ? -value : value;  inline nat_num_t &erase(size_t pos, size_t npos) {
-
-        cthis[k] = other[k];
-
-      }        nat_num_t &cthis = (*this);
-
-      reduce();
-
-    }    while (temp > 0) {    size_t npos_2 = npos;
-
-    return (*this);
-
-  }      digits.push_back(dig_t{static_cast<UINT_T>(temp % B)});    const size_t sz = size();
-
-
-
-  /// Move assignment      temp /= B;    if ((sz == npos) and (pos == 0)) {
-
-  constexpr nat_num_t &operator=(nat_num_t &&other) noexcept = default;
-
-    }      npos_2--;
-
-  /// Assignment from register pair
-
-  constexpr const nat_num_t &operator=(const nat_reg_digs_t &a) noexcept {          operator[](sz - 1) = dig_t(0);
-
-    base_num_t &cthis = (*this);
-
-    cthis.clear();    cthis.resize(digits.size());    }
-
-    aux = nat_reg_digs_t{};
-
-    cthis.resize(2);    for (std::size_t i = 0; i < digits.size(); ++i) {    cthis.dig_string_t::erase(pos, npos_2);
-
-    cthis[0] = a[0];
-
-    cthis[1] = a[1];      cthis[i] = digits[i];    return (*this);
-
-    reduce();
-
-    return (*this);    }  }
-
-  }
-
-    reduce();
-
-  /// Assignment from single digit
-
-  constexpr const nat_num_t &operator=(const dig_t &a0) noexcept {  }  inline iterator erase(iterator first, iterator last) {
-
-    base_num_t &cthis = (*this);
-
-    aux = nat_reg_digs_t{};    size_t npos = last - first;
-
-    cthis.clear();
-
-    cthis.resize(1);  /************************************/    const size_t sz = size();
-
-    cthis[0] = a0;
-
-    return (*this);  /*                                  */    if (sz == npos) {
-
-  }
-
-  /*        ASSIGNMENT OPERATORS     */      last--;
-
-  /// Assignment from integral type
-
-  template <type_traits::integral_c Int_t>  /*                                  */      operator[](sz - 1) = d_0<B>();
-
-  constexpr const nat_num_t &operator=(Int_t value) noexcept {
-
-    *this = nat_num_t{value};  /************************************/    }
-
-    return (*this);
-
-  }    return dig_string_t::erase(first, last);
-
-
-
-public:  /// Copy assignment  }
-
-  /************************************/
-
-  /*                                  */  constexpr nat_num_t &operator=(const nat_num_t &other) noexcept {
-
-  /*        BASIC OPERATIONS          */
-
-  /*                                  */    if (this != &other) {public:
-
-  /************************************/
-
-      base_num_t &cthis = (*this);
-
-  /// Get size
-
-  constexpr std::size_t size() const noexcept {      cthis.clear();  inline dig_t operator[](uint arg) const {
-
-    const base_num_t &cthis = (*this);
-
-    return cthis.size();      aux = other.aux;    const nat_num_t &cthis = (*this);
-
-  }
-
-      const std::size_t sz = other.size();    return cthis.dig_string_t::operator[](arg);
-
-  /// Access operators
-
-  constexpr dig_t operator[](std::size_t arg) const noexcept {      cthis.resize(sz);  }
-
-    const base_num_t &cthis = (*this);
-
-    return cthis[arg];      for (std::size_t k = 0; k < sz; ++k) {  inline dig_t &operator[](uint arg) {
-
-  }
-
-        cthis[k] = other[k];    dig_string_t &cthis = (*this);
-
-  constexpr dig_t &operator[](std::size_t arg) noexcept {
-
-    base_num_t &cthis = (*this);      }    return cthis.dig_string_t::operator[](arg);
-
-    return cthis[arg];
-
-  }      reduce();  }
-
-
-
-  /// Clear    }
-
-  constexpr void clear() noexcept {
-
-    base_num_t &cthis = (*this);    return (*this);  inline void clear() {
-
-    cthis.clear();
-
-    cthis.resize(1);  }    dig_string_t &cthis = (*this);
-
-    cthis[0] = dig_t{0};
-
-  }    cthis.dig_string_t::clear();
-
-
-
-  /// Push back  /// Move assignment  }
-
-  constexpr void push_back(dig_t arg) noexcept {
-
-    base_num_t &cthis = (*this);  constexpr nat_num_t &operator=(nat_num_t &&other) noexcept = default;
-
-    cthis.push_back(arg);
-
-  }    return base_num_t::erase(first, last);
-
-
-
-  /// Push front (insert at beginning)  /// Assignment from register pair  }
-
-  constexpr void push_front(dig_t parg) noexcept {
-
-    base_num_t &cthis = (*this);  constexpr const nat_num_t &operator=(const nat_reg_digs_t &a) noexcept {
-
-    cthis.insert(cthis.begin(), parg);
-
-  }    base_num_t &cthis = (*this);public:
-
-
-
-  /// Iterators    cthis.clear();  inline dig_t operator[](std::size_t arg) const {
-
-  constexpr str_iterator begin() noexcept {
-
-    base_num_t &cthis = (*this);    aux = nat_reg_digs_t{};    const base_num_t &cthis = (*this);
-
-    return cthis.begin();
-
-  }    cthis.resize(2);    return cthis.base_num_t::operator[](arg);
-
-
-
-  constexpr c_str_iterator end() const noexcept {    cthis[0] = a[0];  }
-
-    const base_num_t &cthis = (*this);
-
-    return cthis.end();    cthis[1] = a[1];  inline dig_t &operator[](std::size_t arg) {
-
-  }
-
-    reduce();    base_num_t &cthis = (*this);
-
-  constexpr c_str_iterator begin() const noexcept {
-
-    const base_num_t &cthis = (*this);    return (*this);    return cthis.base_num_t::operator[](arg);
-
-    return cthis.begin();
-
-  }  }  }
-
-
-
-  constexpr str_iterator end() noexcept {
-
-    base_num_t &cthis = (*this);
-
-    return cthis.end();public:  inline void clear() {
-
-  }
-
-  /************************************/    base_num_t &cthis = (*this);
-
-private:
-
-  /// Resize  /*                                  */    cthis.base_num_t::clear();
-
-  constexpr void resize(std::size_t arg) noexcept {
-
-    base_num_t &cthis = (*this);  /*        BASIC OPERATIONS          */  }
-
-    cthis.resize(arg);
-
-  }  /*                                  */
-
-
-
-  /// Insert  /************************************/  inline void push_back(dig_t arg) {
-
-  constexpr nat_num_t &insert(std::size_t pos1, const dig_t chardig) noexcept {
-
-    base_num_t &cthis = (*this);    base_num_t &cthis = (*this);
-
-    cthis.insert(cthis.begin() + pos1, chardig);
-
-    return (*this);  /// Get size    cthis.base_num_t::push_back(arg);
-
-  }
-
-  constexpr std::size_t size() const noexcept {  }
-
-  constexpr nat_num_t &insert(std::size_t pos1, std::size_t n, dig_t c) noexcept {
-
-    base_num_t &cthis = (*this);    const base_num_t &cthis = (*this);
-
-    cthis.insert(cthis.begin() + pos1, n, c);
-
-    return (*this);    return cthis.size();  inline typename base_num_t::str_iterator begin() {
-
-  }
-
-  }    base_num_t &cthis = (*this);
-
-  /// Erase
-
-  constexpr nat_num_t &erase(std::size_t pos, std::size_t npos) noexcept {    return cthis.base_num_t::begin();
-
-    base_num_t &cthis = (*this);
-
-    const std::size_t sz = size();  /// Access operators  }
-
-    if ((sz == npos) && (pos == 0)) {
-
-      // Special case: erasing everything, leave one zero digit  constexpr dig_t operator[](std::size_t arg) const noexcept {
-
-      cthis.clear();
-
-      cthis.resize(1);    const base_num_t &cthis = (*this);  inline typename base_num_t::c_str_iterator end() const {
-
-      cthis[0] = dig_t{0};
-
-    } else {    return cthis[arg];    const base_num_t &cthis = (*this);
-
-      auto it_begin = cthis.begin() + pos;
-
-      auto it_end = (pos + npos < sz) ? it_begin + npos : cthis.end();  }    return cthis.base_num_t::end();
-
-      cthis.erase(it_begin, it_end);
-
-    }  }
-
-    return (*this);
-
-  }  constexpr dig_t &operator[](std::size_t arg) noexcept {  }
-
-
-
-  constexpr str_iterator erase(str_iterator first, str_iterator last) noexcept {    base_num_t &cthis = (*this);
-
-    base_num_t &cthis = (*this);
-
-    const std::size_t npos = std::distance(first, last);    return cthis[arg];public:
-
-    const std::size_t sz = size();
-
-      }
-
-    if (sz == npos) {
-
-      // Erasing everything, leave one zero  nat_num_t() {
-
-      cthis.clear();
-
-      cthis.resize(1);  /// Clear    nat_num_t &cthis = (*this);
-
-      cthis[0] = dig_t{0};
-
-      return cthis.begin();  constexpr void clear() noexcept {    aux = pardigs();
-
-    }
-
-        base_num_t &cthis = (*this);    cthis.resize(1);
-
-    return cthis.erase(first, last);
-
-  }    cthis.clear();    cthis[0] = dig(0);
-
-
-
-public:    cthis.resize(1);  }
-
-  /************************************/
-
-  /*                                  */    cthis[0] = dig_t{0};
-
-  /*        UTILITY FUNCTIONS        */
-
-  /*                                  */  }  const nat_num_t &operator=(const nat_num_t &a) {
-
-  /************************************/
-
+  nat_num_t(const dig &a2, const dig &a1, const dig &a0) {
     nat_num_t &cthis = (*this);
-
-  /// Remove leading zeros
-
-  constexpr void reduce() noexcept {  /// Push back    cthis.clear();
-
-    base_num_t &cthis = (*this);
-
-      constexpr void push_back(dig_t arg) noexcept {    aux = a.aux;
-
-    // Remove leading zeros but keep at least one digit
-
-    while (cthis.size() > 1 && cthis.back() == dig_t{0}) {    base_num_t &cthis = (*this);    const int sz = a.size();
-
-      cthis.pop_back();
-
-    }    cthis.push_back(arg);    cthis.resize(sz);
-
-    
-
-    // Ensure we have at least one digit  }    for (int k = 0; k < sz; ++k) {
-
-    if (cthis.empty()) {
-
-      cthis.resize(1);      cthis[k] = a[k];
-
-      cthis[0] = dig_t{0};
-
-    }  /// Push front (insert at beginning)    }
-
-  }
-
-  constexpr void push_front(dig_t parg) noexcept {    cthis.reduce();
-
-  /// Check if zero
-
-  constexpr bool is_0() const noexcept {    base_num_t &cthis = (*this);    return cthis;
-
-    const base_num_t &cthis = (*this);
-
-    return (cthis.size() == 1 && cthis[0] == dig_t{0});    cthis.insert(cthis.begin(), parg);  }
-
-  }
-
-  }
-
-  /// Check if one
-
-  constexpr bool is_1() const noexcept {  nat_num_t &operator=(nat_num_t &a) {
-
-    const base_num_t &cthis = (*this);
-
-    return (cthis.size() == 1 && cthis[0] == dig_t{1});  /// Iterators    nat_num_t &cthis = (*this);
-
-  }
-
-  constexpr str_iterator begin() noexcept {    aux = a.aux;
-
-  /// Check if even
-
-  constexpr bool is_even() const noexcept {    base_num_t &cthis = (*this);    const int sz = a.size();
-
-    const base_num_t &cthis = (*this);
-
-    return (cthis[0]() % 2 == 0);    return cthis.begin();    cthis.clear();
-
-  }
-
-  }    cthis.resize(sz);
-
-  /// Check if odd
-
-  constexpr bool is_odd() const noexcept {    for (int k = 0; k < sz; ++k) {
-
-    return !is_even();
-
-  }  constexpr c_str_iterator end() const noexcept {      cthis[k] = a[k];
-
-
-
-public:    const base_num_t &cthis = (*this);    }
-
-  /************************************/
-
-  /*                                  */    return cthis.end();    cthis.reduce();
-
-  /*       COMPARISON OPERATORS       */
-
-  /*                                  */  }    return cthis;
-
-  /************************************/
-
-  }
-
-  constexpr bool operator==(const nat_num_t &other) const noexcept {
-
-    const base_num_t &cthis = (*this);  constexpr c_str_iterator begin() const noexcept {
-
-    const base_num_t &other_base = other;
-
-        const base_num_t &cthis = (*this);  nat_num_t(const nat_num_t &a) {
-
-    if (cthis.size() != other_base.size()) {
-
-      return false;    return cthis.begin();    nat_num_t &cthis = (*this);
-
-    }
-
-      }    aux = a.aux;
-
-    for (std::size_t i = 0; i < cthis.size(); ++i) {
-
-      if (cthis[i] != other_base[i]) {    cthis.clear();
-
-        return false;
-
-      }  constexpr str_iterator end() noexcept {    cthis.resize(a.size());
-
-    }
-
-    return true;    base_num_t &cthis = (*this);    for (usint k = 0; k < a.size(); ++k)
-
-  }
-
-    return cthis.end();      cthis[k] = a[k];
-
-  constexpr bool operator!=(const nat_num_t &other) const noexcept {
-
-    return !(*this == other);  }    cthis.reduce();
-
-  }
-
-  }
-
-  constexpr bool operator<(const nat_num_t &other) const noexcept {
-
-    const base_num_t &cthis = (*this);private:
-
-    const base_num_t &other_base = other;
-
-      /// Resize  nat_num_t(const string &a) {
-
-    if (cthis.size() != other_base.size()) {
-
-      return cthis.size() < other_base.size();  constexpr void resize(std::size_t arg) noexcept {    nat_num_t &cthis = (*this);
-
-    }
-
-        base_num_t &cthis = (*this);    cthis.clear();
-
-    // Compare from most significant digit
-
-    for (std::size_t i = cthis.size(); i > 0; --i) {    cthis.resize(arg);    basic_stringstream<char> in;
-
-      if (cthis[i-1] != other_base[i-1]) {
-
-        return cthis[i-1] < other_base[i-1];  }    in.clear();
-
-      }
-
-    }    in << a;
-
-    return false; // Equal
-
-  }  /// Insert    in >> (*this);
-
-
-
-  constexpr bool operator<=(const nat_num_t &other) const noexcept {  constexpr nat_num_t &insert(std::size_t pos1, const dig_t chardig) noexcept {    return;
-
-    return (*this < other) || (*this == other);
-
-  }    base_num_t &cthis = (*this);  }
-
-
-
-  constexpr bool operator>(const nat_num_t &other) const noexcept {    cthis.insert(cthis.begin() + pos1, chardig);
-
-    return !(*this <= other);
-
-  }    return (*this);  const nat_num_t &operator=(const string &a) {
-
-
-
-  constexpr bool operator>=(const nat_num_t &other) const noexcept {  }    nat_num_t &cthis = (*this);
-
-    return !(*this < other);
-
-  }    cthis.clear();
-
-
-
-  /// Three-way comparison (C++20)  constexpr nat_num_t &insert(std::size_t pos1, std::size_t n, dig_t c) noexcept {    basic_stringstream<char> in;
-
-  constexpr std::strong_ordering operator<=>(const nat_num_t &other) const noexcept {
-
-    if (*this < other) return std::strong_ordering::less;    base_num_t &cthis = (*this);    in.clear();
-
-    if (*this > other) return std::strong_ordering::greater;
-
-    return std::strong_ordering::equal;    cthis.insert(cthis.begin() + pos1, n, c);    in << a;
-
-  }
-
-    return (*this);    in >> cthis;
-
-public:
-
-  /************************************/  }    return cthis;
-
-  /*                                  */
-
-  /*       ARITHMETIC OPERATORS       */  }
-
-  /*                                  */
-
-  /************************************/  /// Erase
-
-
-
-  /// Addition  constexpr nat_num_t &erase(std::size_t pos, std::size_t npos) noexcept {  operator string() const {
-
-  constexpr nat_num_t operator+(const nat_num_t &other) const noexcept {
-
-    nat_num_t result = *this;    base_num_t &cthis = (*this);
-
-    result += other;
-
-    return result;    const std::size_t sz = size();    const nat_num_t &cthis = (*this);
-
-  }
-
-    if ((sz == npos) && (pos == 0)) {    string ret;
-
-  constexpr nat_num_t &operator+=(const nat_num_t &other) noexcept {
-
-    base_num_t &cthis = (*this);      // Special case: erasing everything, leave one zero digit    basic_stringstream<char> sal_aux;
-
-    const base_num_t &other_base = other;
-
-          cthis.clear();    sal_aux << cthis;
-
-    const std::size_t max_size = std::max(cthis.size(), other_base.size());
-
-    cthis.resize(max_size + 1); // Extra space for potential carry      cthis.resize(1);    sal_aux >> ret;
-
-    
-
-    dig_t carry{0};      cthis[0] = dig_t{0};    return ret;
-
-    for (std::size_t i = 0; i < max_size; ++i) {
-
-      dig_t a = (i < size()) ? cthis[i] : dig_t{0};    } else {  }
-
-      dig_t b = (i < other_base.size()) ? other_base[i] : dig_t{0};
-
-            auto it_begin = cthis.begin() + pos;
-
-      // Use auxiliary register for addition
-
-      aux[0] = a;      auto it_end = (pos + npos < sz) ? it_begin + npos : cthis.end();  nat_num_t(dig a0) {
-
-      aux[1] = carry;
-
-      aux[0] += aux[1]; // Add carry first      cthis.erase(it_begin, it_end);    nat_num_t &cthis = (*this);
-
-      
-
-      carry = (aux[0]() + b() >= B) ? dig_t{1} : dig_t{0};    }    aux = pardigs();
-
-      cthis[i] = aux[0] + b; // This will automatically mod B
-
-    }    return (*this);    cthis.clear();
-
-    
-
-    if (carry != dig_t{0}) {  }    cthis.resize(1);
-
-      cthis[max_size] = carry;
-
-    } else {    cthis[0] = a0;
-
-      cthis.resize(max_size);
-
-    }  constexpr str_iterator erase(str_iterator first, str_iterator last) noexcept {  }
-
-    
-
-    reduce();    base_num_t &cthis = (*this);
-
-    return *this;
-
-  }    const std::size_t npos = std::distance(first, last);  const nat_num_t &operator=(const dig &a0) {
-
-
-
-  /// Subtraction (assumes this >= other for natural numbers)    const std::size_t sz = size();    nat_num_t &cthis = (*this);
-
-  constexpr nat_num_t operator-(const nat_num_t &other) const noexcept {
-
-    nat_num_t result = *this;        aux = pardigs();
-
-    result -= other;
-
-    return result;    if (sz == npos) {    cthis.clear();
-
-  }
-
-      // Erasing everything, leave one zero    cthis.resize(1);
-
-  constexpr nat_num_t &operator-=(const nat_num_t &other) noexcept {
-
-    base_num_t &cthis = (*this);      cthis.clear();    cthis[0] = a0;
-
-    const base_num_t &other_base = other;
-
-          cthis.resize(1);    return cthis;
-
-    // Natural number subtraction: assume this >= other
-
-    if (*this < other) {      cthis[0] = dig_t{0};  }
-
-      // Result would be negative, set to zero
-
-      clear();      return cthis.begin();
-
-      return *this;
-
-    }    }  nat_num_t(const dig &a1, const dig &a0) {
-
-    
-
-    dig_t borrow{0};        nat_num_t &cthis = (*this);
-
-    for (std::size_t i = 0; i < cthis.size(); ++i) {
-
-      dig_t a = cthis[i];    return cthis.erase(first, last);    aux = pardigs();
-
-      dig_t b = (i < other_base.size()) ? other_base[i] : dig_t{0};
-
-        }    cthis.clear();
-
-      // Use auxiliary register for subtraction
-
-      aux[0] = a;    cthis.resize(2);
-
-      aux[1] = borrow;
-
-      public:    cthis[1] = a0;
-
-      if (aux[0] >= aux[1]) {
-
-        aux[0] -= aux[1];  /************************************/    cthis[0] = a1;
-
-        borrow = dig_t{0};
-
-      } else {  /*                                  */    cthis.reduce();
-
-        aux[0] += dig_t{B - aux[1]()};
-
-        borrow = dig_t{1};  /*        UTILITY FUNCTIONS        */  }
-
-      }
-
-        /*                                  */
-
-      if (aux[0] >= b) {
-
-        cthis[i] = aux[0] - b;  /************************************/  nat_num_t(const dig &a2, const dig &a1, const dig &a0) {
-
-      } else {
-
-        cthis[i] = aux[0] + dig_t{B} - b;    nat_num_t &cthis = (*this);
-
-        borrow = dig_t{1};
-
-      }  /// Remove leading zeros    aux = pardigs();
-
-    }
-
-      constexpr void reduce() noexcept {    cthis.clear();
-
-    reduce();
-
-    return *this;    base_num_t &cthis = (*this);    cthis.resize(3);
-
-  }
-
-        cthis[2] = a0;
-
-  /// Increment operators
-
-  constexpr nat_num_t &operator++() noexcept {    // Remove leading zeros but keep at least one digit    cthis[1] = a1;
-
-    *this += nat_num_t{1};
-
-    return *this;    while (cthis.size() > 1 && cthis.back() == dig_t{0}) {    cthis[0] = a2;
-
-  }
-
-      cthis.pop_back();    cthis.reduce();
-
-  constexpr nat_num_t operator++(int) noexcept {
-
-    nat_num_t temp = *this;    }  }
-
-    ++(*this);
-
-    return temp;    
-
-  }
-
-    // Ensure we have at least one digit  nat_num_t(const vector<dig> &arg) {
-
-  /// Decrement operators
-
-  constexpr nat_num_t &operator--() noexcept {    if (cthis.empty()) {    nat_num_t &cthis = (*this);
-
-    if (!is_0()) {
-
-      *this -= nat_num_t{1};      cthis.resize(1);    aux = pardigs();
-
-    }
-
-    return *this;      cthis[0] = dig_t{0};    cthis.clear();
-
-  }
-
-    }    for (int ix = 0; ix < arg.size(); ++ix)
-
-  constexpr nat_num_t operator--(int) noexcept {
-
-    nat_num_t temp = *this;  }      cthis.push_back(arg[ix]);
-
-    --(*this);
-
-    return temp;    cthis.reduce();
-
-  }
-
-  /// Check if zero  }
-
-  /// Addition with single digit
-
-  constexpr nat_num_t operator+(const dig_t &arg) const noexcept {  constexpr bool is_0() const noexcept {
-
-    nat_num_t result = *this;
-
-    result += arg;    const base_num_t &cthis = (*this);  const nat_num_t &operator=(const vector<dig> &arg) {
-
-    return result;
-
-  }    return (cthis.size() == 1 && cthis[0] == dig_t{0});    nat_num_t &cthis = (*this);
-
-
-
-  constexpr nat_num_t &operator+=(const dig_t &arg) noexcept {  }    aux = pardigs();
-
-    base_num_t &cthis = (*this);
-
-    reduce();    cthis.clear();
-
-    dig_t carry{0};
-
-      /// Check if one    for (int ix = 0; ix < arg.size(); ++ix)
-
-    std::size_t k = cthis.size();
-
-    aux[0] = cthis[k - 1];  constexpr bool is_1() const noexcept {      cthis.push_back(arg[ix]);
-
-    aux[1] = arg;
-
-    aux[0] += aux[1];    const base_num_t &cthis = (*this);    cthis.reduce();
-
-    cthis[k - 1] = aux[0];
-
-    carry = (aux[0]() >= B) ? dig_t{1} : dig_t{0};    return (cthis.size() == 1 && cthis[0] == dig_t{1});    return cthis;
-
-    --k;
-
-      }  }
-
-    for (; k > 0; --k) {
-
-      aux[0] = carry;
-
-      aux[1] = cthis[k - 1];
-
-      aux[0] += aux[1];  /// Check if even  operator vector<dig>() const {
-
-      cthis[k - 1] = aux[0];
-
-      carry = (aux[0]() >= B) ? dig_t{1} : dig_t{0};  constexpr bool is_even() const noexcept {    const nat_num_t &cthis = (*this);
-
-    }
-
-    const base_num_t &cthis = (*this);    const usint sz = (cthis.reduce()).size();
-
-    if (carry != dig_t{0}) {
-
-      push_front(carry);    return (cthis[0]() % 2 == 0);    const usint pos_max = sz - 1;
-
-    }
-
-    reduce();  }    vector<dig> ret(sz);
-
-    return *this;
-
-  }    for (int ix = 0; ix < sz; ++ix)
-
-
-
-public:  /// Check if odd      ret[pos_max - ix] = cthis[ix];
-
-  /************************************/
-
-  /*                                  */  constexpr bool is_odd() const noexcept {    return ret;
-
-  /*          STRING CONVERSION       */
-
-  /*                                  */    return !is_even();  }
-
-  /************************************/
-
-  }
-
-  /// Convert to string in base B
-
-  constexpr std::string to_string() const noexcept {  nat_num_t(const pardigs &a) {
-
-    const base_num_t &cthis = (*this);
-
-    public:    nat_num_t &cthis = (*this);
-
-    std::string result;
-
-    result.reserve(cthis.size() * 3); // Rough estimate  /************************************/    aux = pardigs();
-
-    
-
-    // Add digits from most significant to least significant  /*                                  */    cthis.clear();
-
-    for (std::size_t i = cthis.size(); i > 0; --i) {
-
-      if (!result.empty()) result += ",";  /*       COMPARISON OPERATORS       */    cthis.resize(2);
-
-      result += std::to_string(cthis[i-1]());
-
-    }  /*                                  */    cthis[0] = a.g_first();
-
-    
-
-    return "nat#[" + result + "]#B" + std::to_string(B);  /************************************/    cthis[1] = a.g_second();
-
-  }
-
-    cthis.reduce();
-
-  /// Convert to decimal string (base 10 representation of the number)
-
-  std::string to_decimal_string() const noexcept {  constexpr bool operator==(const nat_num_t &other) const noexcept {  }
-
-    if (is_0()) return "0";
-
-        const base_num_t &cthis = (*this);
-
-    // For now, return simple representation
-
-    return to_string();    const base_num_t &other_base = other;  const nat_num_t &operator=(const pardigs &a) {
-
-  }
-
-        const nat_num_t &cthis = (*this);
-
-  /// Conversion to integral types
-
-  constexpr operator UINT_T() const noexcept {    if (cthis.size() != other_base.size()) {    aux = pardigs();
-
-    const base_num_t &cthis = (*this);
-
-    const std::size_t sz = size();      return false;    cthis.clear();
-
-    UINT_T ret = 0;
-
-        }    cthis.resize(2);
-
-    // Convert from most significant to least significant
-
-    for (std::size_t i = 0; i < sz && i < sizeof(UINT_T); ++i) {        cthis[0] = a.g_first();
-
-      ret *= B;
-
-      ret += cthis[sz - 1 - i]();    for (std::size_t i = 0; i < cthis.size(); ++i) {    cthis[1] = a.g_second();
-
-    }
-
-    return ret;      if (cthis[i] != other_base[i]) {    cthis.reduce();
-
-  }
-
-};        return false;    return cthis;
-
-
-
-/************************************/      }  }
-
-/*                                  */
-
-/*        STREAM OPERATORS          */    }
-
-/*                                  */
-
-/************************************/    return true;  nat_num_t(const n2digs &a) {
-
-
-
-template <std::uint64_t Base>  }    nat_num_t &cthis = (*this);
-
-  requires(Base > 1)
-
-std::ostream &operator<<(std::ostream &os, const nat_num_t<Base> &num) {    aux = pardigs();
-
-  os << num.to_string();
-
-  return os;  constexpr bool operator!=(const nat_num_t &other) const noexcept {    cthis.clear();
-
-}
-
-    return !(*this == other);    cthis.resize(2);
-
-} // namespace NumRepr
-
-  }    cthis[0] = a.first();
-
-#endif // NAT_NUM_T_HPP_INCLUDED
-    cthis[1] = a.second();
-
-  constexpr bool operator<(const nat_num_t &other) const noexcept {    cthis.reduce();
-
-    const base_num_t &cthis = (*this);  }
-
-    const base_num_t &other_base = other;
-
-      const nat_num_t &operator=(const n2digs &a) {
-
-    if (cthis.size() != other_base.size()) {    const nat_num_t &cthis = (*this);
-
-      return cthis.size() < other_base.size();    aux = pardigs();
-
-    }    cthis.clear();
-
-        cthis.resize(2);
-
-    // Compare from most significant digit    cthis[0] = a.first();
-
-    for (std::size_t i = cthis.size(); i > 0; --i) {    cthis[1] = a.second();
-
-      if (cthis[i-1] != other_base[i-1]) {    cthis.reduce();
-
-        return cthis[i-1] < other_base[i-1];    return cthis;
-
-      }  }
-
-    }
-
-    return false; // Equal  nat_num_t(char ch) {
-
-  }    nat_num_t &cthis = (*this);
-
-    cthis.clear();
-
-  constexpr bool operator<=(const nat_num_t &other) const noexcept {    aux = pardigs();
-
-    return (*this < other) || (*this == other);    cthis.resize(1);
-
-  }    cthis[0] = dig_t(static_cast<uchint>(ch - '0'));
-
-  }
-
-  constexpr bool operator>(const nat_num_t &other) const noexcept {
-
-    return !(*this <= other);  const nat_num_t &operator=(char ch) {
-
-  }    nat_num_t &cthis = (*this);
-
-    cthis.clear();
-
-  constexpr bool operator>=(const nat_num_t &other) const noexcept {    aux = pardigs();
-
-    return !(*this < other);    cthis.resize(1);
-
-  }    cthis[0] = dig_t(static_cast<uchint>(ch - '0'));
-
-    return cthis;
-
-  /// Three-way comparison (C++20)  }
-
-  constexpr std::strong_ordering operator<=>(const nat_num_t &other) const noexcept {
-
-    if (*this < other) return std::strong_ordering::less;  nat_num_t(uchint a) {
-
-    if (*this > other) return std::strong_ordering::greater;    nat_num_t &cthis = (*this);
-
-    return std::strong_ordering::equal;    aux = pardigs();
-
-  }    cthis.clear();
-
-    cthis.resize(1);
-
-public:    cthis[0] = UInt2Dig<B>(a);
-
-  /************************************/  }
-
-  /*                                  */
-
-  /*       ARITHMETIC OPERATORS       */  const nat_num_t &operator=(uchint a) {
-
-  /*                                  */    nat_num_t &cthis = (*this);
-
-  /************************************/    aux = pardigs();
-
-    cthis.clear();
-
-  /// Addition    cthis.resize(1);
-
-  constexpr nat_num_t operator+(const nat_num_t &other) const noexcept {    cthis[0] = UInt2Dig<B>(a);
-
-    nat_num_t result = *this;    return cthis;
-
-    result += other;  }
-
-    return result;
-
-  }  nat_num_t(usint a) {
-
-    nat_num_t &cthis = (*this);
-
-  constexpr nat_num_t &operator+=(const nat_num_t &other) noexcept {<<<<<<< HEAD
-
-    base_num_t &cthis = (*this);    dig_string_t<B> temp;
-
-    const base_num_t &other_base = other;=======
-
-        base_num_t<B> temp;
-
-    const std::size_t max_size = std::max(cthis.size(), other_base.size());>>>>>>> 1e470d87efdd6e85008cd373a077b8ffc6dcf33e
-
-    cthis.resize(max_size + 1); // Extra space for potential carry    cthis.clear();
-
-        // cthis.resize(pot_max_base_B_en_Int_T<usint,B>().first);
-
-    dig_t carry{0};    aux = pardigs();
-
-    for (std::size_t i = 0; i < max_size; ++i) {    usint rem = 0, coc = a;
-
-      dig_t a = (i < size()) ? cthis[i] : dig_t{0};    while (coc >= B) {
-
-      dig_t b = (i < other_base.size()) ? other_base[i] : dig_t{0};      rem = coc % B;
-
-            cthis.push_front(UInt2Dig<B>(rem));
-
-      // Use auxiliary register for addition      coc = coc / B;
-
-      aux[0] = a;    }
-
-      aux[1] = carry;    rem = coc % B;
-
-      aux[0] += aux[1]; // Add carry first    cthis.push_front(UInt2Dig<B>(rem));
-
-        }
-
-      carry = (aux[0]() + b() >= B) ? dig_t{1} : dig_t{0};
-
-      cthis[i] = aux[0] + b; // This will automatically mod B  const nat_num_t &operator=(usint a) {
-
-    }    nat_num_t &cthis = (*this);
-
-    <<<<<<< HEAD
-
-    if (carry != dig_t{0}) {    dig_string_t<B> temp;
-
-      cthis[max_size] = carry;=======
-
-    } else {    base_num_t<B> temp;
-
-      cthis.resize(max_size);>>>>>>> 1e470d87efdd6e85008cd373a077b8ffc6dcf33e
-
-    }    cthis.clear();
-
-        // cthis.resize(pot_max_base_B_en_Int_T<usint,B>());
-
-    reduce();    aux = pardigs();
-
-    return *this;    usint rem = 0, coc = a;
-
-  }    while (coc >= B) {
-
-      rem = coc % B;
-
-  /// Subtraction (assumes this >= other for natural numbers)      cthis.push_front(UInt2Dig<B>(rem));
-
-  constexpr nat_num_t operator-(const nat_num_t &other) const noexcept {      coc = coc / B;
-
-    nat_num_t result = *this;    }
-
-    result -= other;    rem = coc % B;
-
-    return result;    cthis.push_front(UInt2Dig<B>(rem));
-
-  }    return cthis;
-
-  }
-
-  constexpr nat_num_t &operator-=(const nat_num_t &other) noexcept {
-
-    base_num_t &cthis = (*this);  nat_num_t(uint a) {
-
-    const base_num_t &other_base = other;    nat_num_t &cthis = (*this);
-
-        cthis.clear();
-
-    // Natural number subtraction: assume this >= other    // const ullint tsz = pot_max_base_B_en_Int_T<uint,B>();
-
-    if (*this < other) {    // cout << tsz << " digitos base 10 en un uint " << endl;
-
-      // Result would be negative, set to zero    // cthis.resize(tsz);
-
-      clear();    aux = pardigs();
-
-      return *this;    uint rem = 0, coc = a;
-
-    }    while (coc >= B) {
-
-          rem = coc % B;
-
-    dig_t borrow{0};      cthis.push_front(UInt2Dig<B>(rem));
-
-    for (std::size_t i = 0; i < cthis.size(); ++i) {      coc = coc / B;
-
-      dig_t a = cthis[i];    }
-
-      dig_t b = (i < other_base.size()) ? other_base[i] : dig_t{0};    rem = coc % B;
-
-          cthis.push_front(UInt2Dig<B>(rem));
-
-      // Use auxiliary register for subtraction  }
-
-      aux[0] = a;
-
-      aux[1] = borrow;  const nat_num_t &operator=(uint a) {
-
-          nat_num_t &cthis = (*this);
-
-      if (aux[0] >= aux[1]) {    cthis.clear();
-
-        aux[0] -= aux[1];    // cthis.resize(pot_max_base_B_en_Int_T<uint,B>());
-
-        borrow = dig_t{0};    aux = pardigs();
-
-      } else {    uint rem = 0, coc = a;
-
-        aux[0] += dig_t{B - aux[1]()};    while (coc >= B) {
-
-        borrow = dig_t{1};      rem = coc % B;
-
-      }      cthis.push_front(UInt2Dig<B>(rem));
-
-            coc = coc / B;
-
-      if (aux[0] >= b) {    }
-
-        cthis[i] = aux[0] - b;    rem = coc % B;
-
-      } else {    cthis.push_front(UInt2Dig<B>(rem));
-
-        cthis[i] = aux[0] + dig_t{B} - b;    return cthis;
-
-        borrow = dig_t{1};  }
-
-      }
-
-    }  nat_num_t(ulint a) {
-
-        nat_num_t &cthis = (*this);
-
-    reduce();    aux = pardigs();
-
-    return *this;    cthis.clear();
-
-  }    // cthis.resize(pot_max_base_B_en_Int_T<ulint,B>().second);
-
-    ulint rem = 0, coc = a;
-
-  /// Increment operators    while (coc >= B) {
-
-  constexpr nat_num_t &operator++() noexcept {      rem = coc % B;
-
-    *this += nat_num_t{1};      cthis.push_front(UInt2Dig<B>(rem));
-
-    return *this;      coc = coc / B;
-
-  }    }
-
-    rem = coc % B;
-
-  constexpr nat_num_t operator++(int) noexcept {    cthis.push_front(UInt2Dig<B>(rem));
-
-    nat_num_t temp = *this;  }
-
-    ++(*this);
-
-    return temp;  const nat_num_t &operator=(ulint a) {
-
-  }    nat_num_t &cthis = (*this);
-
     aux = pardigs();
+    cthis.clear();
+    cthis.resize(3);
+    cthis[2] = a0;
+    cthis[1] = a1;
+    cthis[0] = a2;
+    cthis.reduce();
+  }
 
-  /// Decrement operators    cthis.clear();
+  nat_num_t(const vector<dig> &arg) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    for (int ix = 0; ix < arg.size(); ++ix)
+      cthis.push_back(arg[ix]);
+    cthis.reduce();
+  }
 
-  constexpr nat_num_t &operator--() noexcept {    // cthis.resize(pot_max_base_B_en_Int_T<ulint,B>());
+  const nat_num_t &operator=(const vector<dig> &arg) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    for (int ix = 0; ix < arg.size(); ++ix)
+      cthis.push_back(arg[ix]);
+    cthis.reduce();
+    return cthis;
+  }
 
-    if (!is_0()) {    ulint rem = 0, coc = a;
+  operator vector<dig>() const {
+    const nat_num_t &cthis = (*this);
+    const usint sz = (cthis.reduce()).size();
+    const usint pos_max = sz - 1;
+    vector<dig> ret(sz);
+    for (int ix = 0; ix < sz; ++ix)
+      ret[pos_max - ix] = cthis[ix];
+    return ret;
+  }
 
-      *this -= nat_num_t{1};    while (coc >= B) {
+  nat_num_t(const pardigs &a) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    cthis.resize(2);
+    cthis[0] = a.g_first();
+    cthis[1] = a.g_second();
+    cthis.reduce();
+  }
 
-    }      rem = coc % B;
+  const nat_num_t &operator=(const pardigs &a) {
+    const nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    cthis.resize(2);
+    cthis[0] = a.g_first();
+    cthis[1] = a.g_second();
+    cthis.reduce();
+    return cthis;
+  }
 
-    return *this;      cthis.push_front(UInt2Dig<B>(rem));
+  nat_num_t(const n2digs &a) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    cthis.resize(2);
+    cthis[0] = a.first();
+    cthis[1] = a.second();
+    cthis.reduce();
+  }
 
-  }      coc = coc / B;
+  const nat_num_t &operator=(const n2digs &a) {
+    const nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    cthis.resize(2);
+    cthis[0] = a.first();
+    cthis[1] = a.second();
+    cthis.reduce();
+    return cthis;
+  }
 
+  nat_num_t(char ch) {
+    nat_num_t &cthis = (*this);
+    cthis.clear();
+    aux = pardigs();
+    cthis.resize(1);
+    cthis[0] = dig_t(static_cast<uchint>(ch - '0'));
+  }
+
+  const nat_num_t &operator=(char ch) {
+    nat_num_t &cthis = (*this);
+    cthis.clear();
+    aux = pardigs();
+    cthis.resize(1);
+    cthis[0] = dig_t(static_cast<uchint>(ch - '0'));
+    return cthis;
+  }
+
+  nat_num_t(uchint a) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    cthis.resize(1);
+    cthis[0] = UInt2Dig<B>(a);
+  }
+
+  const nat_num_t &operator=(uchint a) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    cthis.resize(1);
+    cthis[0] = UInt2Dig<B>(a);
+    return cthis;
+  }
+
+  nat_num_t(usint a) {
+    nat_num_t &cthis = (*this);
+<<<<<<< HEAD
+    dig_string_t<B> temp;
+=======
+    base_num_t<B> temp;
+>>>>>>> 1e470d87efdd6e85008cd373a077b8ffc6dcf33e
+    cthis.clear();
+    // cthis.resize(pot_max_base_B_en_Int_T<usint,B>().first);
+    aux = pardigs();
+    usint rem = 0, coc = a;
+    while (coc >= B) {
+      rem = coc % B;
+      cthis.push_front(UInt2Dig<B>(rem));
+      coc = coc / B;
     }
+    rem = coc % B;
+    cthis.push_front(UInt2Dig<B>(rem));
+  }
 
-  constexpr nat_num_t operator--(int) noexcept {    rem = coc % B;
+  const nat_num_t &operator=(usint a) {
+    nat_num_t &cthis = (*this);
+<<<<<<< HEAD
+    dig_string_t<B> temp;
+=======
+    base_num_t<B> temp;
+>>>>>>> 1e470d87efdd6e85008cd373a077b8ffc6dcf33e
+    cthis.clear();
+    // cthis.resize(pot_max_base_B_en_Int_T<usint,B>());
+    aux = pardigs();
+    usint rem = 0, coc = a;
+    while (coc >= B) {
+      rem = coc % B;
+      cthis.push_front(UInt2Dig<B>(rem));
+      coc = coc / B;
+    }
+    rem = coc % B;
+    cthis.push_front(UInt2Dig<B>(rem));
+    return cthis;
+  }
 
-    nat_num_t temp = *this;    cthis.push_front(UInt2Dig<B>(rem));
+  nat_num_t(uint a) {
+    nat_num_t &cthis = (*this);
+    cthis.clear();
+    // const ullint tsz = pot_max_base_B_en_Int_T<uint,B>();
+    // cout << tsz << " digitos base 10 en un uint " << endl;
+    // cthis.resize(tsz);
+    aux = pardigs();
+    uint rem = 0, coc = a;
+    while (coc >= B) {
+      rem = coc % B;
+      cthis.push_front(UInt2Dig<B>(rem));
+      coc = coc / B;
+    }
+    rem = coc % B;
+    cthis.push_front(UInt2Dig<B>(rem));
+  }
 
-    --(*this);    return cthis;
+  const nat_num_t &operator=(uint a) {
+    nat_num_t &cthis = (*this);
+    cthis.clear();
+    // cthis.resize(pot_max_base_B_en_Int_T<uint,B>());
+    aux = pardigs();
+    uint rem = 0, coc = a;
+    while (coc >= B) {
+      rem = coc % B;
+      cthis.push_front(UInt2Dig<B>(rem));
+      coc = coc / B;
+    }
+    rem = coc % B;
+    cthis.push_front(UInt2Dig<B>(rem));
+    return cthis;
+  }
 
-    return temp;  }
+  nat_num_t(ulint a) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    // cthis.resize(pot_max_base_B_en_Int_T<ulint,B>().second);
+    ulint rem = 0, coc = a;
+    while (coc >= B) {
+      rem = coc % B;
+      cthis.push_front(UInt2Dig<B>(rem));
+      coc = coc / B;
+    }
+    rem = coc % B;
+    cthis.push_front(UInt2Dig<B>(rem));
+  }
 
+  const nat_num_t &operator=(ulint a) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    // cthis.resize(pot_max_base_B_en_Int_T<ulint,B>());
+    ulint rem = 0, coc = a;
+    while (coc >= B) {
+      rem = coc % B;
+      cthis.push_front(UInt2Dig<B>(rem));
+      coc = coc / B;
+    }
+    rem = coc % B;
+    cthis.push_front(UInt2Dig<B>(rem));
+    return cthis;
   }
 
   nat_num_t(ullint a) {
-
-public:    nat_num_t &cthis = (*this);
-
-  /************************************/    aux = pardigs();
-
-  /*                                  */    cthis.clear();
-
-  /*          STRING CONVERSION       */    // cthis.resize(pot_max_base_B_en_Int_T<ullint,B>().second);
-
-  /*                                  */    ullint rem = 0, coc = a;
-
-  /************************************/    while (coc >= B) {
-
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    // cthis.resize(pot_max_base_B_en_Int_T<ullint,B>().second);
+    ullint rem = 0, coc = a;
+    while (coc >= B) {
       rem = coc % B;
-
-  /// Convert to string in base B      cthis.push_front(UInt2Dig<B>(rem));
-
-  constexpr std::string to_string() const noexcept {      coc = coc / B;
-
-    const base_num_t &cthis = (*this);    }
-
-        rem = coc % B;
-
-    std::string result;    cthis.push_front(UInt2Dig<B>(rem));
-
-    result.reserve(cthis.size() * 3); // Rough estimate  }
-
-    
-
-    // Add digits from most significant to least significant  const nat_num_t &operator=(ullint a) {
-
-    for (std::size_t i = cthis.size(); i > 0; --i) {    nat_num_t &cthis = (*this);
-
-      if (!result.empty()) result += ",";    aux = pardigs();
-
-      result += std::to_string(cthis[i-1]());    cthis.clear();
-
-    }    // cthis.resize(pot_max_base_B_en_Int_T<ullint,B>());
-
-        ullint rem = 0, coc = a;
-
-    return "nat#[" + result + "]#B" + std::to_string(B);    while (coc >= B) {
-
-  }      rem = coc % B;
-
       cthis.push_front(UInt2Dig<B>(rem));
-
-  /// Convert to decimal string (base 10 representation of the number)      coc = coc / B;
-
-  std::string to_decimal_string() const noexcept {    }
-
-    if (is_0()) return "0";    rem = coc % B;
-
-        cthis.push_front(UInt2Dig<B>(rem));
-
-    // For now, return simple representation    return cthis;
-
-    return to_string();  }
-
+      coc = coc / B;
+    }
+    rem = coc % B;
+    cthis.push_front(UInt2Dig<B>(rem));
   }
 
-};  operator uint() const {
+  const nat_num_t &operator=(ullint a) {
+    nat_num_t &cthis = (*this);
+    aux = pardigs();
+    cthis.clear();
+    // cthis.resize(pot_max_base_B_en_Int_T<ullint,B>());
+    ullint rem = 0, coc = a;
+    while (coc >= B) {
+      rem = coc % B;
+      cthis.push_front(UInt2Dig<B>(rem));
+      coc = coc / B;
+    }
+    rem = coc % B;
+    cthis.push_front(UInt2Dig<B>(rem));
+    return cthis;
+  }
 
+  operator uint() const {
     const nat_num_t &cthis = (*this);
-
-/************************************/    const uint sz = (cthis.reduce()).size();
-
-/*                                  */    const uint pos_max = sz - 1;
-
-/*        STREAM OPERATORS          */    const uint nds = num_digs_max_base_B_en_Int_T<uint, B>();
-
-/*                                  */    // cout << nds << endl;
-
-/************************************/    uchint ret = 0;
-
+    const uint sz = (cthis.reduce()).size();
+    const uint pos_max = sz - 1;
+    const uint nds = num_digs_max_base_B_en_Int_T<uint, B>();
+    // cout << nds << endl;
+    uchint ret = 0;
     for (uint il = 0; (il < sz) and (il < nds); ++il) {
-
-template <std::uint64_t Base>      ret *= B;
-
-  requires(Base > 1)      ret += cthis[sz - nds + il].Dig2UInt();
-
-std::ostream &operator<<(std::ostream &os, const nat_num_t<Base> &num) {    }
-
-  os << num.to_string();    return ret;
-
-  return os;  }
-
-}
+      ret *= B;
+      ret += cthis[sz - nds + il].Dig2UInt();
+    }
+    return ret;
+  }
 
   operator usint() const {
-
-} // namespace NumRepr    const nat_num_t &cthis = (*this);
-
+    const nat_num_t &cthis = (*this);
     const uint sz = (cthis.reduce()).size();
-
-#endif // NAT_NUM_T_HPP_INCLUDED    const uint pos_max = sz - 1;
+    const uint pos_max = sz - 1;
     const uint nds = num_digs_max_base_B_en_Int_T<usint, B>();
     // cout << nds << endl;
     uchint ret = 0;

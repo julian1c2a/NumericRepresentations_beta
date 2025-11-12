@@ -1,8 +1,8 @@
 #ifndef BASE_NUM_T_HPP_INCLUDED
 #define BASE_NUM_T_HPP_INCLUDED
 
-#include "basic_types.hpp"
-#include "dig_t.hpp"
+#include "core/internal/basic_types.hpp"
+#include "core/dig_t.hpp"
 #include "int_reg_digs_t.hpp"
 
 namespace NumRepr {

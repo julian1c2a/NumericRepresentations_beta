@@ -20,7 +20,7 @@
 #include <string>
 #include <limits>
 #include <type_traits>
-#include "dig_t.hpp"
+#include "core/dig_t.hpp"
 
 using namespace NumRepr;
 

@@ -73,19 +73,19 @@ void test_gcd_lcm()
     std::cout << "✅ gcd and lcm tests passed!" << std::endl;
 }
 
-void test_integer_power()
+void test_int_pow()
 {
-    std::cout << "Testing integer_power..." << std::endl;
+    std::cout << "Testing int_pow..." << std::endl;
 
-    static_assert(integer_power(2, 0) == 1, "2^0 should be 1");
-    static_assert(integer_power(2, 1) == 2, "2^1 should be 2");
-    static_assert(integer_power(2, 3) == 8, "2^3 should be 8");
-    static_assert(integer_power(3, 4) == 81, "3^4 should be 81");
-    static_assert(integer_power(5, 3) == 125, "5^3 should be 125");
-    static_assert(integer_power(0, 5) == 0, "0^5 should be 0");
-    static_assert(integer_power(1, 100) == 1, "1^100 should be 1");
+    static_assert(int_pow(2, 0) == 1, "2^0 should be 1");
+    static_assert(int_pow(2, 1) == 2, "2^1 should be 2");
+    static_assert(int_pow(2, 3) == 8, "2^3 should be 8");
+    static_assert(int_pow(3, 4) == 81, "3^4 should be 81");
+    static_assert(int_pow(5, 3) == 125, "5^3 should be 125");
+    static_assert(int_pow(0, 5) == 0, "0^5 should be 0");
+    static_assert(int_pow(1, 100) == 1, "1^100 should be 1");
 
-    std::cout << "✅ integer_power tests passed!" << std::endl;
+    std::cout << "✅ int_pow tests passed!" << std::endl;
 }
 
 void test_digit_counting()
@@ -115,7 +115,7 @@ int main()
     test_is_power_of_2();
     test_is_prime();
     test_gcd_lcm();
-    test_integer_power();
+    test_int_pow();
     test_digit_counting();
 
     // Runtime tests for larger numbers
@@ -124,7 +124,7 @@ int main()
     std::cout << "is_prime(100): " << is_prime(100) << " (should be false)" << std::endl;
     std::cout << "gcd(48, 18): " << gcd(48, 18) << " (should be 6)" << std::endl;
     std::cout << "lcm(12, 15): " << lcm(12, 15) << " (should be 60)" << std::endl;
-    std::cout << "integer_power(2, 10): " << integer_power(2, 10) << " (should be 1024)" << std::endl;
+    std::cout << "int_pow(2, 10): " << int_pow(2, 10) << " (should be 1024)" << std::endl;
     std::cout << "count_digits_base10(987654321): " << count_digits_base10(987654321) << " (should be 9)" << std::endl;
 
     std::cout << "\n🎉 All auxiliary_functions tests completed successfully!" << std::endl;

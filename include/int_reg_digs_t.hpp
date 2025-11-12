@@ -2,7 +2,7 @@
 #define INT_REG_DIGS_T_HPP
 
 #include "nat_reg_digs_t.hpp"
-#include "auxiliary_types.hpp"
+#include "core/internal/auxiliary_types.hpp"
 
 #include <istream>
 #include <ostream>

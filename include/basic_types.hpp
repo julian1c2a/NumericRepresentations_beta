@@ -1,16 +1,47 @@
-
-
 #ifndef BASIC_TYPES_HPP_INCLUDED
 #define BASIC_TYPES_HPP_INCLUDED
 
-#include <cinttypes>
+#include <cstdint>
 
 #include <compare>
+
+#include <type_traits>
+
 #include <concepts>
 
 #include <optional>
+#include <expected>
+#if __has_include(<expected>)
+#  include <expected>
+#else
+#  include <variant>
+#  include <utility>
+namespace std {
+  template <typename E>
+  struct unexpected {
+    E value_;
+    explicit unexpected(E v) : value_(v) {}
+    E error() const noexcept { return value_; }
+  };
 
-#include <type_traits>
+  template <typename T, typename E>
+  class expected {
+    std::variant<T, E> v_;
+  public:
+    expected(const T &t) : v_(t) {}
+    expected(T &&t) : v_(std::move(t)) {}
+    expected(std::unexpected<E> ue) : v_(ue.value_) {}
+    bool has_value() const noexcept { return std::holds_alternative<T>(v_); }
+    explicit operator bool() const noexcept { return has_value(); }
+    T &value() { return std::get<T>(v_); }
+    const T &value() const { return std::get<T>(v_); }
+    E error() const { return std::get<E>(v_); }
+  };
+
+  template <typename E>
+  std::unexpected<E> unexpected(E e) { return std::unexpected<E>(e); }
+}
+#endif
 
 #include <cstring>
 #include <fstream>
@@ -18,6 +49,8 @@
 #include <istream>
 #include <sstream>
 #include <string>
+#include <string_view>
+#include <utility>
 
 #include <array>
 #include <list>
@@ -42,6 +75,7 @@
  * **1. Aliases de tipos estándar:** Nombres simplificados para tipos enteros estándar
  *
  * **2. Sistema de meta-funciones para escalamiento de tipos:**
+ * - `TypeFromIntNumber_t<N> : Obtiene el tipo entero **sin signo** tal que un entero N cabe en él
  * - `sig_UInt_for_UInt_t<T>`: Obtiene el siguiente tipo entero **sin signo** de mayor capacidad
  * - `sig_SInt_for_UInt_t<T>`: Obtiene el siguiente tipo entero **con signo** de mayor capacidad
  *
@@ -57,13 +91,12 @@
  *
  * @example
  * ```cpp
- * // Escalamiento de tipos
- * using bigger = sig_UInt_for_UInt_t<uint32_t>; // = uint64_t
- * using signed_bigger = sig_SInt_for_UInt_t<uint32_t>; // = int64_t
+ * using uint_t = TypeFromIntNumber_t<1028>; // = uint16_t
+ * using bigger = sig_UInt_for_UInt_t<uint_t>; // = uint32_t
+ * using signed_bigger = sig_SInt_for_UInt_t<uint_t>; // = int32_t
  * ```
  */
-namespace NumRepr
-{
+namespace NumRepr {
   /// NUEVOS NOMBRES PARA LOS ENTEROS O PARECIDOS
   using chint_t = char;
   using schint_t = signed char;
@@ -77,7 +110,7 @@ namespace NumRepr
   using ulint_t = unsigned long int;
   using ullint_t = unsigned long long int;
 
-  // 128-bit types - compiler specific
+// 128-bit types - compiler specific
 #if defined(__GNUC__) && !defined(__clang__)
   // GCC specific 128-bit types
   using uint128_t = __uint128_t;
@@ -89,12 +122,8 @@ namespace NumRepr
   using sint128_t = __int128_t;
 #else
   // Fallback: use pair of 64-bit or disable 128-bit operations
-  struct uint128_t
-  {
-    std::uint64_t low, high;
-  };
-  struct sint128_t
-  {
+  struct uint128_t { std::uint64_t low, high; };
+  struct sint128_t {
     std::uint64_t low;
     std::int64_t high;
   };
@@ -102,23 +131,15 @@ namespace NumRepr
 #elif defined(_MSC_VER)
   // MSVC doesn't have native 128-bit types
   // We can use __m128i from SSE or create our own
-  struct uint128_t
-  {
-    std::uint64_t low, high;
-  };
-  struct sint128_t
-  {
+  struct uint128_t { std::uint64_t low, high; };
+  struct sint128_t {
     std::uint64_t low;
     std::int64_t high;
   };
 #else
   // Generic fallback for other compilers
-  struct uint128_t
-  {
-    std::uint64_t low, high;
-  };
-  struct sint128_t
-  {
+  struct uint128_t { std::uint64_t low, high; };
+  struct sint128_t {
     std::uint64_t low;
     std::int64_t high;
   };
@@ -141,9 +162,6 @@ namespace NumRepr
   using least16_t = std::int_least16_t;
   using least32_t = std::int_least32_t;
   using least64_t = std::int_least64_t;
-
-  // using ssize_t 		= std::ssize_t;
-
   using uint8_t = std::uint8_t;
   using uint16_t = std::uint16_t;
   using uint32_t = std::uint32_t;
@@ -159,8 +177,7 @@ namespace NumRepr
   using intmax_t = std::intmax_t;
   using uintmax_t = std::uintmax_t;
 
-  namespace type_traits
-  {
+  namespace type_traits {
 
     /// TYPE_TRAITS AND CONCEPTS
 
@@ -185,49 +202,157 @@ namespace NumRepr
     template <char_type_c CharT>
     constexpr inline CharT nullchar{CharT('\0')};
 
-    /// BORRAR C_STR
-    char *clear_ccad(char *, usint_t);
+    /* removed clear_cstr and devCadenaC: not used outside this header */
 
-    template <template <uchint_t B> class T, uchint_t B>
-    inline const char *devCadenaC(
-        T<B> arg,
-        size_t long_ccad = 64) noexcept
-    {
-      char *c_cad = new char[long_ccad];
-      c_cad = clear_ccad(c_cad, long_ccad);
-      std::stringstream pre_cad;
-      pre_cad << arg;
-      std::string cad(pre_cad.str());
-      const size_t longitud = cad.length();
-      for (size_t i = 0; i < longitud; ++i)
-      {
-        c_cad[i] = cad[i];
-      }
-      for (size_t i = longitud; i < long_ccad; ++i)
-      {
-        c_cad[i] = nullchar<char>;
-      }
-      return c_cad;
-    }
-
-    inline constexpr char *clear_ccad(
-        char *cad_c,
-        size_t long_de_cad_c) noexcept
-    {
-      for (size_t I = 0; I < long_de_cad_c; ++I)
-        cad_c[I] = nullchar<char>;
-      return cad_c;
-    }
-
-    inline constexpr ullint_t atoull(char *text) noexcept
-    {
-      int i = 0;
-      while (*text)
-      {
-        i = (i << 3) + (i << 1) + (*text - '0');
+    /**
+     * @brief Fast conversion from an ASCII decimal C-string to unsigned integer.
+     *
+     * This is a low-level, constexpr-friendly converter that assumes the input
+     * contains only ASCII digits ('0'..'9'). It does not validate input nor
+     * check for overflow. Prefer `atoull_checked` or `atoull_consume` for
+     * production code that must handle invalid input.
+     *
+     * @param text Null-terminated ASCII string containing digits.
+     * @return Converted value (undefined for non-digit input or overflow).
+     */
+    inline constexpr ullint_t atoull(const char *text) noexcept {
+      ullint_t i = 0;
+      while (*text) {
+        i = (i << 3) + (i << 1) + static_cast<ullint_t>(*text - '0');
         ++text;
       }
-      return (i);
+      return i;
+    }
+
+    /**
+     * @brief Fast conversion from a std::string_view containing ASCII digits.
+     *
+     * Same semantics as the C-string overload: no validation, no overflow
+     * detection. Useful in constexpr contexts or tight inner loops where the
+     * caller guarantees well-formed input.
+     *
+     * @param sv string_view with decimal digits
+     * @return Converted value
+     */
+    inline constexpr ullint_t atoull(std::string_view sv) noexcept {
+      ullint_t i = 0;
+      for (char c : sv) {
+        i = (i << 3) + (i << 1) + static_cast<ullint_t>(c - '0');
+      }
+      return i;
+    }
+
+    /**
+     * @brief Error codes for the atoull parsing helpers.
+     */
+    enum class atoull_err_t : int {
+      empty_str, ///< input is null or contains no digits
+      no_digit,  ///< encountered a non-digit character at start
+      overflow,  ///< value would overflow ullint_t
+      unknown    ///< unspecified error
+    };
+
+    /**
+     * @brief Convert a C-string to unsigned long long with validation and
+     * overflow detection using std::expected.
+     *
+     * On success returns the value. On error returns std::unexpected with an
+     * `atoull_err_t` describing the failure: `empty_str`, `no_digit`, `overflow`.
+     *
+     * @param text Null-terminated C-string to parse
+     * @return std::expected<ullint_t, atoull_err_t>
+     */
+    inline std::expected<ullint_t, atoull_err_t> atoull_checked(const char *text) noexcept {
+      if (text == nullptr) return std::unexpected(atoull_err_t::empty_str);
+      ullint_t i = 0;
+      bool any = false;
+      constexpr ullint_t maxv = std::numeric_limits<ullint_t>::max();
+      while (*text) {
+        char c = *text;
+        if (c < '0' || c > '9') return std::unexpected(atoull_err_t::no_digit);
+        unsigned digit = static_cast<unsigned>(c - '0');
+        if (i > (maxv - digit) / 10) return std::unexpected(atoull_err_t::overflow);
+        i = i * 10 + digit;
+        any = true;
+        ++text;
+      }
+      if (!any) return std::unexpected(atoull_err_t::empty_str);
+      return std::expected<ullint_t, atoull_err_t>(i);
+    }
+
+    /**
+     * @brief Convert a std::string_view to unsigned long long with validation.
+     *
+     * Behaviour matches the C-string checked overload.
+     *
+     * @param sv string_view with ASCII decimal digits
+     * @return std::expected<ullint_t, atoull_err_t>
+     */
+    inline std::expected<ullint_t, atoull_err_t> atoull_checked(std::string_view sv) noexcept {
+      if (sv.data() == nullptr || sv.size() == 0) return std::unexpected(atoull_err_t::empty_str);
+      ullint_t i = 0;
+      bool any = false;
+      constexpr ullint_t maxv = std::numeric_limits<ullint_t>::max();
+      for (char c : sv) {
+        if (c < '0' || c > '9') return std::unexpected(atoull_err_t::no_digit);
+        unsigned digit = static_cast<unsigned>(c - '0');
+        if (i > (maxv - digit) / 10) return std::unexpected(atoull_err_t::overflow);
+        i = i * 10 + digit;
+        any = true;
+      }
+      if (!any) return std::unexpected(atoull_err_t::empty_str);
+      return std::expected<ullint_t, atoull_err_t>(i);
+    }
+
+    /**
+     * @brief Parse as many leading decimal digits as possible from a C-string.
+     *
+     * Returns both the parsed value and the number of characters consumed. On
+     * invalid input or overflow returns std::unexpected with an `atoull_err_t`.
+     *
+     * @param text Null-terminated C-string
+     * @return std::expected<std::pair<ullint_t, size_t>, atoull_err_t>
+     */
+    inline std::expected<std::pair<ullint_t, size_t>, atoull_err_t> atoull_consume(const char *text) noexcept {
+      if (text == nullptr) return std::unexpected(atoull_err_t::empty_str);
+      ullint_t i = 0;
+      size_t idx = 0;
+      constexpr ullint_t maxv = std::numeric_limits<ullint_t>::max();
+      while (text[idx]) {
+        char c = text[idx];
+        if (c < '0' || c > '9') break;
+        unsigned digit = static_cast<unsigned>(c - '0');
+        if (i > (maxv - digit) / 10) return std::unexpected(atoull_err_t::overflow);
+        i = i * 10 + digit;
+        ++idx;
+      }
+      if (idx == 0) return std::unexpected(atoull_err_t::no_digit);
+      return std::expected<std::pair<ullint_t, size_t>, atoull_err_t>(std::pair<ullint_t, size_t>{i, idx});
+    }
+
+    /**
+     * @brief Parse as many leading decimal digits as possible from a string_view.
+     *
+     * Behaviour matches the C-string consume overload.
+     *
+     * @param sv input string_view
+     * @return std::expected<std::pair<ullint_t, size_t>, atoull_err_t>
+     */
+    inline std::expected<std::pair<ullint_t, size_t>, atoull_err_t> atoull_consume(std::string_view sv) noexcept {
+      if (sv.data() == nullptr || sv.size() == 0) return std::unexpected(atoull_err_t::empty_str);
+      ullint_t i = 0;
+      size_t idx = 0;
+      constexpr ullint_t maxv = std::numeric_limits<ullint_t>::max();
+      while (idx < sv.size()) {
+        char c = sv[idx];
+        if (c < '0' || c > '9') break;
+        unsigned digit = static_cast<unsigned>(c - '0');
+        if (i > (maxv - digit) / 10) return std::unexpected(atoull_err_t::overflow);
+        i = i * 10 + digit;
+        ++idx;
+      }
+      if (idx == 0) return std::unexpected(atoull_err_t::no_digit);
+      return std::expected<std::pair<ullint_t, size_t>, atoull_err_t>(std::pair<ullint_t, size_t>{i, idx});
     }
 
     /// METAOPERADOR QUE NOS DA LA ADECUACION DE UN TIPO PARA SER BASE DE UN SISTEMA
@@ -235,6 +360,7 @@ namespace NumRepr
     /// CONSIDERADO AQUI. EL MAYOR CONSIDERADO ES Uint64_t
 
     /// CONSTANT BOOL TEMPLATE
+    /// EN ALGÚN MOMENTO PENSÉ QUE NO PODÍA PONER UN UINT64_T COMO BASE (RADIX)
     template <typename UINT_T>
     constexpr bool is_uint_type_for_radix_v =
         std::is_unsigned_v<UINT_T> && (!std::is_same_v<UINT_T, uint64_t>);
@@ -268,13 +394,14 @@ namespace NumRepr
     concept signed_integral_c = is_signed_type_v<SINT_T>;
 
     /// KEYWORD TYPENAME
-    /// TEMPLATE<TYPENAME T> CLASS NOMBRE_T; /// CLASS : NOMBRE_T<STRING>
+    /// TEMPLATE<TYPENAME T> CLASS NOMBRE_T;
+    /// CLASS : NOMBRE_T<STRING>
     /// Si T es un tipo, entonces se puede sustituir en la plantilla de clase
     /// ------------------------------------------------------------------------------------
     /// CONCEPT STD::UNSIGNED_INTEGRAL
     /// TEMPLATE<STD::UNSIGNED_INTEGRAL T> CLASS NOMBRE_T; /// CLASS : NOMBRE_T<UNSINGED INT>
-    /// Si T es un tipo que cumple los requerrimientos de UNSIGNED_INTEGRAL_T, esto es,
-    /// T es un tipo integer y unsigned entonces se puede admitir para la plantilla de
+    /// Si T es un tipo que cumple los requerimientos de UNSIGNED_INTEGRAL_T, esto es,
+    /// T es un tipo integral y unsigned entonces se puede admitir para la plantilla de
     /// clases
     /// -------------------------------------------------------------------------------------
     ///       TEMPLATE CLASS           TYPE     NON-TYPE       TRUE CLASS > TYPE DEFINITION
@@ -306,65 +433,62 @@ namespace NumRepr
 
     ///<  METAFUNCION : DA EL SIGUIENTE TIPO NATURAL PARA EL ACTUAL TIPO NATURAL
     ///<  POR ESPECIALIZACION EXPLICITA
-    namespace ugly_details_UInt_for_UInt
-    {
+    namespace ugly_details_UInt_for_UInt {
+
       template <unsigned_integral_c UInt_t>
-      struct __sig_UInt_for_UInt_t
-      {
-        using type = void;
-      };
+      struct __sig_UInt_for_UInt_t { using type = void; };
 
       template <>
-      struct __sig_UInt_for_UInt_t<ullint_t>
-      {
-        using type = uint64_t;
-      };
+      struct __sig_UInt_for_UInt_t<ullint_t> { using type = uint64_t; };
 
       template <>
-      struct __sig_UInt_for_UInt_t<ulint_t>
-      {
+      struct __sig_UInt_for_UInt_t<ulint_t> {
         template <unsigned_integral_c uint_type>
         static inline constexpr bool uint_type_gt_this_type_v =
             gt_sz_v<uint_type, ulint_t>;
 
         using type = typename std::conditional_t<
-            uint_type_gt_this_type_v<ullint_t>, ullint_t,
-            typename __sig_UInt_for_UInt_t<ullint_t>::type>;
+            uint_type_gt_this_type_v<ullint_t>, 
+                ullint_t,
+                typename __sig_UInt_for_UInt_t<ullint_t>::type
+            >;
       };
 
       template <>
-      struct __sig_UInt_for_UInt_t<uint_t>
-      {
+      struct __sig_UInt_for_UInt_t<uint_t> {
         template <unsigned_integral_c uint_type>
         static inline constexpr bool uint_type_gt_this_type_v =
             gt_sz_v<uint_type, uint_t>;
 
-        using type =
-            std::conditional_t<uint_type_gt_this_type_v<ulint_t>, ulint_t,
-                               typename __sig_UInt_for_UInt_t<ulint_t>::type>;
+    using type = std::conditional_t<uint_type_gt_this_type_v<ulint_t>,
+                    ulint_t,
+                    typename __sig_UInt_for_UInt_t<ulint_t>::type>;
       };
 
       template <>
-      struct __sig_UInt_for_UInt_t<usint_t>
-      {
+      struct __sig_UInt_for_UInt_t<usint_t> {
         template <unsigned_integral_c uint_type>
         static inline constexpr bool uint_type_gt_this_type_v =
             gt_sz_v<uint_type, usint_t>;
 
-        using type = std::conditional_t<uint_type_gt_this_type_v<uint_t>, uint_t,
-                                        typename __sig_UInt_for_UInt_t<uint_t>::type>;
+        using type = std::conditional_t<
+            uint_type_gt_this_type_v<uint_t>, 
+                uint_t,
+                typename __sig_UInt_for_UInt_t<uint_t>::type
+        >;
       };
 
       template <>
-      struct __sig_UInt_for_UInt_t<uchint_t>
-      {
+      struct __sig_UInt_for_UInt_t<uchint_t> {
         template <unsigned_integral_c uint_type>
         static inline constexpr bool uint_type_gt_this_type_v =
             gt_sz_v<uint_type, uchint_t>;
 
         using type =
-            std::conditional_t<uint_type_gt_this_type_v<usint_t>, usint_t,
-                               typename __sig_UInt_for_UInt_t<usint_t>::type>;
+            std::conditional_t<
+                uint_type_gt_this_type_v<usint_t>, 
+                    usint_t,
+                    typename __sig_UInt_for_UInt_t<usint_t>::type>;
       };
 
     } // namespace ugly_details_UInt_for_UInt
@@ -402,23 +526,20 @@ namespace NumRepr
 
     ///<  METAFUNCION : DA EL SIGUIENTE TIPO ENTERO PARA EL ACTUAL TIPO NATURAL
     ///<  POR ESPECIALIZACION EXPLICITA
-    namespace ugly_details_sig_SInt_for_UInt
-    {
+    namespace ugly_details_sig_SInt_for_UInt {
       template <typename UInt>
-      struct __sig_SInt_for_UInt_t
-      {
+      struct __sig_SInt_for_UInt_t {
         using type = void;
       };
 
       template <>
-      struct __sig_SInt_for_UInt_t<ullint_t>
-      {
+      struct __sig_SInt_for_UInt_t<ullint_t> {
         using type = sint64_t;
       };
+
       /* is_unsigned_sz_gt_v */
       template <>
-      struct __sig_SInt_for_UInt_t<ulint_t>
-      {
+      struct __sig_SInt_for_UInt_t<ulint_t> {
         template <typename int_type>
         static inline constexpr bool int_type_gt_this_type_v =
             gt_sz_v<int_type, ulint_t>;
@@ -429,8 +550,7 @@ namespace NumRepr
       };
 
       template <>
-      struct __sig_SInt_for_UInt_t<uint_t>
-      {
+      struct __sig_SInt_for_UInt_t<uint_t> {
         template <typename int_type>
         static inline constexpr bool int_type_gt_this_type_v =
             gt_sz_v<int_type, uint_t>;
@@ -441,8 +561,7 @@ namespace NumRepr
       };
 
       template <>
-      struct __sig_SInt_for_UInt_t<usint_t>
-      {
+      struct __sig_SInt_for_UInt_t<usint_t> {
         template <typename int_type>
         static inline constexpr bool int_type_gt_this_type_v =
             gt_sz_v<int_type, usint_t>;
@@ -452,8 +571,7 @@ namespace NumRepr
       };
 
       template <>
-      struct __sig_SInt_for_UInt_t<uchint_t>
-      {
+      struct __sig_SInt_for_UInt_t<uchint_t> {
         template <typename int_type>
         static inline constexpr bool int_type_gt_this_type_v =
             gt_sz_v<int_type, uchint_t>;
@@ -499,43 +617,24 @@ namespace NumRepr
 
     ///<  METAFUNCION : DA EL SIGUIENTE TIPO NATURAL PARA EL ACTUAL TIPO ENTERO
     ///<  POR ESPECIALIZACION EXPLICITA
-    namespace ugly_details_UInt_for_SInt
-    {
+    namespace ugly_details_UInt_for_SInt {
       template <typename SInt>
-      struct __sig_UInt_for_SInt_t
-      {
-        using type = void;
-      };
+      struct __sig_UInt_for_SInt_t { using type = void; };
 
       template <>
-      struct __sig_UInt_for_SInt_t<sint64_t>
-      {
-        using type = uint64_t;
-      };
+      struct __sig_UInt_for_SInt_t<sint64_t> { using type = uint64_t; };
 
       template <>
-      struct __sig_UInt_for_SInt_t<schint_t>
-      {
-        using type = uchint_t;
-      };
+      struct __sig_UInt_for_SInt_t<schint_t> { using type = uchint_t; };
 
       template <>
-      struct __sig_UInt_for_SInt_t<ssint_t>
-      {
-        using type = usint_t;
-      };
+      struct __sig_UInt_for_SInt_t<ssint_t> { using type = usint_t; };
 
       template <>
-      struct __sig_UInt_for_SInt_t<sint_t>
-      {
-        using type = uint_t;
-      };
+      struct __sig_UInt_for_SInt_t<sint_t> { using type = uint_t; };
 
       template <>
-      struct __sig_UInt_for_SInt_t<slint_t>
-      {
-        using type = ulint_t;
-      };
+      struct __sig_UInt_for_SInt_t<slint_t> { using type = ulint_t; };
 
     } // namespace ugly_details_UInt_for_SInt
 
@@ -551,51 +650,48 @@ namespace NumRepr
 
     ///<  METAFUNCION : DA EL SIGUIENTE TIPO ENTERO PARA EL ACTUAL TIPO ENTERO
     ///<  POR ESPECIALIZACION EXPLICITA
-    namespace ugly_details_SInt_for_SInt
-    {
+    namespace ugly_details_SInt_for_SInt {
 
       template <typename SInt>
-      struct __sig_SInt_for_SInt_t
-      {
-        using type = void;
-      };
+      struct __sig_SInt_for_SInt_t {  using type = void;  };
 
       template <>
-      struct __sig_SInt_for_SInt_t<sllint_t>
-      {
-        using type = sint64_t;
-      };
+      struct __sig_SInt_for_SInt_t<sllint_t> { using type = sint64_t; };
 
       template <>
-      struct __sig_SInt_for_SInt_t<slint_t>
-      {
+      struct __sig_SInt_for_SInt_t<slint_t> {
         template <signed_integral_c SINT_T>
         static inline constexpr bool signed_gt_signed_v = gt_sz_v<SINT_T, slint_t>;
 
-        using type =
-            std::conditional_t<signed_gt_signed_v<sllint_t>, sllint_t,
-                               typename __sig_SInt_for_SInt_t<sllint_t>::type>;
+        using type = std::conditional_t<
+                        signed_gt_signed_v<sllint_t>, 
+                            sllint_t,
+                            typename __sig_SInt_for_SInt_t<sllint_t>::type
+                    >;
       };
 
       template <>
-      struct __sig_SInt_for_SInt_t<sint_t>
-      {
+      struct __sig_SInt_for_SInt_t<sint_t> {
         template <typename SINT_T>
         static inline constexpr bool signed_gt_signed_v = gt_sz_v<SINT_T, sint_t>;
 
-        using type =
-            std::conditional_t<signed_gt_signed_v<slint_t>, slint_t,
-                               typename __sig_SInt_for_SInt_t<slint_t>::type>;
+        using type = std::conditional_t<
+            signed_gt_signed_v<slint_t>, 
+                slint_t,
+                typename __sig_SInt_for_SInt_t<slint_t>::type
+        >;
       };
 
       template <>
-      struct __sig_SInt_for_SInt_t<ssint_t>
-      {
+      struct __sig_SInt_for_SInt_t<ssint_t> {
         template <typename SINT_T>
         static inline constexpr bool signed_gt_signed_v = gt_sz_v<SINT_T, ssint_t>;
 
-        using type = std::conditional_t<signed_gt_signed_v<sint_t>, sint_t,
-                                        typename __sig_SInt_for_SInt_t<sint_t>::type>;
+        using type = std::conditional_t<
+            signed_gt_signed_v<sint_t>, 
+                sint_t,
+                typename __sig_SInt_for_SInt_t<sint_t>::type
+            >;
       };
 
       template <>
@@ -702,7 +798,7 @@ namespace NumRepr
       return (B <= maxbase<UINT_T>());
     }
 
-    /// FUNCIÓN QUE DADO UN TIPO USIGNED INTEGRAL Y UN ENTERO DE ESE TIPO
+    /// FUNCIÓN QUE DADO UN TIPO UNSIGNED INTEGRAL Y UN ENTERO DE ESE TIPO
     /// ES UNA BASE APROPIADA
     template <typename UINT_T, UINT_T B>
     consteval bool suitable_base()
@@ -725,7 +821,7 @@ namespace NumRepr
 
     /// FUNCIÓN QUE DADO UN TIPO ENTERO SIN SIGNO ME DA EL ENTERO MEDIO
     /// UINT_A > SQRT_MAX => UINT_A^2 NO CABE EN UINT_T
-    /// UINT_A < SQRT_MAX => UINT_A^2 SI CABE EN UINT_T
+    /// UINT_A < SQRT_MAX <= UINT_A^2 SI CABE EN UINT_T
 
     /// @brief Compute integer square root (floor of square root)
     /// @param arg Number to compute square root of
@@ -741,16 +837,16 @@ namespace NumRepr
       {
         return UINT_T(1);
       }
-      else if (arg < 4) // arg is 2 or 3
-      {
+      else if (arg < 4)
+      { // arg is 2 or 3
         return UINT_T(1);
       }
-      else if (arg < 9) // arg is 4-8
-      {
+      else if (arg < 9)
+      { // arg is 4-8
         return UINT_T(2);
       }
-      else if (arg < 16) // arg is 9-15
-      {
+      else if (arg < 16)
+      { // arg is 9-15
         return UINT_T(3);
       }
       else
@@ -780,7 +876,7 @@ namespace NumRepr
       // return static_cast<UINT_T>(raiz_real);
 
       // Implementación simple de sqrt con Newton para compatibilidad constexpr en Clang
-      constexpr auto x = static_cast<long double>(static_cast<SIG_UINT_T>(base));
+      constexpr auto x{static_cast<long double>(static_cast<SIG_UINT_T>(base))};
       if (x == 0.0)
         return static_cast<UINT_T>(0);
 
@@ -810,7 +906,14 @@ namespace NumRepr
       {
         using UIntType = std::conditional_t<
             static_cast<uint64_t>(Radix) <= maxbase<uint8_t>(),
-            uint8_t, std::conditional_t<static_cast<uint64_t>(Radix) <= maxbase<uint16_t>(), uint16_t, std::conditional_t<static_cast<uint64_t>(Radix) <= maxbase<uint32_t>(), uint32_t, uint64_t>>>;
+            uint8_t,
+            std::conditional_t<
+                static_cast<uint64_t>(Radix) <= maxbase<uint16_t>(),
+                uint16_t,
+                std::conditional_t<
+                    static_cast<uint64_t>(Radix) <= maxbase<uint32_t>(),
+                    uint32_t,
+                    uint64_t>>>;
       };
     } // namespace ugly_details_for_suitable_type_deduction
     using namespace ugly_details_for_suitable_type_deduction;

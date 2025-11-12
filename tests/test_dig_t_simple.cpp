@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cassert>
-#include "dig_t.hpp"
+#include "core/dig_t.hpp"
 
 using namespace NumRepr;
 

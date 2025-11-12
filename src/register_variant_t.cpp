@@ -12,14 +12,15 @@ namespace NumRepr {
 	constexpr register_variant_t::UINT_T register_variant_t::gbase() const noexcept {
   		const auto indice{this->index()};
   		return ((indice/lvar_sz)+2ull);
-  	}
+	  }
 
-	constexpr register_variant_t::UINT_T register_variant_t::glong() const noexcept {
-  		const auto indice{this->index()};
-  		const auto pow2result{indice%lvar_sz};
-  		const auto result{util_functs::log2(pow2result)};
-  		return result;
-  	}
+	  constexpr register_variant_t::UINT_T register_variant_t::glong() const noexcept {
+	 		const auto indice{this->index()};
+	 		const auto pow2result{indice%lvar_sz};
+	 		// Use the new int_log2 implementation directly (incremental migration)
+	 		const auto result{auxiliary_functions::int_log2(pow2result)};
+	 		return result;
+	 	}
 
   	constexpr digit_variant register_variant_t::dig_0(std::uint64_t base) const noexcept {
   		return make_digit_variant(base,0);

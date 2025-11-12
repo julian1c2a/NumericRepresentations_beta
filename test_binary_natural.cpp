@@ -12,7 +12,7 @@
 #include <iostream>
 #include <bitset>
 #include "include/nat_reg_digs_t.hpp"
-#include "include/dig_t_display_helpers.hpp"
+#include "core/dig_t_display_helpers.hpp"
 
 using namespace NumRepr;
 

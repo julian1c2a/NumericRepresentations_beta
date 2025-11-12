@@ -2,7 +2,7 @@
 #define NAT_RAT_FIXED_REG_T_HPP_INCLUDED
 
 #include "nat_reg_digs_t.hpp"
-#include "utilities.hpp"
+#include "core/internal/utilities.hpp"
 
 namespace NumRepr {
 
