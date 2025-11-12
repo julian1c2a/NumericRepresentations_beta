@@ -11,10 +11,10 @@
 namespace util_functs {
 
 template<std::uint64_t N>
-consteval std::uint64_t pow2ct() noexcept { return NumRepr::auxiliary_functions::int_pow2ct<N>(); }
+consteval std::uint64_t pow2ct() noexcept { return NumRepr::auxiliary_functions::int_pow2_ct<N>(); }
 
 template<std::uint64_t N>
-consteval std::uint64_t log2ct() noexcept { return NumRepr::auxiliary_functions::int_log2ct<N>(); }
+consteval std::uint64_t log2ct() noexcept { return NumRepr::auxiliary_functions::int_log2_ct<N>(); }
 
 constexpr std::uint64_t pow2(std::uint64_t n) noexcept { return NumRepr::auxiliary_functions::int_pow2(n); }
 

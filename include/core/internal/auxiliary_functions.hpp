@@ -15,14 +15,90 @@ namespace NumRepr {
   namespace auxiliary_functions {
   
   /**
+   * @brief Método genérico de Newton-Raphson en tiempo de compilación.
+   * @details Implementación recursiva del método de Newton-Raphson que converge cuando
+   * x_{k+1} >= x_k, indicando que se ha alcanzado el mínimo entero.
+   * 
+   * @tparam n Parámetro fijo (típicamente el número a aproximar).
+   * @tparam x0 Estimación actual.
+   * @tparam IterExpr Función template que calcula x_{k+1} = IterExpr<x_k, n>::value.
+   * 
+   * @return El valor convergido de la iteración.
+   * 
+   * @note IterExpr debe ser un template struct/class con un miembro estático value:
+   * @code
+   *   template <std::uint64_t xk, std::uint64_t n>
+   *   struct IterExpr { 
+   *       static constexpr std::uint64_t value = ...; 
+   *   };
+   * @endcode
+   * 
+   * @par Ejemplo completo - Raíz cuadrada:
+   * @code
+   *   // Definir expresión de iteración: x1 = (x0 + n/x0) / 2
+   *   template <std::uint64_t x0, std::uint64_t n>
+   *   struct sqrt_iteration {
+   *       static constexpr std::uint64_t value = (x0 + n / x0) / 2;
+   *   };
+   *   
+   *   // Usar el método genérico
+   *   constexpr auto result = newton_raphson_ct<100, 16, sqrt_iteration>();
+   *   // result == 10
+   * @endcode
+   * 
+   * @par Ejemplo - Raíz cúbica (aproximación):
+   * @code
+   *   // Expresión: x1 = (2*x0 + n/(x0^2)) / 3
+   *   template <std::uint64_t x0, std::uint64_t n>
+   *   struct cbrt_iteration {
+   *       static constexpr std::uint64_t value = 
+   *           (x0 == 0) ? 1 : (2 * x0 + n / (x0 * x0)) / 3;
+   *   };
+   *   
+   *   constexpr auto result = newton_raphson_ct<27, 4, cbrt_iteration>();
+   *   // result aproximadamente 3
+   * @endcode
+   */
+  template <std::uint64_t n, std::uint64_t x0, template<std::uint64_t, std::uint64_t> class IterExpr>
+  consteval std::uint64_t newton_raphson_ct() noexcept {
+      constexpr std::uint64_t x1 = IterExpr<x0, n>::value;
+      if constexpr (x1 >= x0) {
+          // Convergencia alcanzada
+          return x0;
+      } else {
+          // Continuar iterando recursivamente
+          return newton_raphson_ct<n, x1, IterExpr>();
+      }
+  }
+
+  /**
+   * @brief Función auxiliar recursiva para el método de Newton-Raphson en tiempo de compilación.
+   * @details Calcula iterativamente una aproximación de la raíz cuadrada entera de `n` comenzando
+   * desde la estimación inicial `x0` usando la fórmula: x_{k+1} = (x_k + n/x_k) / 2
+   * @tparam n El número cuya raíz cuadrada se calcula.
+   * @tparam x0 La estimación actual de la raíz cuadrada.
+   * @return La raíz cuadrada entera por defecto de `n`.
+   */
+  template <std::uint64_t n, std::uint64_t x0>
+  consteval std::uint64_t floorsqrt_ct_newton() noexcept {
+      // Calcular x1 = (x0 + n/x0) / 2
+      if constexpr ((x0 + n / x0) / 2 >= x0) {
+          // Convergencia alcanzada
+          return x0;
+      } else {
+          // Continuar iterando recursivamente con x1
+          return floorsqrt_ct_newton<n, (x0 + n / x0) / 2>();
+      }
+  }
+
+  /**
    * @brief Calcula la raíz cuadrada entera por defecto de un número entero no negativo.
    * @details Esta función calcula la parte entera de la raíz cuadrada de un número no negativo `n` dado.
    * Encuentra el entero más grande `r` tal que `r*r <= n`.
    * Para mayor eficiencia, utiliza una combinación de una tabla de búsqueda para valores pequeños y el método
    * de Newton-Raphson para valores más grandes.
    *
-   * @tparam T El tipo del entero, que debe ser un tipo integral.
-   * @param n El entero no negativo cuya raíz cuadrada se va a calcular.
+   * @tparam n El número entero no negativo cuya raíz cuadrada se va a calcular.
    * @return La raíz cuadrada entera por defecto de `n`.
    *
    * @pre `n` debe ser no negativo.
@@ -41,6 +117,51 @@ namespace NumRepr {
    * - La función no debe entrar en un bucle infinito.
    * - La función no debe devolver un valor `r` tal que `r*r > n`.
    * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
+   */
+  template <std::uint64_t n> consteval
+  std::uint64_t floorsqrt_ct() noexcept {
+      /// VALORES PREESTABLECIDO COMO EN UNA TABLA
+      /// AL MODO LOOKUP TABLES
+      if constexpr (n == 0)                  return 0;
+      if constexpr (n >= 1 && n < 4)         return 1;
+      if constexpr (n >= 4 && n < 9)         return 2;
+      if constexpr (n >= 9 && n < 16)        return 3;
+      if constexpr (n >= 16 && n < 25)       return 4;
+      if constexpr (n >= 25 && n < 36)       return 5;
+      if constexpr (n >= 36 && n < 49)       return 6;
+      if constexpr (n >= 49 && n < 64)       return 7;
+      if constexpr (n >= 64 && n < 81)       return 8;
+      if constexpr (n >= 81 && n < 100)      return 9;
+      if constexpr (n >= 100 && n < 121)     return 10;
+      if constexpr (n >= 121 && n < 144)     return 11;
+      if constexpr (n >= 144 && n < 169)     return 12;
+      if constexpr (n >= 169 && n < 196)     return 13;
+      if constexpr (n >= 196 && n < 225)     return 14;
+      if constexpr (n >= 225 && n < 256)     return 15;
+      if constexpr (n >= 256 && n < 289)     return 16;
+      if constexpr (n >= 289 && n < 324)     return 17;
+      if constexpr (n >= 324 && n < 361)     return 18;
+      if constexpr (n >= 361 && n < 400)     return 19;
+      if constexpr (n >= 400 && n < 441)     return 20;
+      if constexpr (n >= 441 && n < 484)     return 21;
+      if constexpr (n >= 484 && n < 529)     return 22;
+      else {
+          // Calcular estimación inicial usando bit_width
+          constexpr std::uint64_t x0_base{(1ull << (std::bit_width(n) / 2))};
+          // Asegurar que la estimación inicial sea sobreestimación
+          constexpr std::uint64_t x0{(x0_base * x0_base < n) ? (x0_base * 2) : x0_base};
+          // Aplicar Newton-Raphson recursivamente
+          return floorsqrt_ct_newton<n, x0>();
+      }
+  }
+
+  /**
+   * @brief Calcula la raíz cuadrada entera por defecto de un número en tiempo de ejecución.
+   * @details Implementación runtime del algoritmo de Newton-Raphson para calcular floor(sqrt(n)).
+   * Usa lookup tables para valores pequeños (< 529) y Newton-Raphson para valores mayores.
+   * @tparam T Tipo integral del número.
+   * @param n El número cuya raíz cuadrada se calcula.
+   * @return La raíz cuadrada entera por defecto de `n`.
    */
   template <typename T> constexpr
   T floorsqrt(T n) noexcept {
@@ -117,7 +238,19 @@ namespace NumRepr {
    * - La función no debe devolver un valor `r` tal que `r*r < n`.
    * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
    */
-  template <typename T>
+  template <std::uint64_t n>
+  consteval std::uint64_t ceilsqrt_ct() noexcept {
+      if constexpr (n == 0) return 0;
+      constexpr std::uint64_t root = floorsqrt_ct<n>();
+      // Si n no es un cuadrado perfecto, la raíz cuadrada entera superior es root + 1.
+      if constexpr (root * root == n) {
+          return root;
+      } else {
+          return root + 1;
+      }
+  }
+
+  template <std::integral T>
   constexpr T ceilsqrt(T n) noexcept {
       if (n == 0) return 0;
       T root = floorsqrt(n);
@@ -239,20 +372,13 @@ namespace NumRepr {
 
   /**
    * @brief Busca recursivamente un factor impar de un número en un rango en tiempo de compilación.
-   * @details Esta es una función auxiliar para `is_prime`. Realiza una búsqueda
-   * recursiva en el rango de enteros `[low, high)` para encontrar un entero `k`
-   * tal que `2*k + 1` es un factor de `n`.
-   *
-   * @tparam T El tipo integral.
-   * @tparam n El número a factorizar.
-   * @tparam low El límite inferior (inclusivo) del rango de búsqueda para `k`.
-   * @tparam high El límite superior (exclusivo) del rango de búsqueda para `k`.
-   * @return `true` si se encuentra un `k` en `[low, high)` tal que `(2*k + 1)` divide a `n`.
-   *         `false` en caso contrario.
-   *
-   * @pre `n > high`, `high > low` y `low > 1`.
-   *
-   * @post `find_factor_ct` es true si se encuentra un factor en el rango, false en caso contrario.
+   * @details Función auxiliar helper que implementa búsqueda binaria recursiva para encontrar
+   * factores de la forma (2*k + 1) en el rango [low, high). Usada internamente por `is_prime_ct`.
+   * @tparam T Tipo integral.
+   * @tparam n Número a factorizar.
+   * @tparam low Límite inferior (inclusivo) del rango de búsqueda.
+   * @tparam high Límite superior (exclusivo) del rango de búsqueda.
+   * @return `true` si existe k en [low, high) tal que (2*k + 1) divide a n, `false` en caso contrario.
    */
    template <std::integral T, T n, T low, T high>
         requires ( (low > 1) && (high > low) && (n > high) )
@@ -362,22 +488,27 @@ namespace NumRepr {
   consteval
   bool is_prime_ct() noexcept {
     if constexpr (n < 2) return false;
-    else if constexpr (n == 2 || n == 3) return true;
-    else if constexpr (n % 2 == 0 || n % 3 == 0) return false;
-    else if constexpr (n % 5 == 0 || n % 7 == 0 || n % 11 == 0) return false;
-    else if constexpr (n % 13 == 0 || n % 17 == 0 || n % 19 == 0 || n % 23 == 0) return false;
-    else if constexpr (n % 29 == 0 || n % 31 == 0 || n % 37 == 0 || n % 41 == 0) return false;
-    else if constexpr (n % 43 == 0 || n % 47 == 0 || n % 53 == 0 || n % 59 == 0) return false;
-    else if constexpr ( n < 3600) return true; 
-    else {
-      // sabemos que si n es primo es mayor que 3600
-      constexpr std::uint64_t high = (ceilsqrt(n) + 1) / 2;
-      constexpr std::uint64_t low = 2;
-      if constexpr (high <= low) { // if range is invalid or empty
-          return true; // No factors to check
-      } else {
-          return !find_factor_ct<std::uint64_t, n, low, high>();
-      }
+    if constexpr (n == 2 || n == 3) return true;
+    if constexpr (n % 2 == 0 || n % 3 == 0) return false;
+    if constexpr (n < 9) return true; // 5, 7 are prime
+    if constexpr (n % 5 == 0) return false;
+    if constexpr (n < 25) return true; // 11, 13, 17, 19, 23 are prime
+    if constexpr (n % 7 == 0 || n % 11 == 0 || n % 13 == 0 || n % 17 == 0 || n % 19 == 0 || n % 23 == 0) return false;
+    if constexpr (n < 29*29) { // 29^2 = 841
+      // For numbers in [25, 841), just check remaining small primes
+      return true; // If we got here, n is not divisible by any prime < 29
+    }
+    // For numbers >= 841, check divisibility by more primes
+    if constexpr (n % 29 == 0 || n % 31 == 0 || n % 37 == 0 || n % 41 == 0) return false;
+    if constexpr (n % 43 == 0 || n % 47 == 0 || n % 53 == 0 || n % 59 == 0) return false;
+    
+    // For larger numbers, use find_factor_ct
+    constexpr std::uint64_t high = (ceilsqrt_ct<n>() + 1) / 2;
+    constexpr std::uint64_t low = 2;
+    if constexpr (high <= low) {
+        return true; // No factors to check
+    } else {
+        return !find_factor_ct<std::uint64_t, n, low, high>();
     }
   }
 
@@ -390,28 +521,52 @@ namespace NumRepr {
   constexpr inline
   bool is_prime(T n) noexcept {
     if (n < 2) return false;
-    else if (n == 2 || n == 3) return true;
-    else if (n % 2 == 0 || n % 3 == 0) return false;
-    else if (n % 5 == 0 || n % 7 == 0 || n % 11 == 0) return false;
-    else if (n % 13 == 0 || n % 17 == 0 || n % 19 == 0 || n % 23 == 0) return false;
-    else if (n % 29 == 0 || n % 31 == 0 || n % 37 == 0 || n % 41 == 0 || n % 43 == 0 ) return false;
-    else if (n % 47 == 0 || n % 53 == 0 || n % 59 == 0 || n % 67 == 0 || n % 71 == 0 || n % 73 == 0) return false;
-    else if ( n < 3600) return true; 
-    else {
-      auto result = find_factor(n, static_cast<T>(2), (ceilsqrt(n) + 1) / 2);
-      // If find_factor returns an error (e.g. invalid range for small n),
-      // it means no odd factors were checked, so the number is prime in this context.
-      // value_or(false) means if error, no factor was found.
-      return !result.value_or(false);
+    if (n == 2 || n == 3) return true;
+    if (n % 2 == 0 || n % 3 == 0) return false;
+    if (n < 9) return true; // 5, 7 are prime
+    if (n % 5 == 0) return false;
+    if (n < 25) return true; // 11, 13, 17, 19, 23 are prime
+    if (n % 7 == 0 || n % 11 == 0 || n % 13 == 0 || n % 17 == 0 || n % 19 == 0 || n % 23 == 0) return false;
+    if (n < 29*29) { // 29^2 = 841
+      // For numbers in [25, 841), just check remaining small primes
+      return true; // If we got here, n is not divisible by any prime < 29
     }
+    // For numbers >= 841, check divisibility by more primes
+    if (n % 29 == 0 || n % 31 == 0 || n % 37 == 0 || n % 41 == 0 || n % 43 == 0) return false;
+    if (n % 47 == 0 || n % 53 == 0 || n % 59 == 0) return false;
+    
+    // Use find_factor for even larger numbers
+    auto result = find_factor(n, static_cast<T>(2), (ceilsqrt(n) + 1) / 2);
+    return !result.value_or(false);
   }
 
   /**
    * @brief Calcula el máximo común divisor (MCD) de dos números.
-   * Algoritmo de Euclides.
+   * Algoritmo de Euclides implementado recursivamente.
    * @param a El primer número.
    * @param b El segundo número.
    * @return El MCD de a y b.
+   */
+  template<std::uint64_t a, std::uint64_t b> consteval
+  std::uint64_t gcd_ct() noexcept {
+    if constexpr (b == 0) {
+      return a;
+    } else if constexpr (a == 0) {
+      return b;
+    } else if constexpr (a == b) {
+      return a;
+    } else if constexpr (b > a) {
+      return gcd_ct<b, a>();
+    } else {
+      return gcd_ct<b, a % b>();
+    }
+  }
+
+  /**
+   * @brief Algoritmo de Euclides iterativo para calcular el MCD en tiempo de ejecución.
+   * @param a Primer número.
+   * @param b Segundo número.
+   * @return El máximo común divisor de a y b.
    */
   constexpr inline
   std::uint64_t gcd(std::uint64_t a, std::uint64_t b) noexcept {
@@ -435,9 +590,27 @@ namespace NumRepr {
    * @param b El segundo número.
    * @return El mcm de a y b.
    */
+  template<std::uint64_t a, std::uint64_t b> consteval
+  std::uint64_t lcm_ct() noexcept {
+    constexpr auto minimum{std::min(a, b)};
+    constexpr auto maximum{std::max(a, b)};
+    return (a == 0 || b == 0) ? 
+               0              : // a o b es 0 <=> mcm es 0 
+               (minimum / gcd_ct<a, b>()) * maximum;
+  }
+
+  /**
+   * @brief Calcula el mínimo común múltiplo en tiempo de ejecución.
+   * @details Usa la relación lcm(a,b) * gcd(a,b) = a * b para calcular el mcm eficientemente.
+   * @param a Primer número.
+   * @param b Segundo número.
+   * @return El mínimo común múltiplo de a y b.
+   */
   constexpr inline
   std::uint64_t lcm(std::uint64_t a, std::uint64_t b) noexcept { 
-    return (a == 0 || b == 0) ? 0 : (std::min(a, b) / gcd(a, b)) * std::max(a, b);
+    return (a == 0 || b == 0) ? 
+               0              : // a o b es 0 <=> mcm es 0 
+               (std::min(a, b) / gcd(a, b)) * std::max(a, b);
   }
 
   /**
@@ -521,6 +694,20 @@ namespace NumRepr {
    * @tparam base La base.
    * @tparam exponent El exponente.
    * @return base elevado al exponente.
+   * 
+   * @pre exponent <= max_exponent_for_base_ct<base>()
+   * 
+   * @post Para todo exponente, el valor devuelto es mayor que 0 si base > 0.
+   * 
+   * @invariant int_pow_ct<base, exponent>() == base * int_pow_ct<base, exponent - 1>() para exponent > 0.
+   * @invariant int_pow_ct<base, 0>() == 1.
+   * @invariant Si base == 0 y exponent > 0, entonces int_pow_ct<base, exponent>() == 0.
+   * @invariant Si base == 1, entonces int_pow_ct<base, exponent>() == 1 para cualquier exponent.
+   * @invariant Para todo exp_1 y exp_2 (exponentes) enteros, entonces se cumple 
+   * int_pow_ct<base, exp_1 + exp_2>() == int_pow_ct<base, exp_1>() * int_pow_ct<base, exp_2>().
+   * 
+   * @par Si exponent > max_exponent_for_base_ct<base>(), no compila.
+   * 
    */
   template <std::uint64_t base, std::size_t exponent>
     requires (exponent <= max_exponent_for_base_ct<base>())
@@ -531,9 +718,9 @@ namespace NumRepr {
     else if constexpr (base == 0) { return 0; }
     else if constexpr (base == 1) { return 1; }
     else {
-      std::uint64_t result = 1;
-      std::uint64_t current_base = base;
-      std::uint32_t exp = exponent;
+      std::uint64_t result{1ull};
+      std::uint64_t current_base{base};
+      std::uint32_t exp{exponent};
       while (exp > 0) {
         if (exp & 1) { result *= current_base; }
         current_base *= current_base;
@@ -548,6 +735,20 @@ namespace NumRepr {
    * @param base La base.
    * @param exponent El exponente.
    * @return base elevado al exponente, o 0 si ocurre un desbordamiento.
+   * 
+   * @pre exponent <= max_exponent_for_base(base)
+   * 
+   * @post Para todo exponente, el valor devuelto es mayor que 0 si base > 0.
+   * 
+   * @invariant int_pow(base, exponent) == base * int_pow(base, exponent - 1) para exponent > 0.
+   * @invariant int_pow(base, 0) == 1.
+   * @invariant Si base == 0 y exponent > 0, entonces int_pow(base, exponent) == 0.
+   * @invariant Si base == 1, entonces int_pow(base, exponent) == 1 para cualquier exponent.
+   * @invariant Para todo exp_1 y exp_2 (exponentes) enteros, entonces se cumple 
+   * int_pow(base, exp_1 + exp_2) == int_pow(base, exp_1) * int_pow(base, exp_2).
+   * 
+   * @par Si exponent > max_exponent_for_base(base), retorna 0 como error.
+   * 
    */
   constexpr inline std::uint64_t int_pow(std::uint64_t base,
                                          std::uint32_t exponent) noexcept {
@@ -570,11 +771,19 @@ namespace NumRepr {
     }
   }
 
+  
   /**
    * @brief Comprueba si un número es un cuadrado perfecto (sobrecarga para uint64_t).
    * @param n El número a comprobar.
    * @return true si n es un cuadrado perfecto, false en caso contrario.
    */
+  template<std::uint64_t n> consteval
+  bool is_perfect_square_ct() noexcept {
+    if constexpr (n == 0ull || n == 1ull) { return true; }
+    constexpr auto root = floorsqrt_ct<n>();
+    return root * root == n;
+  }
+
   constexpr inline
   bool is_perfect_square(std::uint64_t n) noexcept {
     if (n == 0 || n == 1) { return true; }
@@ -592,6 +801,10 @@ namespace NumRepr {
    * @tparam base La base del logaritmo.
    * @tparam n El número del que se calcula el logaritmo.
    * @return El logaritmo entero de n en base `base`.
+   * 
+   * @pre n > 0
+   * 
+   * @post int_pow_ct<base, int_log_ct<base, n>>() <= n < int_pow_ct<base, int_log_ct<base, n> + 1>()
    */
   template <std::uint64_t base, std::int64_t n> consteval
   std::int64_t int_log_ct() noexcept {
@@ -610,6 +823,10 @@ namespace NumRepr {
    * @param base La base del logaritmo.
    * @param n El número del que se calcula el logaritmo.
    * @return El logaritmo entero de n en base `base`.
+   * 
+   * @pre n > 0
+   *
+   * @post  int_pow<base, int_log(base, n)> <= n < int_pow<base, int_log(base, n) + 1>()
    */
   constexpr std::int64_t int_log(std::uint64_t base, std::int64_t n) noexcept {
     if (n <= 0) {
@@ -633,19 +850,87 @@ namespace NumRepr {
   }
 
   /**
-   * @brief Checks if base^exponent is less than or equal to a limit using exponentiation by squaring.
+   * @brief Función auxiliar recursiva para verificar si base^exponent <= limit.
+   * @details Implementa exponenciación por cuadrados de forma recursiva con detección de overflow.
+   * Usada internamente por `pow_leq_limit_ct` y `count_digits_base`.
+   * @tparam result Resultado acumulado parcial.
+   * @tparam cur Base actual elevada a potencia de 2.
+   * @tparam e Exponente restante.
+   * @tparam limit Límite superior a verificar.
+   * @return `true` si result * cur^e <= limit sin overflow, `false` en caso contrario.
+   */
+  template <std::uint64_t result, std::uint64_t cur, std::uint32_t e, std::uint64_t limit>
+  consteval bool pow_leq_limit_ct_helper() noexcept {
+    if constexpr (e == 0) {
+      return result <= limit;
+    } else {
+      // Si el bit menos significativo de e es 1
+      if constexpr (e & 1u) {
+        // Verificar si result * cur excedería el límite
+        if constexpr (result > limit / cur) {
+          return false; // Excedería el límite
+        } else {
+          constexpr std::uint64_t new_result = result * cur;
+          constexpr std::uint32_t new_e = e >> 1u;
+          if constexpr (new_e == 0) {
+            return new_result <= limit;
+          } else {
+            // Verificar overflow en cur * cur
+            if constexpr (cur > std::numeric_limits<std::uint64_t>::max() / cur) {
+              return false; // Overflow, resultado definitivamente > limit
+            } else {
+              constexpr std::uint64_t new_cur = cur * cur;
+              return pow_leq_limit_ct_helper<new_result, new_cur, new_e, limit>();
+            }
+          }
+        }
+      } else {
+        // Bit es 0, no multiplicamos result
+        constexpr std::uint32_t new_e = e >> 1u;
+        if constexpr (new_e == 0) {
+          return result <= limit;
+        } else {
+          // Verificar overflow en cur * cur
+          if constexpr (cur > std::numeric_limits<std::uint64_t>::max() / cur) {
+            return false; // Overflow
+          } else {
+            constexpr std::uint64_t new_cur = cur * cur;
+            return pow_leq_limit_ct_helper<result, new_cur, new_e, limit>();
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * @brief Checks if base^exponent is less than or equal to a limit 
+   * using exponentiation by squaring.
    * @param b The base.
    * @param exp The exponent.
    * @param limit The limit to check against.
    * @return True if b^exp <= limit, false otherwise. This function is overflow-safe.
    */
-  constexpr inline bool pow_leq_limit(std::uint64_t b, std::uint32_t exp, std::uint64_t limit) noexcept {
+  template <std::uint64_t b, std::uint32_t exp, std::uint64_t limit>
+  consteval bool pow_leq_limit_ct() noexcept {
+    if constexpr (b == 0) return 0 <= limit;
+    if constexpr (b == 1) return 1 <= limit;
+    if constexpr (exp == 0) return 1 <= limit;
+    
+    return pow_leq_limit_ct_helper<1ull, b, exp, limit>();
+  }
+
+  constexpr inline bool pow_leq_limit(
+        std::uint64_t b, 
+        std::uint32_t exp, 
+        std::uint64_t limit
+    ) noexcept {
+    
     if (b == 0) return 0 <= limit;
     if (b == 1) return 1 <= limit;
     
-    std::uint64_t result = 1;
-    std::uint64_t cur = b;
-    std::uint32_t e = exp;
+    std::uint64_t result{1ull};
+    std::uint64_t cur{b};
+    std::uint32_t e{exp};
 
     while (e > 0) {
       if (e & 1u) {
@@ -699,9 +984,9 @@ namespace NumRepr {
 
   // ---- util_functs moved here ----
   template<std::uint64_t>
-  consteval std::uint64_t int_pow2ct() noexcept;
+  consteval std::uint64_t int_pow2_ct() noexcept;
   template<std::uint64_t>
-  consteval std::uint64_t int_log2ct() noexcept;
+  consteval std::uint64_t int_log2_ct() noexcept;
 
   constexpr
   std::uint64_t int_pow2(std::uint64_t) noexcept;
@@ -715,10 +1000,10 @@ namespace NumRepr {
    */
   template<std::uint64_t n>
   consteval
-  std::uint64_t int_pow2ct() noexcept {
+  std::uint64_t int_pow2_ct() noexcept {
     if constexpr (n == 0) { return 1ull; }
     else if constexpr (n == 1) { return 2ull; }
-    else { return (2ull*int_pow2ct<n-1ull>()); }
+    else { return (2ull*int_pow2_ct<n-1ull>()); }
   }
 
   /**
@@ -735,7 +1020,7 @@ namespace NumRepr {
 
   // Backwards-compatible aliases
   template<std::uint64_t N>
-  consteval std::uint64_t pow2ct() noexcept { return int_pow2ct<N>(); }
+  consteval std::uint64_t pow2ct() noexcept { return int_pow2_ct<N>(); }
   constexpr std::uint64_t pow2(std::uint64_t n) noexcept { return int_pow2(n); }
 
   /**
@@ -746,7 +1031,7 @@ namespace NumRepr {
   template<std::uint64_t n>
     requires (n>0)
   consteval
-  std::uint64_t int_log2ct() noexcept {
+  std::uint64_t int_log2_ct() noexcept {
     return std::bit_width(n) - 1;
   }
 
@@ -755,7 +1040,7 @@ namespace NumRepr {
    * @param n El número.
    * @return El logaritmo entero en base 2 de n.
    */
-  constexpr
+  constexpr inline
   std::uint64_t int_log2(std::uint64_t n) noexcept {
     if (n == 0) return 0; // Or handle as an error, though std::bit_width(0) is 0.
     return std::bit_width(n) - 1;
@@ -763,57 +1048,341 @@ namespace NumRepr {
 
     // Backwards-compatible aliases
     template<std::uint64_t N>
-    consteval std::uint64_t log2ct() noexcept { return int_log2ct<N>(); }
+    consteval std::uint64_t log2ct() noexcept { return int_log2_ct<N>(); }
     constexpr std::uint64_t log2(std::uint64_t n) noexcept { return int_log2(n); }
+
+    /**
+     * @brief Errores posibles en conversión segura de representación a entero.
+     */
+    enum class ConversionError {
+        InvalidDigit,      ///< Dígito >= base (dígito inválido para la base)
+        Overflow,          ///< Resultado excede uint64_t::max
+        InvalidBase        ///< Base < 2 (base inválida)
+    };
+
+    /**
+     * @brief Convierte representación numérica base-B a uint64_t.
+     * @details Transforma secuencia de dígitos en base B a su valor decimal equivalente.
+     *          Algoritmo de Horner: para dígitos [d₀, d₁, ..., dₙ]:
+     *          resultado = ((...((dₙ * B) + dₙ₋₁) * B) + ...) * B) + d₀
+     * 
+     * @tparam B Base del sistema numérico (2, 8, 10, 16, 256, etc.).
+     * @tparam L Longitud (número de dígitos).
+     * @tparam A Tipo del contenedor de dígitos.
+     * 
+     * @param arg Objeto contenedor que provee acceso a dígitos via operator[](index)().
+     *            Cada dígito debe ser accesible como arg[i](), devolviendo uint64_t.
+     * 
+     * @return Valor entero equivalente en uint64_t.
+     * 
+     * @pre Todos los dígitos son válidos (< B).
+     * @pre No hay overflow (resultado < B^L debe caber en uint64_t).
+     * @pre arg[i]() devuelve valor convertible a uint64_t.
+     * 
+     * @note Complejidad: O(L) - una multiplicación y una suma por dígito.
+     * @note Sin validación de errores. Para versión segura, usa conversion_to_int_safe.
+     * @note Orden little-endian: arg[0] es el dígito menos significativo.
+     * 
+     * @code
+     * // Ejemplo: Convertir 456 en base 10
+     * reg_digs_t<10, 3> rd;
+     * rd[0] = dig_t<10>(6); // unidades
+     * rd[1] = dig_t<10>(5); // decenas
+     * rd[2] = dig_t<10>(4); // centenas
+     * 
+     * uint64_t value = conversion_to_int<10, 3>(rd); // value == 456
+     * 
+     * // Proceso interno:
+     * // acc = rd[2]() = 4
+     * // acc = 4*10 + rd[1]() = 40 + 5 = 45
+     * // acc = 45*10 + rd[0]() = 450 + 6 = 456
+     * @endcode
+     */
+    template <auto B, auto L, typename A>
+    constexpr inline uint64_t conversion_to_int(const A &arg) noexcept {
+        constexpr uint64_t base{static_cast<uint64_t>(B)};
+        uint64_t acc{arg[L - 1]()};
+        for (sint64_t ix{L - 2}; ix > -1; --ix) {
+            acc *= base;
+            acc += static_cast<uint64_t>(arg[ix]());
+        };
+        return acc;
+    }
+
+    /**
+     * @brief Versión segura de conversion_to_int con validación y manejo de errores.
+     * @details Convierte representación base-B a uint64_t verificando:
+     *          - Cada dígito < base (validez)
+     *          - No overflow durante multiplicación y suma
+     *          - Base >= 2 (válida)
+     * 
+     * @tparam B Base del sistema numérico (debe ser >= 2).
+     * @tparam L Longitud (número de dígitos).
+     * @tparam A Tipo del contenedor de dígitos.
+     * 
+     * @param arg Objeto contenedor con dígitos accesibles via operator[](index)().
+     * 
+     * @return std::expected<uint64_t, ConversionError>
+     *         - Éxito: valor convertido
+     *         - Error: InvalidDigit, Overflow, o InvalidBase
+     * 
+     * @note Usa std::expected (C++23) para manejo de errores sin excepciones.
+     * @note Complejidad: O(L) con verificaciones de overflow en cada paso.
+     * 
+     * @code
+     * // Ejemplo: Conversión segura
+     * reg_digs_t<10, 3> rd;
+     * rd[0] = dig_t<10>(6); rd[1] = dig_t<10>(5); rd[2] = dig_t<10>(4);
+     * 
+     * auto result = conversion_to_int_safe<10, 3>(rd);
+     * if (result) {
+     *     std::cout << "Valor: " << *result << '\n'; // 456
+     * } else {
+     *     switch (result.error()) {
+     *         case ConversionError::InvalidDigit: 
+     *             std::cout << "Dígito inválido\n"; break;
+     *         case ConversionError::Overflow: 
+     *             std::cout << "Overflow detectado\n"; break;
+     *         case ConversionError::InvalidBase:
+     *             std::cout << "Base inválida\n"; break;
+     *     }
+     * }
+     * @endcode
+     */
+    template <auto B, auto L, typename A>
+    constexpr inline std::expected<uint64_t, ConversionError> 
+    conversion_to_int_safe(const A &arg) noexcept {
+        constexpr uint64_t base{static_cast<uint64_t>(B)};
+        
+        // Validar base
+        if constexpr (base < 2) {
+            return std::unexpected(ConversionError::InvalidBase);
+        }
+        
+        // Obtener primer dígito y validar
+        uint64_t digit_val = static_cast<uint64_t>(arg[L - 1]());
+        if (digit_val >= base) {
+            return std::unexpected(ConversionError::InvalidDigit);
+        }
+        
+        uint64_t acc{digit_val};
+        constexpr uint64_t max_before_mult = std::numeric_limits<uint64_t>::max() / base;
+        
+        for (sint64_t ix{L - 2}; ix > -1; --ix) {
+            // Verificar overflow en multiplicación
+            if (acc > max_before_mult) {
+                return std::unexpected(ConversionError::Overflow);
+            }
+            
+            digit_val = static_cast<uint64_t>(arg[ix]());
+            
+            // Validar dígito
+            if (digit_val >= base) {
+                return std::unexpected(ConversionError::InvalidDigit);
+            }
+            
+            acc *= base;
+            
+            // Verificar overflow en suma
+            if (acc > std::numeric_limits<uint64_t>::max() - digit_val) {
+                return std::unexpected(ConversionError::Overflow);
+            }
+            
+            acc += digit_val;
+        }
+        
+        return acc;
+    }
+
+    /**
+     * @brief Versión compile-time de conversion_to_int.
+     * @details Idéntica a conversion_to_int pero marcada como consteval para garantizar
+     *          evaluación en tiempo de compilación. Sin validación de errores.
+     * 
+     * @tparam B Base del sistema numérico.
+     * @tparam L Longitud (número de dígitos).
+     * @tparam A Tipo del contenedor de dígitos.
+     * 
+     * @param arg Objeto contenedor con dígitos.
+     * @return Valor convertido en uint64_t.
+     * 
+     * @pre Todos los dígitos son válidos (< B)
+     * @pre No hay overflow (resultado < B^L <= uint64_t::max)
+     * 
+     * @note Uso: Cuando necesitas garantía compile-time sin overhead de validación.
+     * 
+     * @code
+     * constexpr auto value = conversion_to_int_ct<10, 3>(rd); // Compile-time
+     * @endcode
+     */
+    template <auto B, auto L, typename A>
+    consteval inline uint64_t conversion_to_int_ct(const A &arg) noexcept {
+        constexpr uint64_t base{static_cast<uint64_t>(B)};
+        uint64_t acc{arg[L - 1]()};
+        for (sint64_t ix{L - 2}; ix > -1; --ix) {
+            acc *= base;
+            acc += static_cast<uint64_t>(arg[ix]());
+        }
+        return acc;
+    }
+
+    /**
+     * @brief Versión compile-time SEGURA con validación de errores.
+     * @details Combina evaluación compile-time (consteval) con validación completa
+     *          usando std::expected. Ideal para inicializaciones constexpr seguras.
+     * 
+     * @tparam B Base del sistema numérico (debe ser >= 2).
+     * @tparam L Longitud (número de dígitos).
+     * @tparam A Tipo del contenedor de dígitos.
+     * 
+     * @param arg Objeto contenedor con dígitos.
+     * @return std::expected<uint64_t, ConversionError>
+     * 
+     * @note Si falla en compile-time, el compilador generará error descriptivo.
+     * @note Uso: Validación en compile-time con manejo explícito de errores.
+     * 
+     * @code
+     * // Compile-time con validación
+     * constexpr auto result = conversion_to_int_safe_ct<10, 3>(rd);
+     * static_assert(result.has_value(), "Conversión inválida");
+     * constexpr uint64_t value = *result; // 456
+     * @endcode
+     */
+    template <auto B, auto L, typename A>
+    consteval inline std::expected<uint64_t, ConversionError> 
+    conversion_to_int_safe_ct(const A &arg) noexcept {
+        constexpr uint64_t base{static_cast<uint64_t>(B)};
+        
+        // Validar base
+        if constexpr (base < 2) {
+            return std::unexpected(ConversionError::InvalidBase);
+        }
+        
+        // Obtener primer dígito y validar
+        uint64_t digit_val = static_cast<uint64_t>(arg[L - 1]());
+        if (digit_val >= base) {
+            return std::unexpected(ConversionError::InvalidDigit);
+        }
+        
+        uint64_t acc{digit_val};
+        constexpr uint64_t max_before_mult = std::numeric_limits<uint64_t>::max() / base;
+        
+        for (sint64_t ix{L - 2}; ix > -1; --ix) {
+            // Verificar overflow en multiplicación
+            if (acc > max_before_mult) {
+                return std::unexpected(ConversionError::Overflow);
+            }
+            
+            digit_val = static_cast<uint64_t>(arg[ix]());
+            
+            // Validar dígito
+            if (digit_val >= base) {
+                return std::unexpected(ConversionError::InvalidDigit);
+            }
+            
+            acc *= base;
+            
+            // Verificar overflow en suma
+            if (acc > std::numeric_limits<uint64_t>::max() - digit_val) {
+                return std::unexpected(ConversionError::Overflow);
+            }
+            
+            acc += digit_val;
+        }
+        
+        return acc;
+    }
 
     namespace special {
         // NOTE: The following metaprogramming utilities are complex and lack documentation and tests.
         // This section should be reviewed for clarity, purpose, and correctness.
 
+        /**
+         * @brief [DEPRECADO] Usa int_pow_ct en su lugar.
+         * @deprecated Esta función está obsoleta. Usa utilities::int_pow_ct<base, exponent>() directamente.
+         *             Base_pow_to_Size será eliminada en una futura versión.
+         * @details Alias para compatibilidad con código legacy. Redirige a int_pow_ct que usa
+         *          exponenciación por cuadrado (O(log n)) en lugar de recursión simple (O(n)).
+         * @tparam B Base de la potencia.
+         * @tparam L Exponente de la potencia.
+         * @return B^L calculado de manera eficiente.
+         * @note int_pow_ct incluye protección contra overflow con max_exponent_for_base_ct.
+         * @code
+         * // Ejemplo de uso (legacy):
+         * constexpr auto result = Base_pow_to_Size<10, 3>(); // 1000
+         * 
+         * // Recomendado (moderno):
+         * constexpr auto result = int_pow_ct<10, 3>(); // 1000
+         * @endcode
+         */
         template <usint_t B, usint_t L>
+        [[deprecated("Usa utilities::int_pow_ct<base, exponent>() en su lugar")]]
         consteval inline uint64_t Base_pow_to_Size() noexcept {
-            constexpr uint64_t Bc{B};
-            if constexpr (L == 0)
-                return static_cast<uint64_t>(1);
-            else if constexpr (L == 1)
-                return static_cast<uint64_t>(Bc);
-            else if constexpr (L == 2)
-                return static_cast<uint64_t>(Bc * Bc);
-            else
-                return static_cast<uint64_t>(Bc * Base_pow_to_Size<B, L - 1>());
+            static_assert(L <= max_exponent_for_base_ct<B>(),
+                          "Exponente excede el máximo seguro para esta base. Usa max_exponent_for_base_ct<base>() para verificar.");
+            return int_pow_ct<B, L>();
         }
 
+        /**
+         * @brief [DEPRECADO] Estructura template para potencias. Usa int_pow_ct en su lugar.
+         * @deprecated Esta estructura está obsoleta. Usa utilities::int_pow_ct<base, exponent>() directamente.
+         *             pow_B_to_E_t será eliminada en una futura versión.
+         * @details Implementación antigua (C++14/17) usando recursión template con especializaciones.
+         *          Algoritmo O(n) sin protección overflow. Reemplazada por int_pow_ct (O(log n)).
+         * @tparam Base Base de la potencia.
+         * @tparam Exp Exponente de la potencia.
+         * @note Uso legacy: pow_B_to_E_t<10, 3>::value. Moderno: int_pow_ct<10, 3>()
+         */
         template <usint_t Base, usint_t Exp>
-        struct pow_B_to_E_t {
+        struct [[deprecated("Usa int_pow_ct<base, exponent>() en su lugar")]] pow_B_to_E_t {
             static constexpr uint64_t base = static_cast<uint64_t>(Base);
             static constexpr uint64_t exponent = static_cast<uint64_t>(Exp);
             static constexpr uint64_t value = base * (pow_B_to_E_t<base, exponent - 1>::value);
         };
 
         template <usint_t Base>
-        struct pow_B_to_E_t<Base, 2> {
+        struct [[deprecated("Usa int_pow_ct<base, 2>() en su lugar")]] pow_B_to_E_t<Base, 2> {
             static constexpr uint64_t base = static_cast<uint64_t>(Base);
             static constexpr uint64_t exponent = static_cast<uint64_t>(2);
             static constexpr uint64_t value = base * base;
         };
 
         template <usint_t Base>
-        struct pow_B_to_E_t<Base, 1> {
+        struct [[deprecated("Usa int_pow_ct<base, 1>() en su lugar")]] pow_B_to_E_t<Base, 1> {
             static constexpr uint64_t base = static_cast<uint64_t>(Base);
             static constexpr uint64_t exponent = static_cast<uint64_t>(1);
             static constexpr uint64_t value = base;
         };
 
         template <usint_t Base>
-        struct pow_B_to_E_t<Base, 0> {
+        struct [[deprecated("Usa int_pow_ct<base, 0>() en su lugar")]] pow_B_to_E_t<Base, 0> {
             static constexpr uint64_t base = static_cast<uint64_t>(Base);
             static constexpr uint64_t exponent = static_cast<uint64_t>(0);
             static constexpr uint64_t value = static_cast<uint64_t>(1);
         };
 
+        /**
+         * @brief [DEPRECADO] Variable template para potencias. Usa int_pow_ct en su lugar.
+         * @deprecated Esta variable template está obsoleta. Usa utilities::int_pow_ct<base, exponent>() directamente.
+         * @tparam Base Base de la potencia.
+         * @tparam Exp Exponente de la potencia.
+         * @note Migración: Pow_B2L_v<10, 3> → int_pow_ct<10, 3>()
+         */
         template <usint_t Base, usint_t Exp>
+        [[deprecated("Usa int_pow_ct<base, exponent>() en su lugar")]]
         constexpr uint64_t Pow_B2L_v = pow_B_to_E_t<Base, Exp>::value;
 
+        // ============================================================================
+        // CÓDIGO MUERTO: tuple_builder_t, tuple_user_constructor_t, tuple_constr_v
+        // ============================================================================
+        // RAZÓN: Sin uso detectado en el codebase (búsqueda exhaustiva con grep)
+        // ANÁLISIS: Solo llamadas recursivas internas, sin invocaciones externas
+        // FECHA: 12 noviembre 2025
+        // DECISIÓN: Comentado para preservar historial, candidato a eliminación en v2.0
+        // Ver: ANALISIS_NAMESPACE_SPECIAL.md para detalles completos
+        // ============================================================================
+
+        /*
         template <std::int64_t IntObj_ct, std::int64_t BeginIntObj_ct,
                   std::int64_t EndIntObj_ct, std::int64_t Base,
                   template <std::int64_t, std::int64_t> class Funct_tt>
@@ -898,16 +1467,70 @@ namespace NumRepr {
                 Base, 
                 Funct_tt
             >::build();
+        */
 
+        // ============================================================================
+        // FIN CÓDIGO MUERTO
+        // ============================================================================
+
+        /**
+         * @brief [DEPRECADO] Alias de compatibilidad. Usa auxiliary_functions::ConversionError.
+         * @deprecated Esta definición está obsoleta. Usa auxiliary_functions::ConversionError directamente.
+         */
+        using ConversionError [[deprecated("Usa auxiliary_functions::ConversionError")]] = auxiliary_functions::ConversionError;
+
+        /**
+         * @brief [DEPRECADO] Alias de compatibilidad. Usa auxiliary_functions::conversion_to_int.
+         * @deprecated Esta función está obsoleta. Usa auxiliary_functions::conversion_to_int<B, L>(arg) directamente.
+         * 
+         * @details Redirige a auxiliary_functions::conversion_to_int para mantener compatibilidad.
+         *          Ver documentación en auxiliary_functions::conversion_to_int para detalles completos.
+         */
         template <auto B, auto L, typename A>
+        [[deprecated("Usa auxiliary_functions::conversion_to_int")]]
         constexpr inline uint64_t conversion_to_int(const A &arg) noexcept {
-            constexpr uint64_t base{static_cast<uint64_t>(B)};
-            uint64_t acc{arg[L - 1]()};
-            for (sint64_t ix{L - 2}; ix > -1; --ix) {
-                acc *= base;
-                acc += static_cast<uint64_t>(arg[ix]());
-            };
-            return acc;
+            return auxiliary_functions::conversion_to_int<B, L>(arg);
+        }
+
+        /**
+         * @brief [DEPRECADO] Alias de compatibilidad. Usa auxiliary_functions::conversion_to_int_safe.
+         * @deprecated Esta función está obsoleta. Usa auxiliary_functions::conversion_to_int_safe<B, L>(arg) directamente.
+         * 
+         * @details Redirige a auxiliary_functions::conversion_to_int_safe para mantener compatibilidad.
+         *          Ver documentación en auxiliary_functions::conversion_to_int_safe para detalles completos.
+         */
+        template <auto B, auto L, typename A>
+        [[deprecated("Usa auxiliary_functions::conversion_to_int_safe")]]
+        constexpr inline std::expected<uint64_t, auxiliary_functions::ConversionError> 
+        conversion_to_int_safe(const A &arg) noexcept {
+            return auxiliary_functions::conversion_to_int_safe<B, L>(arg);
+        }
+
+        /**
+         * @brief [DEPRECADO] Alias de compatibilidad. Usa auxiliary_functions::conversion_to_int_ct.
+         * @deprecated Esta función está obsoleta. Usa auxiliary_functions::conversion_to_int_ct<B, L>(arg) directamente.
+         * 
+         * @details Redirige a auxiliary_functions::conversion_to_int_ct para mantener compatibilidad.
+         *          Ver documentación en auxiliary_functions::conversion_to_int_ct para detalles completos.
+         */
+        template <auto B, auto L, typename A>
+        [[deprecated("Usa auxiliary_functions::conversion_to_int_ct")]]
+        consteval inline uint64_t conversion_to_int_ct(const A &arg) noexcept {
+            return auxiliary_functions::conversion_to_int_ct<B, L>(arg);
+        }
+
+        /**
+         * @brief [DEPRECADO] Alias de compatibilidad. Usa auxiliary_functions::conversion_to_int_safe_ct.
+         * @deprecated Esta función está obsoleta. Usa auxiliary_functions::conversion_to_int_safe_ct<B, L>(arg) directamente.
+         * 
+         * @details Redirige a auxiliary_functions::conversion_to_int_safe_ct para mantener compatibilidad.
+         *          Ver documentación en auxiliary_functions::conversion_to_int_safe_ct para detalles completos.
+         */
+        template <auto B, auto L, typename A>
+        [[deprecated("Usa auxiliary_functions::conversion_to_int_safe_ct")]]
+        consteval inline std::expected<uint64_t, auxiliary_functions::ConversionError> 
+        conversion_to_int_safe_ct(const A &arg) noexcept {
+            return auxiliary_functions::conversion_to_int_safe_ct<B, L>(arg);
         }
 
     } /// CLOSE NAMESPACE special

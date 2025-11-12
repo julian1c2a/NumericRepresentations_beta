@@ -19,7 +19,7 @@ struct TC2p_variant;
 
 template <template <std::uint64_t I,std::uint64_t J> class TC2p, std::uint64_t... Ks>
 struct TC2p_variant<TC2p, std::index_sequence<Ks...>> {
-  using type = typename std::variant<TC2p<(Ks/lvar_sz)+2ull, auxiliary_functions::int_pow2ct<Ks%lvar_sz>()>...>;
+  using type = typename std::variant<TC2p<(Ks/lvar_sz)+2ull, auxiliary_functions::int_pow2_ct<Ks%lvar_sz>()>...>;
 };
 
 template <template <std::uint64_t I,std::uint64_t J> class TC2p, class TSeq>

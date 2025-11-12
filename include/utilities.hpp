@@ -6,8 +6,7 @@
 #include <array>
 #include <tuple>
 
-namespace utilities
-{
+namespace utilities {
   template <NumRepr::type_traits::unsigned_integral_c UINT_T>
   using uintspair = typename std::array<UINT_T, 2>;
   template <NumRepr::type_traits::unsigned_integral_c UINT_T, UINT_T B>
@@ -37,15 +36,12 @@ namespace utilities
   /// };
   /// type_i es un PACK
   /// tipo std::tupla<class ... Ts>;
-  namespace ugly_pack2tuple_details
-  { // OPEN NAMESPACE UGLY_PACK2TUPLE_DETAILS
+  namespace ugly_pack2tuple_details { // OPEN NAMESPACE UGLY_PACK2TUPLE_DETAILS
     template <typename... Ts>
-    struct pack2tuple
-    {
+    struct pack2tuple {
       using tuple_type = std::tuple<Ts...>;
       static constexpr unsigned pack_size() noexcept { return (sizeof...(Ts)); }
-      constexpr tuple_type operator()(Ts &&...args) noexcept
-      {
+      constexpr tuple_type operator()(Ts &&...args) noexcept {
         tuple_type content = std::make_tuple(std::forward(args...));
         return std::move(content);
       }
@@ -54,8 +50,7 @@ namespace utilities
       using elem_type = typename std::tuple_element<K, tuple_type>::type;
       /// DEVUELVE EL OBJETO ARGUMENTO INDICE J DE LA LISTA DE ARGUMENTOS PASADOS
       template <unsigned J>
-      static constexpr elem_type<J>::type get(Ts &&...args) noexcept
-      {
+      static constexpr elem_type<J>::type get(Ts &&...args) noexcept {
         tuple_type content = std::make_tuple(std::forward(args...));
         elem_type<J> ret{std::get<J>(std::forward(content))};
         return ret;
@@ -77,26 +72,21 @@ namespace utilities
   /// head of tuple_obj is {2}
   /// tail of tuple_obj is {"xyz",3.14159}
 
-  namespace ugly_details
-  { // OPEN NAMESPACE UGLY_DETAILS
+  namespace ugly_details { // OPEN NAMESPACE UGLY_DETAILS
     /// BEGIN: TEMPLATE GENERICO Y SUS ESPECIALIZACIONES
-    struct local_void_t
-    {
-    };
+    struct local_void_t {};
 
     /// COMPRUEBA QUE TODOS LOS TIPOS PASADOS SON EL MISMO
     /// (PARA CONSTRUIR UN ARRAY POR EJEMPLO)
     template <class Head_t, class... Tail_t>
-    struct for_each_same_type
-    {
+    struct for_each_same_type {
       using second_t = typename std::tuple_element<0, std::tuple<Tail_t...>>::type;
       constexpr static bool are_same_type_v =
           ((std::is_same_v<Head_t, second_t>) &&
            (for_each_same_type<Tail_t...>::are_same_type_v));
     };
     template <class Head_t>
-    struct for_each_same_type<Head_t>
-    {
+    struct for_each_same_type<Head_t> {
       constexpr static bool are_same_type_v = true;
     };
   } // CLOSE NAMESPACE UGLY_DETAILS
@@ -111,12 +101,10 @@ namespace utilities
   concept there_is_one_or_more_c = requires(Ts...) { ((sizeof...(Ts)) > 0); };
 
   /// END: 	TEMPLATE GENERICO Y SUS ESPECIALIZACIONES
-  namespace ugly_pack_details
-  {
+  namespace ugly_pack_details {
     template <typename... Ts>
       requires(all_are_the_same_type_c<Ts...> && there_is_one_or_more_c<Ts...>)
-    struct pack2array
-    {
+    struct pack2array {
       static constexpr std::size_t size = sizeof...(Ts);
 
       // Simplificado: usar std::common_type_t en lugar de template complejo
@@ -125,15 +113,13 @@ namespace utilities
       using elem_type = inner_type;
 
       // Operador simple compatible con MSVC
-      constexpr array_type operator()(Ts... args) const noexcept
-      {
+      constexpr array_type operator()(Ts... args) const noexcept {
         return array_type{static_cast<inner_type>(args)...};
       }
 
       // Versión simplificada de get
       template <std::size_t J>
-      static constexpr elem_type get(Ts... args) noexcept
-      {
+      static constexpr elem_type get(Ts... args) noexcept {
         array_type content{static_cast<inner_type>(args)...};
         return content[J];
       }
@@ -141,13 +127,11 @@ namespace utilities
       // for_each simplificado para MSVC
       template <std::size_t... I>
       static constexpr void for_each_impl(array_type &iarray, const Ts... args,
-                                          std::index_sequence<I...>) noexcept
-      {
+                                          std::index_sequence<I...>) noexcept {
         ((iarray[I] = static_cast<inner_type>(args)), ...);
       }
 
-      static constexpr void for_each(array_type &iarray, const Ts... args) noexcept
-      {
+      static constexpr void for_each(array_type &iarray, const Ts... args) noexcept {
         for_each_impl(iarray, args..., std::make_index_sequence<sizeof...(args)>{});
       }
     };
@@ -157,8 +141,7 @@ namespace utilities
   /// EN UN ARRAY CON UN ORDEN, EN TIEMPO DE COMPILACIÓN
   template <class... Ts>
     requires(all_are_the_same_type_c<Ts...> && there_is_one_or_more_c<Ts...>)
-  void assign_with_order(auto &dest, const Ts &...args) noexcept
-  {
+  void assign_with_order(auto &dest, const Ts &...args) noexcept {
     using type = typename ugly_pack_details::pack2array<Ts...>;
     type::for_each(dest, args...);
     return;
@@ -169,28 +152,15 @@ namespace utilities
   ///
   /// donde los "args" son de tipo "Ts" (que es uno solo, todos iguales entre si)
 
-  namespace special
-  {
+  namespace special {
 
-    /// FORMA SENCILLA DE CONSEGUIR POTENCIAS DE UNA BASE EN COMPILE TIME
-    template <NumRepr::usint_t B, NumRepr::usint_t L>
-    consteval inline NumRepr::uint64_t Base_pow_to_Size() noexcept
-    {
-      constexpr NumRepr::uint64_t Bc{B};
-      if constexpr (L == 0)
-        return static_cast<NumRepr::uint64_t>(1);
-      else if constexpr (L == 1)
-        return static_cast<NumRepr::uint64_t>(Bc);
-      else if constexpr (L == 2)
-        return static_cast<NumRepr::uint64_t>(Bc * Bc);
-      else
-        return static_cast<NumRepr::uint64_t>(Bc * Base_pow_to_Size<B, L - 1>());
-    }
+    // Base_pow_to_Size: Eliminado duplicado. Usa la versión en auxiliary_functions.hpp
+    // que ahora redirige a int_pow_ct (O(log n) con protección overflow).
 
     /// FORMA ANTIGUA PERO SEGURA DE CONSEGUIR POTENCIAS DE UNA BASE EN COMPILE TIME
+    /// [DEPRECADO] Usa int_pow_ct en su lugar. Ver auxiliary_functions.hpp para documentación completa.
     template <NumRepr::usint_t Base, NumRepr::usint_t Exp>
-    struct pow_B_to_E_t
-    {
+    struct [[deprecated("Usa int_pow_ct<base, exponent>() en su lugar")]] pow_B_to_E_t {
       static constexpr NumRepr::uint64_t base =
           static_cast<NumRepr::uint64_t>(Base);
       static constexpr NumRepr::uint64_t exponent =
@@ -200,8 +170,7 @@ namespace utilities
     };
 
     template <NumRepr::usint_t Base>
-    struct pow_B_to_E_t<Base, 2>
-    {
+    struct [[deprecated("Usa int_pow_ct<base, 2>() en su lugar")]] pow_B_to_E_t<Base, 2> {
       static constexpr NumRepr::uint64_t base =
           static_cast<NumRepr::uint64_t>(Base);
       static constexpr NumRepr::uint64_t exponent =
@@ -210,8 +179,7 @@ namespace utilities
     };
 
     template <NumRepr::usint_t Base>
-    struct pow_B_to_E_t<Base, 1>
-    {
+    struct [[deprecated("Usa int_pow_ct<base, 1>() en su lugar")]] pow_B_to_E_t<Base, 1> {
       static constexpr NumRepr::uint64_t base =
           static_cast<NumRepr::uint64_t>(Base);
       static constexpr NumRepr::uint64_t exponent =
@@ -220,8 +188,7 @@ namespace utilities
     };
 
     template <NumRepr::usint_t Base>
-    struct pow_B_to_E_t<Base, 0>
-    {
+    struct [[deprecated("Usa int_pow_ct<base, 0>() en su lugar")]] pow_B_to_E_t<Base, 0> {
       static constexpr NumRepr::uint64_t base =
           static_cast<NumRepr::uint64_t>(Base);
       static constexpr NumRepr::uint64_t exponent =
@@ -230,9 +197,22 @@ namespace utilities
           static_cast<NumRepr::uint64_t>(1);
     };
 
+    /// [DEPRECADO] Usa int_pow_ct<base, exponent>() en su lugar.
     template <NumRepr::usint_t Base, NumRepr::usint_t Exp>
+    [[deprecated("Usa int_pow_ct<base, exponent>() en su lugar")]]
     constexpr NumRepr::uint64_t Pow_B2L_v = pow_B_to_E_t<Base, Exp>::value;
 
+    // ============================================================================
+    // CÓDIGO MUERTO: tuple_builder_t, tuple_user_constructor_t, tuple_constr_v
+    // ============================================================================
+    // RAZÓN: Sin uso detectado en el codebase (búsqueda exhaustiva con grep)
+    // ANÁLISIS: Solo llamadas recursivas internas, sin invocaciones externas
+    // FECHA: 12 noviembre 2025
+    // DECISIÓN: Comentado para preservar historial, candidato a eliminación en v2.0
+    // Ver: ANALISIS_NAMESPACE_SPECIAL.md para detalles completos
+    // ============================================================================
+
+    /*
     /// OBTENER UNA TUPLA EN TIEMPO DE COMPILACION DONDE CADA POSICION ESTA
     /// INICIALIZADA PERO CON UNA LLAMADA DISTINTA A FUNCION POR CADA INDICE
     /// EN TIEMPO DE COMPILACION
@@ -327,6 +307,11 @@ namespace utilities
       requires(BeginIntObj_ct < EndIntObj_ct)
     constexpr auto tuple_constr_v = tuple_user_constructor_t<
         BeginIntObj_ct, EndIntObj_ct, Base, Funct_tt>::build();
+    */
+
+    // ============================================================================
+    // FIN CÓDIGO MUERTO
+    // ============================================================================
 
     // ========================================
     // REFACTORED TEMPLATE METAPROGRAMMING - MSVC COMPATIBLE
@@ -343,13 +328,10 @@ namespace utilities
 
     // Helper for recursive template expansion (MSVC-safe approach)
     template <std::size_t Index, std::size_t End>
-    struct ct_for_impl
-    {
+    struct ct_for_impl {
       template <std::size_t Base, typename Functor, typename... Ts>
-      static constexpr void apply(std::tuple<Ts...> const &t, Functor &&func) noexcept
-      {
-        if constexpr (Index < End)
-        {
+      static constexpr void apply(std::tuple<Ts...> const &t, Functor &&func) noexcept {
+        if constexpr (Index < End) {
           func.template operator()<Base, Index>(std::get<Index>(t));
           ct_for_impl<Index + 1, End>::template apply<Base>(t, std::forward<Functor>(func));
         }
@@ -358,11 +340,9 @@ namespace utilities
 
     // Specialization to end recursion
     template <std::size_t End>
-    struct ct_for_impl<End, End>
-    {
+    struct ct_for_impl<End, End> {
       template <std::size_t Base, typename Functor, typename... Ts>
-      static constexpr void apply(std::tuple<Ts...> const &, Functor &&) noexcept
-      {
+      static constexpr void apply(std::tuple<Ts...> const &, Functor &&) noexcept {
         // Base case - do nothing
       }
     };
@@ -395,8 +375,7 @@ namespace utilities
      * ```
      */
     template <std::size_t start, std::size_t end, std::size_t Base, typename Functor, typename... Ts>
-    constexpr void ct_for(std::tuple<Ts...> const &t, Functor &&func) noexcept
-    {
+    constexpr void ct_for(std::tuple<Ts...> const &t, Functor &&func) noexcept {
       ct_for_impl<start, end>::template apply<Base>(t, std::forward<Functor>(func));
     }
 
@@ -406,11 +385,9 @@ namespace utilities
 
     // Helper struct for legacy template template parameter adaptation (must be defined outside)
     template <template <typename, std::size_t, std::size_t> typename Funct_tt>
-    struct legacy_wrapper_functor
-    {
+    struct legacy_wrapper_functor {
       template <std::size_t B, std::size_t Index>
-      constexpr void operator()(auto &&element) const
-      {
+      constexpr void operator()(auto &&element) const {
         using element_type = std::decay_t<decltype(element)>;
         Funct_tt<element_type, B, Index>{}(element);
       }
@@ -424,15 +401,13 @@ namespace utilities
     template <std::size_t start, std::size_t end, std::size_t Base,
               template <typename, std::size_t, std::size_t> typename Funct_tt,
               typename... Ts>
-    constexpr void ct_for_legacy(std::tuple<Ts...> const &t) noexcept
-    {
+    constexpr void ct_for_legacy(std::tuple<Ts...> const &t) noexcept {
       ct_for<start, end, Base>(t, legacy_wrapper_functor<Funct_tt>{});
     }
 
     /// CONVERSION DE REGISTRO DE DIGITOS A ENTERO EN TIEMPO DE COMPILACION
     template <auto B, auto L, typename A>
-    constexpr inline NumRepr::uint64_t conversion_to_int(const A &arg) noexcept
-    {
+    constexpr inline NumRepr::uint64_t conversion_to_int(const A &arg) noexcept {
       using NumRepr::sint64_t;
       using NumRepr::uint64_t;
       constexpr uint64_t base{static_cast<uint64_t>(B)};
@@ -441,7 +416,7 @@ namespace utilities
       {
         acc *= base;
         acc += static_cast<uint64_t>(arg[ix]());
-      };
+      }
       return acc;
     }
 

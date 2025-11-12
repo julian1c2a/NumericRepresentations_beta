@@ -5,15 +5,15 @@ call "D:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary
 if not exist build_test mkdir build_test
 
 echo.
-echo === Compilando test_auxiliary_functions.cpp ===
-cl /EHsc /std:c++latest /I include /I tmp\\Catch2\\src /I build-gcc\\_deps\\catch2-build\\generated-includes /c tests\\test_auxiliary_functions.cpp /Fo:build_test\\test_auxiliary_functions.obj
+echo === Compilando test_pack2array.cpp ===
+cl /EHsc /std:c++latest /I include /I tmp\\Catch2\\src /I build-gcc\\_deps\\catch2-build\\generated-includes /c tests\\test_pack2array.cpp /Fo:build_test\\test_pack2array.obj
 cl /EHsc /std:c++latest /I tmp\\Catch2\\src /I build-gcc\\_deps\\catch2-build\\generated-includes /c tmp\\Catch2\\extras\\catch_amalgamated.cpp /Fo:build_test\\catch_amalgamated.obj
-link /out:build_test\\test_auxiliary_functions.exe build_test\\test_auxiliary_functions.obj build_test\\catch_amalgamated.obj
+link /out:build_test\\test_pack2array.exe build_test\\test_pack2array.obj build_test\\catch_amalgamated.obj
 
 if %ERRORLEVEL% EQU 0 (
     echo.
-    echo === Ejecutando test basico ===
-    build_test\\test_auxiliary_functions.exe
+    echo === Ejecutando tests ===
+    build_test\\test_pack2array.exe
 ) else (
     echo Error en compilacion
 )

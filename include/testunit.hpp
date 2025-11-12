@@ -28,7 +28,15 @@ convert_to_int(const reg_digs_t<B, L> &arg) noexcept {
   return accum;
 }
 
+/**
+ * @brief [DEPRECADO] Wrapper para Base_pow_to_Size. Usa utilities::int_pow_ct en su lugar.
+ * @deprecated Esta función está obsoleta. Usa utilities::int_pow_ct<base, exponent>() directamente.
+ * @tparam B Base de la potencia.
+ * @tparam L Exponente de la potencia.
+ * @return B^L calculado de manera eficiente.
+ */
 template <std::size_t B, std::size_t L>
+[[deprecated("Usa utilities::int_pow_ct<base, exponent>() en su lugar")]]
 constexpr inline uint64_t Base_pow_to_Size() noexcept {
   namespace us = utilities::special;
   return us::Base_pow_to_Size<B, L>();
@@ -59,9 +67,9 @@ test_result_t test_div_fediv_entre_dos_objetos_tipo_reg_digs() {
   reg_digs_t dndo{};
   reg_digs_t dsor{};
   dndo = 0;
-  for (size_t dndo_idx{0}; dndo_idx < us::Pow_B2L_v<Base, Long>; ++dndo_idx) {
+  for (size_t dndo_idx{0}; dndo_idx < us::int_pow_ct<Base, Long>(); ++dndo_idx) {
     dsor = 1;
-    for (size_t dsor_idx{1}; dsor_idx < us::Pow_B2L_v<Base, Long>; ++dsor_idx) {
+    for (size_t dsor_idx{1}; dsor_idx < us::int_pow_ct<Base, Long>(); ++dsor_idx) {
       const auto dndo_int{convert_to_int<Base, Long>(dndo)};
       const auto dsor_int{convert_to_int<Base, Long>(dsor)};
 

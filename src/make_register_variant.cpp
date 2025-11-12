@@ -28,7 +28,7 @@ namespace NumRepr {
 //		template<std::uint64_t ...Ixs>
 //		constexpr auto fn(std::index_sequence<Ixs...>) {
 //			const functsArray_t<bvar_sz,lvar_sz> result{
-//				(local_fn<(Ixs/lvar_sz)+2,NumRepr::auxiliary_functions::int_pow2ct<Ixs%lvar_sz>()>(std::int64_t)
+//				(local_fn<(Ixs/lvar_sz)+2,NumRepr::auxiliary_functions::int_pow2_ct<Ixs%lvar_sz>()>(std::int64_t)
 //				...)
 //			};
 //			return result;
