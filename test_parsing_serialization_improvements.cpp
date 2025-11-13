@@ -120,32 +120,64 @@ void test_constexpr_parsing() {
 }
 
 void test_to_cstr_function() {
-    std::cout << "\n=== TO_CSTR CONSTEVAL FUNCTION (Needs Implementation) ===" << std::endl;
+    std::cout << "\n=== TO_CSTR CONSTEVAL FUNCTION ===" << std::endl;
     
-    // Note: to_cstr doesn't exist yet, this is what we want to test after implementation
-    std::cout << "[INFO] to_cstr() function needs to be implemented" << std::endl;
-    std::cout << "       Expected signature: static consteval const char* to_cstr() const;" << std::endl;
-    std::cout << "       Expected output format: \"d[N]BM\" where N=value, M=base" << std::endl;
+    // Helper for compile-time string comparison
+    constexpr auto cstr_equal = [](const char* a, const char* b) constexpr {
+        std::size_t i = 0;
+        while (a[i] != '\0' && b[i] != '\0') {
+            if (a[i] != b[i]) return false;
+            i++;
+        }
+        return a[i] == b[i];
+    };
     
-    // When implemented, tests should look like:
-    /*
-    constexpr dig_t<10> d(7);
-    constexpr auto str = d.to_cstr();
-    test_case("to_cstr() returns correct format", std::strcmp(str, "d[7]B10") == 0);
+    // Test basic to_cstr functionality
+    constexpr dig_t<10> d1(7);
+    constexpr auto str1 = d1.to_cstr();
+    test_case("to_cstr() returns array", str1.size() > 0);
+    test_case("to_cstr() format d[7]B10", std::strcmp(str1.data(), "d[7]B10") == 0);
     
-    // Verify it's compile-time evaluable
-    constexpr dig_t<16> hex(15);
-    constexpr auto hex_str = hex.to_cstr();
-    test_case("to_cstr() works at compile time", std::strcmp(hex_str, "d[15]B16") == 0);
+    // Test with different bases
+    constexpr dig_t<16> d2(15);
+    constexpr auto str2 = d2.to_cstr();
+    test_case("to_cstr() format d[15]B16", std::strcmp(str2.data(), "d[15]B16") == 0);
+    
+    constexpr dig_t<2> d3(1);
+    constexpr auto str3 = d3.to_cstr();
+    test_case("to_cstr() format d[1]B2", std::strcmp(str3.data(), "d[1]B2") == 0);
+    
+    // Test with zero
+    constexpr dig_t<10> d4(0);
+    constexpr auto str4 = d4.to_cstr();
+    test_case("to_cstr() format d[0]B10", std::strcmp(str4.data(), "d[0]B10") == 0);
+    
+    // Test with max value for base
+    constexpr dig_t<10> d5(9);
+    constexpr auto str5 = d5.to_cstr();
+    test_case("to_cstr() format d[9]B10", std::strcmp(str5.data(), "d[9]B10") == 0);
     
     // Test round-trip: to_cstr -> from_cstr
     constexpr dig_t<10> original(8);
     constexpr auto cstr = original.to_cstr();
-    constexpr dig_t<10> restored(cstr);
+    constexpr dig_t<10> restored(cstr.data());
     test_case("Round-trip to_cstr -> from_cstr", original.get() == restored.get());
-    */
     
-    test_case("to_cstr() implemented", false); // Will pass when implemented
+    // Test with larger base
+    constexpr dig_t<256> d6(255);
+    constexpr auto str6 = d6.to_cstr();
+    test_case("to_cstr() format d[255]B256", std::strcmp(str6.data(), "d[255]B256") == 0);
+    
+    // Test compile-time evaluation using constexpr lambda
+    constexpr auto compile_time_test = []() constexpr {
+        constexpr dig_t<10> d(42);  // 42 % 10 = 2
+        constexpr auto s = d.to_cstr();
+        // Manual character-by-character check for constexpr context
+        // Note: 42 % 10 = 2, so we expect "d[2]B10"
+        return s[0] == 'd' && s[1] == '[' && s[2] == '2' && 
+               s[3] == ']' && s[4] == 'B' && s[5] == '1' && s[6] == '0' && s[7] == '\0';
+    };
+    test_case("to_cstr() evaluates at compile time", compile_time_test());
 }
 
 void test_existing_to_string() {

@@ -978,31 +978,79 @@ namespace NumRepr {
     }
 
     // =========================================================================
+    // COMPILE-TIME STRING HELPERS FOR to_cstr()
+    // =========================================================================
+    
+    /// @brief Calcula el número de dígitos decimales de un número en tiempo de compilación
+    /// @param n Número a contar dígitos
+    /// @return Cantidad de dígitos decimales necesarios
+    static constexpr std::size_t count_decimal_digits(std::uint64_t n) noexcept {
+      if (n == 0) return 1;
+      std::size_t count = 0;
+      while (n > 0) {
+        n /= 10;
+        count++;
+      }
+      return count;
+    }
+    
+    /// @brief Convierte un número a string en un buffer en tiempo de compilación
+    /// @param n Número a convertir
+    /// @param buffer Buffer donde escribir el resultado
+    /// @param len Longitud del buffer
+    /// @return Cantidad de caracteres escritos
+    static constexpr std::size_t uint_to_cstr_buffer(
+        std::uint64_t n, char* buffer, std::size_t len) noexcept {
+      if (len == 0) return 0;
+      
+      if (n == 0) {
+        buffer[0] = '0';
+        return 1;
+      }
+      
+      std::size_t digits = count_decimal_digits(n);
+      if (digits > len) return 0;  // Buffer too small
+      
+      for (std::size_t i = digits; i > 0; i--) {
+        buffer[i - 1] = '0' + (n % 10);
+        n /= 10;
+      }
+      
+      return digits;
+    }
+
+    // =========================================================================
     // TODO: MEJORAS PENDIENTES EN PARSING Y SERIALIZACIÓN
     // =========================================================================
     // 
-    // 1. **to_cstr consteval**: Crear versión consteval de to_string para C-strings
-    //    - Permitiría literales compile-time sin depender de std::to_string
+    // ✅ 1. **to_cstr consteval**: IMPLEMENTADO
+    //    - Versión consteval de to_string para C-strings
+    //    - Permite literales compile-time sin depender de std::to_string
     //    - Formato de salida: "d[N]BM" donde N=valor, M=base
-    //    - Beneficio: from_cstr() podría usarse completamente en compile-time
+    //    - Beneficio: from_cstr() puede usarse completamente en compile-time
     //
-    // 2. **Parser incompleto**: Actualmente solo soporta 2 de 4 combinaciones
-    //    La especificación completa debería ser:
+    // ✅ 2. **Parser completo**: IMPLEMENTADO
+    //    La especificación completa ahora soportada:
     //      formato ::= prefijo separadores número "B" base
     //      prefijo ::= "d" | "dig"
     //      separadores ::= "[" ... "]" | "#" ... "#"
     //    
     //    Estado actual:
-    //      ✅ "d[N]BM"     - soportado (línea 992)
-    //      ✅ "dig#N#BM"   - soportado (línea 996)
-    //      ❌ "d#N#BM"     - NO soportado (falta implementar)
-    //      ❌ "dig[N]BM"   - NO soportado (falta implementar)
+    //      ✅ "d[N]BM"     - soportado
+    //      ✅ "dig#N#BM"   - soportado
+    //      ✅ "d#N#BM"     - soportado (NUEVO)
+    //      ✅ "dig[N]BM"   - soportado (NUEVO)
     //
-    //    Razón: parse_impl() asume d→[...] y dig→#...# de forma fija
-    //    Solución: Separar detección de prefijo y separadores independientemente
+    //    Solución aplicada: parse_impl() ahora detecta prefijo y separadores
+    //    de forma independiente, permitiendo todas las combinaciones.
     // =========================================================================
 
     /// IMPLEMENTACIÓN DE LA FUNCIÓN DE PARSEO DESDE UNA CADENA DE CARACTERES CSTR
+    /// Soporta las 4 combinaciones de formato:
+    ///   - "d[N]BM"     (prefijo corto, separadores [ ])
+    ///   - "dig#N#BM"   (prefijo largo, separadores # #)
+    ///   - "d#N#BM"     (prefijo corto, separadores # #)
+    ///   - "dig[N]BM"   (prefijo largo, separadores [ ])
     static constexpr 
     std::pair<uint_t, bool> parse_impl(
         const char *str, std::size_t size, 
@@ -1010,49 +1058,64 @@ namespace NumRepr {
       if (!str || size < 4) return {0, false};
 
       std::size_t pos = 0;
-      bool is_strict_format = false;
-
-      if (size >= 4 && str[0] == 'd' && str[1] == '[') {
-        is_strict_format = true;
-        pos = 2;
+      
+      // Paso 1: Detectar prefijo ("d" o "dig")
+      bool has_short_prefix = false;  // "d"
+      if (size >= 2 && str[0] == 'd' && str[1] == 'i' && 
+          pos + 2 < size && str[2] == 'g') {
+        // Prefijo "dig"
+        pos = 3;
+        has_short_prefix = false;
       }
-      else if (size >= 6 && str[0] == 'd' && str[1] == 'i' && str[2] == 'g' && str[3] == '#') {
-        is_strict_format = false;
-        pos = 4;
+      else if (str[0] == 'd') {
+        // Prefijo "d"
+        pos = 1;
+        has_short_prefix = true;
       }
-      else { return {0, false}; }
+      else {
+        return {0, false};
+      }
 
+      // Paso 2: Detectar separador de apertura ("[" o "#")
+      if (pos >= size) return {0, false};
+      
+      char open_sep = str[pos];
+      char close_sep;
+      
+      if (open_sep == '[') {
+        close_sep = ']';
+        pos++;
+      }
+      else if (open_sep == '#') {
+        close_sep = '#';
+        pos++;
+      }
+      else {
+        return {0, false};
+      }
+
+      // Paso 3: Leer el número hasta encontrar el separador de cierre
       uint_t numero = 0;
       std::size_t digit_count = 0;
 
-      if (is_strict_format) {
-        while (pos < size && str[pos] != ']') {
-          if (str[pos] >= '0' && str[pos] <= '9') {
-            sig_uint_t temp = static_cast<sig_uint_t>(numero) * 10 + (str[pos] - '0');
-            numero = static_cast<uint_t>(temp % static_cast<sig_uint_t>(base_template));
-            digit_count++;
-          } else { return {0, false}; }
-          pos++;
+      while (pos < size && str[pos] != close_sep) {
+        if (str[pos] >= '0' && str[pos] <= '9') {
+          sig_uint_t temp = static_cast<sig_uint_t>(numero) * 10 + (str[pos] - '0');
+          numero = static_cast<uint_t>(temp % static_cast<sig_uint_t>(base_template));
+          digit_count++;
+        } else { 
+          return {0, false}; 
         }
-
-        if (pos >= size || str[pos] != ']') return {0, false};
-        pos++;
-      } else {
-        while (pos < size && str[pos] != '#') {
-          if (str[pos] >= '0' && str[pos] <= '9') {
-            sig_uint_t temp = static_cast<sig_uint_t>(numero) * 10 + (str[pos] - '0');
-            numero = static_cast<uint_t>(temp % static_cast<sig_uint_t>(base_template));
-            digit_count++;
-          } else { return {0, false}; }
-          pos++;
-        }
-
-        if (pos >= size || str[pos] != '#') return {0, false};
         pos++;
       }
 
+      // Paso 4: Verificar separador de cierre
+      if (pos >= size || str[pos] != close_sep) return {0, false};
+      pos++;
+
       if (digit_count == 0) return {0, false};
 
+      // Paso 5: Verificar "B" seguido de la base
       if (pos >= size || str[pos] != 'B') return {0, false};
       pos++;
 
@@ -1084,6 +1147,65 @@ namespace NumRepr {
       const std::string ret{"d[" + num + "]" + radix_str()};
       return ret;
     }
+
+    /**
+     * @brief Conversión consteval a C-string en tiempo de compilación
+     * @return Array de caracteres con formato "d[N]BM" donde N=valor, M=base
+     * @details Esta función permite generar literales de cadena en tiempo de 
+     *          compilación sin depender de std::to_string. El resultado puede
+     *          usarse directamente con from_cstr() en contextos constexpr.
+     *          
+     *          Formato de salida: "d[N]BM"
+     *          - Prefijo estricto "d[" para consistencia con to_string()
+     *          - N: valor decimal del dígito (0 a B-1)
+     *          - Sufijo "]B" seguido de la base M en decimal
+     * 
+     * @note Template con std::array para retorno por valor en consteval
+     * @note Tamaño máximo: "d[" (2) + 20 dígitos valor + "]B" (2) + 20 dígitos base + '\0' = 45
+     * 
+     * @code
+     * constexpr dig_t<10> d(7);
+     * constexpr auto str = d.to_cstr();
+     * // str.data() == "d[7]B10"
+     * 
+     * // Round-trip compile-time
+     * constexpr dig_t<10> restored(str.data());
+     * static_assert(restored.get() == 7);
+     * @endcode
+     */
+    consteval auto to_cstr() const noexcept {
+      // Formato: "d[N]BM\0"
+      // Máximo: "d[" + 20 dígitos + "]B" + 20 dígitos + '\0' = 45 chars
+      std::array<char, 45> result{};
+      std::size_t pos = 0;
+      
+      // Escribir prefijo "d["
+      result[pos++] = 'd';
+      result[pos++] = '[';
+      
+      // Escribir valor del dígito
+      char num_buffer[21] = {};  // Suficiente para uint64_t
+      std::size_t num_len = uint_to_cstr_buffer(m_d, num_buffer, 20);
+      for (std::size_t i = 0; i < num_len; i++) {
+        result[pos++] = num_buffer[i];
+      }
+      
+      // Escribir "]B"
+      result[pos++] = ']';
+      result[pos++] = 'B';
+      
+      // Escribir base
+      char base_buffer[21] = {};
+      std::size_t base_len = uint_to_cstr_buffer(B, base_buffer, 20);
+      for (std::size_t i = 0; i < base_len; i++) {
+        result[pos++] = base_buffer[i];
+      }
+      
+      // Null terminator (ya inicializado a 0)
+      result[pos] = '\0';
+      
+      return result;
+    }
   }; /// END CLASS DIG_T
 
   /// FUNCIÓN DE PARSEO DESDE UNA CADENA DE CARACTERES (STATIC)
@@ -1096,7 +1218,9 @@ namespace NumRepr {
     if (!success)
     {
       throw std::invalid_argument("Invalid dig_t format: expected 'd[number]B" +
-                                  std::to_string(Base) + "' or 'dig#number#B" +
+                                  std::to_string(Base) + "', 'dig#number#B" +
+                                  std::to_string(Base) + "', 'd#number#B" +
+                                  std::to_string(Base) + "', or 'dig[number]B" +
                                   std::to_string(Base) + "'");
     }
 
@@ -1122,7 +1246,9 @@ namespace NumRepr {
     if (!success)
     {
       throw std::invalid_argument("Invalid dig_t format: expected 'd[number]B" +
-                                  std::to_string(Base) + "' or 'dig#number#B" +
+                                  std::to_string(Base) + "', 'dig#number#B" +
+                                  std::to_string(Base) + "', 'd#number#B" +
+                                  std::to_string(Base) + "', or 'dig[number]B" +
                                   std::to_string(Base) + "'");
     }
 
