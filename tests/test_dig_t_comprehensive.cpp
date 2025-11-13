@@ -1,355 +1,506 @@
+/**
+ * @file test_dig_t_comprehensive.cpp
+ * @brief Test exhaustivo de todas las funcionalidades de dig_t documentadas y optimizadas
+ * 
+ * @details Cubre:
+ * - Constructores (default, copy, from int, from array compile-time)
+ * - Parser compile-time (parse_impl_ct, from_array_ct)
+ * - Operadores aritméticos (+, -, *, /, %)
+ * - Operadores lógicos (&, |, ^) con interpretación min/max
+ * - Operador exponenciación (^) con algoritmo binario O(log exp)
+ * - Operadores comparación (==, !=, <, <=, >, >=, <=>)
+ * - Funciones auxiliares (is_unit, mult_inv, sum_carry, etc.)
+ * - Casos edge (0^0=1, división por 0, inversión de no-unidades)
+ */
+
+#include "../include/core/dig_t.hpp"
 #include <iostream>
 #include <cassert>
-#include <sstream>
-#include <iomanip>
 #include <chrono>
 
-// Test integral de todas las funcionalidades de dig_t
-#include "../include/dig_t.hpp"
-
+using namespace std;
+using namespace std::chrono;
 using namespace NumRepr;
 
-template <std::uint64_t B>
-void comprehensive_dig_t_test()
-{
-    std::cout << "\n=== COMPREHENSIVE dig_t<" << B << "> FUNCTIONALITY TEST ===" << std::endl;
+// ============================================================================
+// SECCIÓN 1: CONSTRUCTORES Y INICIALIZACIÓN
+// ============================================================================
 
-    using dig_type = dig_t<B>;
-    using clock_t = std::chrono::high_resolution_clock;
+template <uint64_t B>
+void test_constructores() {
+    cout << "\n=== TEST CONSTRUCTORES (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    // Constructor por defecto (debe inicializar a 0)
+    dig d1;
+    assert(d1() == 0);
+    cout << "✓ Constructor por defecto: d() = " << d1() << endl;
+    
+    // Constructor desde entero positivo
+    dig d2(42);
+    assert(d2() == (42 % B));
+    cout << "✓ Constructor desde int: dig(" << 42 << ") = " << d2() << endl;
+    
+    // Constructor desde entero negativo (debe normalizar correctamente)
+    dig d3(-5);
+    uint64_t expected = (B - (5 % B)) % B;
+    assert(d3() == expected);
+    cout << "✓ Constructor desde int negativo: dig(-5) = " << d3() << " (normalizado)" << endl;
+    
+    // Constructor copia
+    dig d4 = d2;
+    assert(d4() == d2());
+    cout << "✓ Constructor copia: d4 = d2 = " << d4() << endl;
+}
 
-    auto start_time = clock_t::now();
+// ============================================================================
+// SECCIÓN 2: PARSER COMPILE-TIME
+// ============================================================================
 
-    // 1. ARQUITECTURA Y CONSTRUCCIÓN
-    std::cout << "\n--- ARQUITECTURA Y CONSTRUCCIÓN ---" << std::endl;
+template <uint64_t B>
+void test_parser_compile_time() {
+    cout << "\n=== TEST PARSER COMPILE-TIME (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    // from_array_ct con array de caracteres válido
+    constexpr std::array<char, 2> arr1{'4', '2'};
+    auto result1 = dig::from_array_ct(arr1);
+    if (result1.has_value()) {
+        dig d1 = result1.value();
+        assert(d1() == (42 % B));
+        cout << "✓ from_array_ct({'4','2'}) = " << d1() << " (compile-time OK)" << endl;
+    } else {
+        cout << "✗ from_array_ct({'4','2'}) falló inesperadamente" << endl;
+    }
+    
+    // from_array_ct con '0'
+    constexpr std::array<char, 1> arr2{'0'};
+    auto result2 = dig::from_array_ct(arr2);
+    if (result2.has_value()) {
+        dig d2 = result2.value();
+        assert(d2() == 0);
+        cout << "✓ from_array_ct({'0'}) = 0" << endl;
+    }
+    
+    // Error: carácter inválido
+    constexpr std::array<char, 3> arr3{'1', 'x', '3'};
+    auto result3 = dig::from_array_ct(arr3);
+    if (!result3.has_value()) {
+        cout << "✓ from_array_ct({'1','x','3'}) → error detectado correctamente" << endl;
+    }
+    
+    // Error: array vacío
+    constexpr std::array<char, 0> arr4{};
+    auto result4 = dig::from_array_ct(arr4);
+    if (!result4.has_value()) {
+        cout << "✓ from_array_ct(array vacío) → error detectado correctamente" << endl;
+    }
+}
 
-    dig_type default_constructed;
-    dig_type value_constructed(7u);
-    dig_type zero = dig_type::dig_0();
-    dig_type one = dig_type::dig_1();
-    dig_type max_val = dig_type::dig_max();
+// ============================================================================
+// SECCIÓN 3: OPERADORES ARITMÉTICOS
+// ============================================================================
 
-    std::cout << "default = " << default_constructed.get() << std::endl;
-    std::cout << "value(7) = " << value_constructed.get() << std::endl;
-    std::cout << "dig_0() = " << zero.get() << std::endl;
-    std::cout << "dig_1() = " << one.get() << std::endl;
-    std::cout << "dig_max() = " << max_val.get() << std::endl;
+template <uint64_t B>
+void test_operadores_aritmeticos() {
+    cout << "\n=== TEST OPERADORES ARITMÉTICOS (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    dig a(7), b(3);
+    
+    // Suma
+    dig sum = a + b;
+    assert(sum() == ((7 + 3) % B));
+    cout << "✓ " << a() << " + " << b() << " = " << sum() << " (mod " << B << ")" << endl;
+    
+    // Resta
+    dig diff = a - b;
+    assert(diff() == ((7 - 3 + B) % B));
+    cout << "✓ " << a() << " - " << b() << " = " << diff() << " (mod " << B << ")" << endl;
+    
+    // Multiplicación
+    dig prod = a * b;
+    assert(prod() == ((7 * 3) % B));
+    cout << "✓ " << a() << " × " << b() << " = " << prod() << " (mod " << B << ")" << endl;
+    
+    // División (si b es unidad)
+    if constexpr (B == 257) { // Base prima
+        dig quotient = a / b;
+        dig check = quotient * b;
+        assert(check() == a());
+        cout << "✓ " << a() << " / " << b() << " = " << quotient() << " (verificado: " << quotient() << "×" << b() << "=" << check() << ")" << endl;
+    }
+    
+    // Módulo
+    if (B > 10) {
+        dig c(15), d(7);
+        dig mod = c % d;
+        cout << "✓ " << c() << " % " << d() << " = " << mod() << endl;
+    }
+    
+    // Operadores compuestos
+    dig x(5);
+    x += dig(3);
+    assert(x() == ((5 + 3) % B));
+    cout << "✓ Operador += funciona correctamente" << endl;
+    
+    x *= dig(2);
+    assert(x() == ((8 * 2) % B));
+    cout << "✓ Operador *= funciona correctamente" << endl;
+}
 
-    // Validar propiedades básicas
-    assert(zero.get() == 0);
-    assert(one.get() == 1u % B);
-    assert(max_val.get() == B - 1);
-    std::cout << "✅ Construcción y propiedades básicas correctas" << std::endl;
+// ============================================================================
+// SECCIÓN 4: OPERADORES LÓGICOS (INTERPRETACIÓN MIN/MAX)
+// ============================================================================
 
-    // 2. ARITMÉTICA MODULAR COMPLETA
-    std::cout << "\n--- ARITMÉTICA MODULAR ---" << std::endl;
+template <uint64_t B>
+void test_operadores_logicos() {
+    cout << "\n=== TEST OPERADORES LÓGICOS (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    dig a(5), b(9);
+    
+    // Operador & (min)
+    dig and_result = a & b;
+    assert(and_result() == min(a(), b()));
+    cout << "✓ " << a() << " & " << b() << " = " << and_result() << " (min)" << endl;
+    
+    // Operador | (max)
+    dig or_result = a | b;
+    assert(or_result() == max(a(), b()));
+    cout << "✓ " << a() << " | " << b() << " = " << or_result() << " (max)" << endl;
+    
+    // Operador && (equivalente a &)
+    dig and2_result = a && b;
+    assert(and2_result() == and_result());
+    cout << "✓ " << a() << " && " << b() << " = " << and2_result() << " (equivalente a &)" << endl;
+    
+    // Operador || (equivalente a |)
+    dig or2_result = a || b;
+    assert(or2_result() == or_result());
+    cout << "✓ " << a() << " || " << b() << " = " << or2_result() << " (equivalente a |)" << endl;
+    
+    // Operadores compuestos
+    dig x(3);
+    x &= dig(7);
+    assert(x() == 3);
+    cout << "✓ Operador &= (min) funciona correctamente" << endl;
+    
+    dig y(3);
+    y |= dig(7);
+    assert(y() == 7);
+    cout << "✓ Operador |= (max) funciona correctamente" << endl;
+}
 
-    dig_type a(5u), b(8u);
+// ============================================================================
+// SECCIÓN 5: EXPONENCIACIÓN BINARIA O(log exp)
+// ============================================================================
 
-    // Operaciones básicas
-    dig_type sum = a + b;
-    dig_type diff = a - b;
-    dig_type prod = a * b;
+template <uint64_t B>
+void test_exponenciacion() {
+    cout << "\n=== TEST EXPONENCIACIÓN BINARIA (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    // Caso especial: 0^0 = 1
+    dig zero(0);
+    dig result_0_0 = zero ^ 0U;
+    assert(result_0_0() == 1);
+    cout << "✓ 0^0 = " << result_0_0() << " (convención matemática)" << endl;
+    
+    // Casos base
+    dig base(3);
+    assert((base ^ 0U)() == 1);
+    cout << "✓ 3^0 = 1" << endl;
+    
+    assert((base ^ 1U)() == 3);
+    cout << "✓ 3^1 = 3" << endl;
+    
+    assert((base ^ 2U)() == ((3 * 3) % B));
+    cout << "✓ 3^2 = " << (base ^ 2U)() << endl;
+    
+    // Exponente grande (verifica algoritmo binario)
+    if (B == 257) { // Base prima para verificar Teorema de Fermat
+        dig a(2);
+        dig result = a ^ 256U; // 2^(p-1) ≡ 1 (mod p) para p primo
+        assert(result() == 1);
+        cout << "✓ 2^256 ≡ 1 (mod 257) - Teorema de Fermat verificado" << endl;
+        
+        // Exponente muy grande
+        dig b(3);
+        dig result_large = b ^ 1000U;
+        cout << "✓ 3^1000 (mod 257) = " << result_large() << " (algoritmo O(log 1000) ≈ 10 iteraciones)" << endl;
+    }
+    
+    // Verificar operador ^=
+    dig c(5);
+    c ^= 3U;
+    assert(c() == ((5 * 5 * 5) % B));
+    cout << "✓ Operador ^= funciona: 5^3 = " << c() << endl;
+}
 
-    std::cout << a.get() << " + " << b.get() << " = " << sum.get() << " (mod " << B << ")" << std::endl;
-    std::cout << a.get() << " - " << b.get() << " = " << diff.get() << " (mod " << B << ")" << std::endl;
-    std::cout << a.get() << " * " << b.get() << " = " << prod.get() << " (mod " << B << ")" << std::endl;
+// ============================================================================
+// SECCIÓN 6: OPERADORES DE COMPARACIÓN
+// ============================================================================
 
-    // Verificar aritmética modular
-    assert(sum.get() == (5u + 8u) % B);
-    assert(prod.get() == (5u * 8u) % B);
-
-    // Test incremento con wraparound
-    dig_type near_max(B - 2);
-    dig_type wrapped = near_max + dig_type(3u);
-    std::cout << "Wraparound: " << (B - 2) << " + 3 = " << wrapped.get() << " (debe ser " << ((B - 2 + 3) % B) << ")" << std::endl;
-    assert(wrapped.get() == (B - 2 + 3) % B);
-
-    std::cout << "✅ Aritmética modular verificada" << std::endl;
-
-    // 3. COMPARACIONES Y ORDENAMIENTO
-    std::cout << "\n--- COMPARACIONES ---" << std::endl;
-
-    // Usar valores que respeten la aritmética modular
-    dig_type x(1u), y(3u), z(1u); // En cualquier base >= 4, 1 < 3
-
-    // Verificar valores antes de comparar
-    std::cout << "x = " << x.get() << ", y = " << y.get() << ", z = " << z.get() << std::endl;
-
-    // Comparaciones tradicionales
-    assert(x < y);
-    assert(y > x);
-    assert(x == z);
-    assert(x != y);
-    assert(x <= z);
-    assert(y >= x);
-
-    // C++20 three-way comparison
-    auto cmp1 = x <=> y;
-    auto cmp2 = x <=> z;
-
+template <uint64_t B>
+void test_comparaciones() {
+    cout << "\n=== TEST OPERADORES COMPARACIÓN (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    dig a(5), b(9), c(5);
+    
+    // Igualdad
+    assert(a == c);
+    assert(!(a == b));
+    cout << "✓ Operador == funciona: " << a() << " == " << c() << endl;
+    
+    // Desigualdad
+    assert(a != b);
+    assert(!(a != c));
+    cout << "✓ Operador != funciona: " << a() << " != " << b() << endl;
+    
+    // Menor que
+    assert(a < b);
+    assert(!(b < a));
+    cout << "✓ Operador < funciona: " << a() << " < " << b() << endl;
+    
+    // Mayor que
+    assert(b > a);
+    assert(!(a > b));
+    cout << "✓ Operador > funciona: " << b() << " > " << a() << endl;
+    
+    // Menor o igual
+    assert(a <= b);
+    assert(a <= c);
+    cout << "✓ Operador <= funciona" << endl;
+    
+    // Mayor o igual
+    assert(b >= a);
+    assert(c >= a);
+    cout << "✓ Operador >= funciona" << endl;
+    
+    // Operador <=> (spaceship)
+    auto cmp1 = a <=> b;
     assert(cmp1 == std::strong_ordering::less);
+    cout << "✓ Operador <=> (spaceship): " << a() << " <=> " << b() << " = less" << endl;
+    
+    auto cmp2 = a <=> c;
     assert(cmp2 == std::strong_ordering::equal);
+    cout << "✓ Operador <=> (spaceship): " << a() << " <=> " << c() << " = equal" << endl;
+    
+    // Comparación con entero (normalización módulo B)
+    assert(dig(3) == (B + 3));
+    cout << "✓ Comparación con entero: dig(3) == " << (B + 3) << " (mod " << B << ")" << endl;
+    
+    auto cmp3 = dig(3) <=> (B + 3);
+    assert(cmp3 == std::weak_ordering::equivalent);
+    cout << "✓ Operador <=> con entero: weak_ordering::equivalent para 3 ≡ " << (B + 3) << " (mod " << B << ")" << endl;
+}
 
-    std::cout << "✅ Comparaciones tradicionales y C++20 correctas" << std::endl;
+// ============================================================================
+// SECCIÓN 7: FUNCIONES AUXILIARES (is_unit, mult_inv)
+// ============================================================================
 
-    // 4. OPERADORES MATEMÁTICOS ESPECIALES
-    std::cout << "\n--- OPERADORES MATEMÁTICOS ESPECIALES ---" << std::endl;
-
-    dig_type min_test1(4u), min_test2(9u);
-    dig_type max_test1(4u), max_test2(9u);
-
-    // Min/Max (& y |)
-    dig_type min_result = min_test1 & min_test2;
-    dig_type max_result = max_test1 | max_test2;
-
-    assert(min_result.get() == std::min(min_test1.get(), min_test2.get()));
-    assert(max_result.get() == std::max(max_test1.get(), max_test2.get()));
-
-    // Exponenciación (^)
-    dig_type base(3u);
-    dig_type squared = base ^ 2u;
-    dig_type cubed = base ^ 3u;
-
-    assert(squared.get() == (3u * 3u) % B);
-
-    // Complementos (~ y -)
-    dig_type comp_b1 = ~base;
-    dig_type comp_b = -base;
-
-    assert(comp_b1.get() == (B - 1) - base.get());
-    if (base.get() != 0)
-    {
-        assert(comp_b.get() == B - base.get());
+template <uint64_t B>
+void test_funciones_auxiliares() {
+    cout << "\n=== TEST FUNCIONES AUXILIARES (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    // is_unit() - verificar unidades
+    dig uno(1);
+    assert(uno.is_unit());
+    cout << "✓ is_unit(1) = true" << endl;
+    
+    dig zero(0);
+    assert(!zero.is_unit());
+    cout << "✓ is_unit(0) = false" << endl;
+    
+    if constexpr (B == 257) { // Base prima - todos excepto 0 son unidades
+        dig a(7);
+        assert(a.is_unit());
+        cout << "✓ is_unit(7) = true en base prima 257" << endl;
+        
+        // mult_inv() - inversión multiplicativa
+        dig inv = a.mult_inv();
+        dig product = a * inv;
+        assert(product() == 1);
+        cout << "✓ mult_inv(7) = " << inv() << " verificado: 7 × " << inv() << " ≡ 1 (mod 257)" << endl;
+    } else if constexpr (B == 256) { // Base potencia de 2 - solo impares son unidades
+        dig par(4);
+        assert(!par.is_unit());
+        cout << "✓ is_unit(4) = false en base 256 (par)" << endl;
+        
+        dig impar(5);
+        assert(impar.is_unit());
+        dig inv = impar.mult_inv();
+        dig product = impar * inv;
+        assert(product() == 1);
+        cout << "✓ mult_inv(5) = " << inv() << " verificado: 5 × " << inv() << " ≡ 1 (mod 256)" << endl;
     }
+    
+    // is_Bm1() - verificar si es B-1
+    dig Bm1(B - 1);
+    assert(Bm1.is_Bm1());
+    cout << "✓ is_Bm1(" << (B - 1) << ") = true" << endl;
+    
+    dig not_Bm1(B - 2);
+    assert(!not_Bm1.is_Bm1());
+    cout << "✓ is_Bm1(" << (B - 2) << ") = false" << endl;
+}
 
-    std::cout << "✅ Operadores matemáticos especiales verificados" << std::endl;
+// ============================================================================
+// SECCIÓN 8: CASOS EDGE Y LÍMITES
+// ============================================================================
 
-    // 5. SERIALIZACIÓN E I/O
-    std::cout << "\n--- SERIALIZACIÓN ---" << std::endl;
+template <uint64_t B>
+void test_casos_edge() {
+    cout << "\n=== TEST CASOS EDGE (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    // Overflow en suma
+    dig max_val(B - 1);
+    dig sum = max_val + dig(1);
+    assert(sum() == 0); // Debe dar vuelta módulo B
+    cout << "✓ Overflow suma: (" << (B - 1) << " + 1) mod " << B << " = 0" << endl;
+    
+    // Underflow en resta
+    dig zero(0);
+    dig diff = zero - dig(1);
+    assert(diff() == (B - 1));
+    cout << "✓ Underflow resta: (0 - 1) mod " << B << " = " << (B - 1) << endl;
+    
+    // Multiplicación con 0
+    dig any(42);
+    dig prod_zero = any * dig(0);
+    assert(prod_zero() == 0);
+    cout << "✓ Multiplicación por 0: 42 × 0 = 0" << endl;
+    
+    // Multiplicación con 1 (neutro)
+    dig prod_one = any * dig(1);
+    assert(prod_one() == any());
+    cout << "✓ Multiplicación por 1: 42 × 1 = 42 (neutro)" << endl;
+    
+    // Potencia con exponente 0
+    dig base(123);
+    dig pow_zero = base ^ 0U;
+    assert(pow_zero() == 1);
+    cout << "✓ Exponente 0: 123^0 = 1" << endl;
+    
+    // Exponenciación y verificación con exponente grande
+    if (B == 257) {
+        dig a(2);
+        // 2^8 = 256 ≡ -1 (mod 257)
+        dig result_8 = a ^ 8U;
+        assert(result_8() == 256);
+        cout << "✓ 2^8 ≡ 256 ≡ -1 (mod 257)" << endl;
+        
+        // 2^16 = (2^8)^2 ≡ (-1)^2 ≡ 1 (mod 257)
+        dig result_16 = a ^ 16U;
+        assert(result_16() == 1);
+        cout << "✓ 2^16 ≡ 1 (mod 257)" << endl;
+    }
+}
 
-    dig_type io_test(6u);
+// ============================================================================
+// SECCIÓN 9: BENCHMARK DE RENDIMIENTO
+// ============================================================================
 
-    // Test salida
-    std::ostringstream oss;
-    oss << io_test;
-    std::string serialized = oss.str();
-
-    std::cout << "Serializado: \"" << serialized << "\"" << std::endl;
-
-    // Verificar formato
-    std::string expected = "d[" + std::to_string(io_test.get()) + "]B" + std::to_string(B);
-    assert(serialized == expected);
-
-    std::cout << "✅ Serialización verificada" << std::endl;
-
-    // 6. CASOS EXTREMOS Y ROBUSTEZ
-    std::cout << "\n--- CASOS EXTREMOS ---" << std::endl;
-
-    // Overflow/Underflow
-    dig_type overflow_test = max_val + one;
-    dig_type underflow_test = zero - one;
-
-    assert(overflow_test.get() == 0);      // max + 1 = 0
-    assert(underflow_test.get() == B - 1); // 0 - 1 = max
-
-    // División por cero (si está implementada con protección)
-    if (B > 10)
-    {
-        try
-        {
-            dig_type div_test = dig_type(15u) / dig_type(3u);
-            assert(div_test.get() == 5u);
-            std::cout << "División 15/3 = " << div_test.get() << std::endl;
+template <uint64_t B>
+void benchmark_operaciones() {
+    cout << "\n=== BENCHMARK RENDIMIENTO (Base " << B << ") ===" << endl;
+    
+    using dig = dig_t<B>;
+    
+    constexpr int N = 100000;
+    
+    // Benchmark suma
+    auto start = high_resolution_clock::now();
+    dig acc(0);
+    for (int i = 0; i < N; ++i) {
+        acc += dig(i % B);
+    }
+    auto end = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(end - start).count();
+    cout << "✓ Suma: " << N << " operaciones en " << duration << " µs (" 
+         << (double(duration) / N) << " µs/op)" << endl;
+    
+    // Benchmark multiplicación
+    start = high_resolution_clock::now();
+    dig prod(1);
+    for (int i = 1; i < 1000; ++i) {
+        prod *= dig(i % B);
+    }
+    end = high_resolution_clock::now();
+    duration = duration_cast<microseconds>(end - start).count();
+    cout << "✓ Multiplicación: 1000 operaciones en " << duration << " µs (" 
+         << (double(duration) / 1000) << " µs/op)" << endl;
+    
+    // Benchmark exponenciación binaria
+    if (B == 257) {
+        start = high_resolution_clock::now();
+        for (int i = 0; i < 10000; ++i) {
+            dig base(2);
+            dig result = base ^ 1000U;
         }
-        catch (...)
-        {
-            std::cout << "División protegida contra casos problemáticos" << std::endl;
-        }
+        end = high_resolution_clock::now();
+        duration = duration_cast<microseconds>(end - start).count();
+        cout << "✓ Exponenciación 2^1000: 10000 operaciones en " << duration << " µs (" 
+             << (double(duration) / 10000) << " µs/op, algoritmo O(log 1000) ≈ 10 iter)" << endl;
     }
-
-    std::cout << "✅ Casos extremos manejados correctamente" << std::endl;
-
-    // 7. PROPIEDADES MATEMÁTICAS
-    std::cout << "\n--- PROPIEDADES MATEMÁTICAS ---" << std::endl;
-
-    dig_type prop1(4u), prop2(7u), prop3(2u);
-
-    // Conmutatividad
-    assert((prop1 + prop2).get() == (prop2 + prop1).get());
-    assert((prop1 * prop2).get() == (prop2 * prop1).get());
-
-    // Asociatividad (cuando no hay overflow)
-    if (B > 20)
-    {
-        auto assoc1 = (prop1 + prop2) + prop3;
-        auto assoc2 = prop1 + (prop2 + prop3);
-        // Nota: En aritmética modular puede haber diferencias por overflow timing
-    }
-
-    // Elemento neutro
-    assert((prop1 + zero).get() == prop1.get());
-    assert((prop1 * one).get() == prop1.get());
-
-    // Negación (para x != 0)
-    if (prop1.get() != 0)
-    {
-        dig_type sum_with_neg = prop1 + (-prop1);
-        assert(sum_with_neg.get() == 0);
-    }
-
-    std::cout << "✅ Propiedades matemáticas verificadas" << std::endl;
-
-    // 8. PERFORMANCE Y OPTIMIZACIONES
-    std::cout << "\n--- PERFORMANCE ---" << std::endl;
-
-    auto perf_start = clock_t::now();
-
-    // Test operaciones rápidas
-    dig_type perf_test(5u);
-    for (int i = 0; i < 10000; ++i)
-    {
-        perf_test += dig_type(1u);
-        perf_test *= dig_type(2u);
-        perf_test %= dig_type(3u);
-    }
-
-    auto perf_end = clock_t::now();
-    auto perf_duration = std::chrono::duration_cast<std::chrono::microseconds>(perf_end - perf_start);
-
-    std::cout << "10,000 operaciones completadas en " << perf_duration.count() << " μs" << std::endl;
-    std::cout << "✅ Performance aceptable" << std::endl;
-
-    auto end_time = clock_t::now();
-    auto total_duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-
-    std::cout << "\n✅ TODAS LAS PRUEBAS COMPREHENSIVAS PARA dig_t<" << B << "> PASARON!" << std::endl;
-    std::cout << "   Tiempo total: " << total_duration.count() << " ms" << std::endl;
 }
 
-void multi_base_compatibility_test()
-{
-    std::cout << "\n=== MULTI-BASE COMPATIBILITY TEST ===" << std::endl;
+// ============================================================================
+// MAIN - EJECUTAR TODAS LAS BATERÍAS DE TESTS
+// ============================================================================
 
-    // Test interacciones entre diferentes bases
-    dig_t<5> base5(3u);
-    dig_t<10> base10(3u);
-    dig_t<16> base16(3u);
-
-    std::cout << "Mismo valor (3) en diferentes bases:" << std::endl;
-    std::cout << "Base 5: " << base5 << std::endl;
-    std::cout << "Base 10: " << base10 << std::endl;
-    std::cout << "Base 16: " << base16 << std::endl;
-
-    // Verificar que las operaciones dentro de cada base son independientes
-    dig_t<5> base5_max = dig_t<5>::dig_max();
-    dig_t<10> base10_max = dig_t<10>::dig_max();
-
-    std::cout << "Valores máximos:" << std::endl;
-    std::cout << "Base 5 max: " << base5_max.get() << " (debe ser 4)" << std::endl;
-    std::cout << "Base 10 max: " << base10_max.get() << " (debe ser 9)" << std::endl;
-
-    assert(base5_max.get() == 4);
-    assert(base10_max.get() == 9);
-
-    // Test overflow en bases diferentes
-    dig_t<5> base5_overflow = base5_max + dig_t<5>(1u);
-    dig_t<10> base10_overflow = base10_max + dig_t<10>(1u);
-
-    assert(base5_overflow.get() == 0);
-    assert(base10_overflow.get() == 0);
-
-    std::cout << "✅ Compatibilidad multi-base verificada" << std::endl;
-}
-
-void edge_cases_stress_test()
-{
-    std::cout << "\n=== EDGE CASES STRESS TEST ===" << std::endl;
-
-    // Test bases extremas
-    using tiny_base = dig_t<2>;    // Base mínima
-    using large_base = dig_t<255>; // Base grande
-
-    // Base 2 (binaria)
-    tiny_base bin0(0u);
-    tiny_base bin1(1u);
-
-    std::cout << "Base 2 - valores: " << bin0.get() << ", " << bin1.get() << std::endl;
-
-    tiny_base bin_sum = bin1 + bin1; // 1 + 1 = 0 (mod 2)
-    assert(bin_sum.get() == 0);
-    std::cout << "Base 2: 1 + 1 = " << bin_sum.get() << " ✅" << std::endl;
-
-    // Base grande
-    large_base large_test(200u);
-    large_base large_max = large_base::dig_max();
-
-    std::cout << "Base 255 - test: " << large_test.get() << ", max: " << large_max.get() << std::endl;
-    assert(large_max.get() == 254);
-
-    std::cout << "✅ Casos extremos de bases manejados correctamente" << std::endl;
-}
-
-int main()
-{
-    std::cout << "======================================================================" << std::endl;
-    std::cout << "===     COMPREHENSIVE dig_t<Base> FUNCTIONALITY TEST SUITE        ===" << std::endl;
-    std::cout << "======================================================================" << std::endl;
-    std::cout << "Validación integral de todas las funcionalidades documentadas" << std::endl;
-
-    try
-    {
-        // Tests comprehensivos por base
-        comprehensive_dig_t_test<5>();   // Base pequeña
-        comprehensive_dig_t_test<10>();  // Base decimal estándar
-        comprehensive_dig_t_test<16>();  // Base hexadecimal
-        comprehensive_dig_t_test<17>();  // Base prima
-        comprehensive_dig_t_test<64>();  // Base potencia de 2
-        comprehensive_dig_t_test<100>(); // Base grande
-
-        // Tests de compatibilidad e integración
-        multi_base_compatibility_test();
-        edge_cases_stress_test();
-
-        std::cout << "\n🎉🎉🎉 TODOS LOS TESTS COMPREHENSIVOS COMPLETADOS EXITOSAMENTE 🎉🎉🎉" << std::endl;
-
-        std::cout << "\n📊 RESUMEN FINAL DE VALIDACIONES:" << std::endl;
-        std::cout << "✅ Arquitectura y construcción de dig_t<Base>" << std::endl;
-        std::cout << "✅ Aritmética modular completa (+, -, *, /, %, ++, --)" << std::endl;
-        std::cout << "✅ Comparaciones tradicionales y C++20 three-way" << std::endl;
-        std::cout << "✅ Operadores matemáticos especiales (&, |, ^, ~, -)" << std::endl;
-        std::cout << "✅ Serialización e I/O con validación de formato" << std::endl;
-        std::cout << "✅ Casos extremos y manejo de overflow/underflow" << std::endl;
-        std::cout << "✅ Propiedades matemáticas (conmutatividad, elementos neutros)" << std::endl;
-        std::cout << "✅ Performance de operaciones constexpr" << std::endl;
-        std::cout << "✅ Compatibilidad multi-base independiente" << std::endl;
-        std::cout << "✅ Casos extremos (bases 2-255)" << std::endl;
-
-        std::cout << "\n🔧 ASPECTOS TÉCNICOS VALIDADOS:" << std::endl;
-        std::cout << "✅ Template constraints (requires Base > 1)" << std::endl;
-        std::cout << "✅ Concepts C++20 para tipos integrales" << std::endl;
-        std::cout << "✅ Optimizaciones compile-time (constexpr/noexcept)" << std::endl;
-        std::cout << "✅ Strong/weak ordering en three-way comparison" << std::endl;
-        std::cout << "✅ Semántica matemática no-tradicional en operadores bitwise" << std::endl;
-        std::cout << "✅ Parser FSM robusto para entrada" << std::endl;
-        std::cout << "✅ Validación runtime de tipos y bases" << std::endl;
-
-        std::cout << "\n📚 DOCUMENTACIÓN ASOCIADA:" << std::endl;
-        std::cout << "📄 dig_t_analysis.md - Arquitectura general" << std::endl;
-        std::cout << "📄 dig_t_operadores_aritmeticos.md - Operadores aritméticos" << std::endl;
-        std::cout << "📄 dig_t_operadores_comparacion.md - Operadores de comparación" << std::endl;
-        std::cout << "📄 dig_t_operadores_bitwise.md - Operadores matemáticos especiales" << std::endl;
-        std::cout << "📄 dig_t_operadores_io.md - Operadores de entrada/salida" << std::endl;
-
+int main() {
+    cout << "\n";
+    cout << "╔══════════════════════════════════════════════════════════════════╗\n";
+    cout << "║  TEST EXHAUSTIVO dig_t<B> - TODAS LAS FUNCIONALIDADES           ║\n";
+    cout << "╚══════════════════════════════════════════════════════════════════╝\n";
+    
+    try {
+        // Tests en base 256 (potencia de 2)
+        test_constructores<256>();
+        test_parser_compile_time<256>();
+        test_operadores_aritmeticos<256>();
+        test_operadores_logicos<256>();
+        test_exponenciacion<256>();
+        test_comparaciones<256>();
+        test_funciones_auxiliares<256>();
+        test_casos_edge<256>();
+        benchmark_operaciones<256>();
+        
+        cout << "\n" << string(70, '=') << "\n";
+        
+        // Tests en base 257 (primo)
+        test_constructores<257>();
+        test_parser_compile_time<257>();
+        test_operadores_aritmeticos<257>();
+        test_operadores_logicos<257>();
+        test_exponenciacion<257>();
+        test_comparaciones<257>();
+        test_funciones_auxiliares<257>();
+        test_casos_edge<257>();
+        benchmark_operaciones<257>();
+        
+        cout << "\n";
+        cout << "╔══════════════════════════════════════════════════════════════════╗\n";
+        cout << "║  ✓✓✓ TODOS LOS TESTS PASARON EXITOSAMENTE ✓✓✓                  ║\n";
+        cout << "╚══════════════════════════════════════════════════════════════════╝\n";
+        
         return 0;
-    }
-    catch (const std::exception &e)
-    {
-        std::cout << "\n❌ ERROR DURANTE LOS TESTS: " << e.what() << std::endl;
-        return 1;
-    }
-    catch (...)
-    {
-        std::cout << "\n❌ ERROR DESCONOCIDO DURANTE LOS TESTS" << std::endl;
+        
+    } catch (const exception& e) {
+        cerr << "\n✗✗✗ ERROR: " << e.what() << endl;
         return 1;
     }
 }

@@ -832,7 +832,7 @@ namespace NumRepr {
     if (n <= 0) {
       return -1; // Not in domain of the function log_base(n)
                  // Domain(log_base) = ]0, +infinity[ = [1, +infinity[
-    } else if (n < base) {
+    } else if (static_cast<std::uint64_t>(n) < base) {
       return 0;
     } else {
       return 1 + int_log(base, n / base);
