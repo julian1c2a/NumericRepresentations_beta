@@ -1,2 +1,2 @@
-AuxiliaryFunctionsTest 13 0.0353264
+AuxiliaryFunctionsTest 14 0.026376
 ---

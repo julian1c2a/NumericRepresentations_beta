@@ -4,7 +4,7 @@ call "D:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build
 
 echo.
 echo === Compilando test_advanced_edge_cases.cpp ===
-cl /EHsc /std:c++latest /I.\include test_advanced_edge_cases.cpp /Fe:test_advanced_edge_cases_msvc.exe
+cl /EHsc /std:c++latest /Iinclude test_advanced_edge_cases.cpp /Fe:test_advanced_edge_cases_msvc.exe
 
 if %ERRORLEVEL% EQU 0 (
     echo.
