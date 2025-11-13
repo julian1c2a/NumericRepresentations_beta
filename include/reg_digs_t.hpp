@@ -3,7 +3,7 @@
 
 #include <algorithm> // Para std::reverse, std::find_if, std::count_if
 #include "core/dig_t.hpp"
-#include "core/internal/utilities.hpp"
+#include "core/internal/auxiliary_functions.hpp"
 
 namespace NumRepr
 { // BEGIN NAMESPACE NumRepr
@@ -711,7 +711,7 @@ namespace NumRepr
     {
       ///< CREA UN STD_ARRAY DEL TIPO INT PASADO POR UN PACK DE ARGUMENTOS
       ///< EL TAMANO ES EL DEL PACK DE ARGUMENTOS PASADO (MENOR O IGUAL QUE L)
-      using pack_type = typename utilities::ugly_pack_details::pack2array<Ints_type...>;
+      using pack_type = typename NumRepr::pack2array<Ints_type...>;
       ///< DEVUELVE EL TIPO INTERNO DE ELEMENTO DEL ARRAY ANTERIOR
       ///< [UN TIPO ENTERO]
       using unique_type = typename pack_type::elem_type;

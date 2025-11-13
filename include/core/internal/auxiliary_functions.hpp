@@ -1533,6 +1533,69 @@ namespace NumRepr {
             return auxiliary_functions::conversion_to_int_safe_ct<B, L>(arg);
         }
 
+        // ========================================================================
+        // COMPILE-TIME FOR LOOP - MSVC COMPATIBLE
+        // ========================================================================
+        /**
+         * @brief Compile-time for loop implementation compatible with all compilers
+         * @details Refactored version that eliminates template template parameters
+         *          causing issues with MSVC while maintaining full functionality.
+         *
+         * Uses function objects instead of template template parameters for 
+         * better portability across compilers.
+         */
+
+        // Helper for recursive template expansion (MSVC-safe approach)
+        template <std::size_t Index, std::size_t End>
+        struct for_ct_impl {
+            template <std::size_t Base, typename Functor, typename... Ts>
+            static constexpr void apply(std::tuple<Ts...> const &t, Functor &&func) noexcept {
+                if constexpr (Index < End) {
+                    func.template operator()<Base, Index>(std::get<Index>(t));
+                    for_ct_impl<Index + 1, End>::template apply<Base>(t, std::forward<Functor>(func));
+                }
+            }
+        };
+
+        // Specialization to end recursion
+        template <std::size_t End>
+        struct for_ct_impl<End, End> {
+            template <std::size_t Base, typename Functor, typename... Ts>
+            static constexpr void apply(std::tuple<Ts...> const &, Functor &&) noexcept {
+                // Base case - do nothing
+            }
+        };
+
+        /**
+         * @brief Compile-time for loop - universal compiler compatibility
+         * @tparam start Starting index
+         * @tparam end Ending index (exclusive)
+         * @tparam Base Base parameter for the operation
+         * @tparam Functor Function object type
+         * @tparam Ts Tuple element types
+         * @param t The tuple to iterate over
+         * @param func Function object to apply to each element
+         *
+         * @example
+         * ```cpp
+         * // Function object that processes elements
+         * struct MyFunctor {
+         *     template<std::size_t Base, std::size_t Index>
+         *     void operator()(auto&& element) const {
+         *         // Process element at Index with Base
+         *     }
+         * };
+         *
+         * std::tuple<int, int, int> my_tuple{1, 2, 3};
+         * for_ct<0, 3, 10>(my_tuple, MyFunctor{});
+         * ```
+         */
+        template <std::size_t start, std::size_t end, std::size_t Base, 
+                  typename Functor, typename... Ts>
+        constexpr void for_ct(std::tuple<Ts...> const &t, Functor &&func) noexcept {
+            for_ct_impl<start, end>::template apply<Base>(t, std::forward<Functor>(func));
+        }
+
     } /// CLOSE NAMESPACE special
   } // CLOSE NAMESPACE auxiliary_functions
 } // CLOSE NAMESPACE NumRepr
