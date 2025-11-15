@@ -2,7 +2,7 @@
 #include <cassert>
 
 // Test simple para dig_t
-#include "../include/dig_t.hpp"
+#include <core/dig_t.hpp>
 
 using namespace NumRepr;
 

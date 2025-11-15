@@ -3,7 +3,7 @@
 
 #include <algorithm> // Para std::reverse, std::find_if, std::count_if
 #include "core/dig_t.hpp"
-#include "core/internal/utilities.hpp"
+#include "core/internal/basic_types.hpp"
 
 namespace NumRepr
 { // BEGIN NAMESPACE NumRepr

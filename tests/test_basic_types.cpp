@@ -1,7 +1,7 @@
 #include <iostream>
 
 // Intentamos incluir solo basic_types.hpp primero
-#include "../include/basic_types.hpp"
+#include <basic_types.hpp>
 
 int main()
 {

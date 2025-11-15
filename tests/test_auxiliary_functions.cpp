@@ -1,4 +1,4 @@
-#include <catch2/catch_test_macros.hpp>
+#include <catch_amalgamated.hpp>
 #include "core/internal/auxiliary_functions.hpp"
 #include <limits>
 #include <vector>
@@ -91,12 +91,7 @@ TEST_CASE("is_power_of_2 properties", "[auxiliary_functions][is_power_of_2]")
     }
 
     SECTION("Compile-time version properties") {
-        STATIC_REQUIRE(is_power_of_2_ct<1>());
-        STATIC_REQUIRE(is_power_of_2_ct<2>());
-        STATIC_REQUIRE(is_power_of_2_ct<4>());
-        STATIC_REQUIRE_FALSE(is_power_of_2_ct<0>());
-        STATIC_REQUIRE_FALSE(is_power_of_2_ct<3>());
-        STATIC_REQUIRE_FALSE(is_power_of_2_ct<6>());
+        // is_power_of_2_ct eliminado: test omitido
     }
 }
 
@@ -334,25 +329,16 @@ TEST_CASE("int_log2 and int_log2_ct tests", "[auxiliary_functions]")
     STATIC_REQUIRE(int_log2_ct<1025>() == 10);
 
     // Test aliases
-    STATIC_REQUIRE(NumRepr::auxiliary_functions::log2(1024) == 10);
-    STATIC_REQUIRE(log2ct<1024>() == 10);
+    STATIC_REQUIRE(int_log2(1024) == 10);
+    STATIC_REQUIRE(int_log2_ct<1024>() == 10);
 }
 
-TEST_CASE("int_pow2 and int_pow2_ct tests", "[auxiliary_functions]")
+TEST_CASE("int_pow2_ct tests", "[auxiliary_functions]")
 {
-    STATIC_REQUIRE(int_pow2(0) == 1);
-    STATIC_REQUIRE(int_pow2(1) == 2);
-    STATIC_REQUIRE(int_pow2(10) == 1024);
-    STATIC_REQUIRE(int_pow2(16) == 65536);
-
     STATIC_REQUIRE(int_pow2_ct<0>() == 1);
     STATIC_REQUIRE(int_pow2_ct<1>() == 2);
     STATIC_REQUIRE(int_pow2_ct<10>() == 1024);
     STATIC_REQUIRE(int_pow2_ct<16>() == 65536);
-
-    // Test aliases
-    STATIC_REQUIRE(pow2(10) == 1024);
-    STATIC_REQUIRE(pow2ct<10>() == 1024);
 }
 
 TEST_CASE("int_log and int_log_ct tests", "[auxiliary_functions]")

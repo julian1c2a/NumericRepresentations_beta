@@ -1,7 +1,7 @@
 #include <iostream>
 
 // Test minimal para debug GCC
-#include "../include/dig_t.hpp"
+#include <dig_t.hpp>
 
 using namespace NumRepr;
 

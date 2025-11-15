@@ -1,12 +1,12 @@
 #include <iostream>
 #include <cassert>
-#include "include/auxiliary_types.hpp"
+#include "core/internal/basic_types.hpp"
 
 using namespace NumRepr;
 
 int main()
 {
-    std::cout << "Testing auxiliary_types.hpp improvements...\n"
+    std::cout << "Testing basic_types.hpp enums/utilities (migración desde auxiliary_types.hpp)...\n"
               << std::endl;
 
     // Test sign functions
@@ -63,7 +63,7 @@ int main()
     std::cout << "  - Rem: " << static_cast<int>(binop_e::rem) << std::endl;
 
     std::cout << "\n✅ All tests completed successfully!" << std::endl;
-    std::cout << "🎉 auxiliary_types.hpp is working correctly with improvements!" << std::endl;
+    std::cout << "[OK] basic_types.hpp cubre todos los enums/utilities legacy de auxiliary_types.hpp" << std::endl;
 
     return 0;
 }

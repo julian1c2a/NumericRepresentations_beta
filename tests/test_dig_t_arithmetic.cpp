@@ -2,8 +2,8 @@
 #include <cassert>
 #include <iomanip>
 
-// Test completo de operadores aritméticos de dig_t
-#include "../include/dig_t.hpp"
+// Test completo de operadores aritmeticos de dig_t
+#include <core/dig_t.hpp>
 
 using namespace NumRepr;
 
@@ -45,8 +45,8 @@ void test_arithmetic_operators()
     dig_type i = g - h;
     std::cout << "2 - 5 = " << i.get() << " (underflow modular)" << std::endl;
 
-    // 3. Test multiplicación (*, *=)
-    std::cout << "\n--- MULTIPLICACIÓN ---" << std::endl;
+    // 3. Test multiplicacion (*, *=)
+    std::cout << "\n--- MULTIPLICACION ---" << std::endl;
     dig_type j(4u);
     dig_type k(6u);
 
@@ -60,10 +60,10 @@ void test_arithmetic_operators()
     std::cout << "j *= k; j = " << j.get() << std::endl;
     assert(j.get() == (4 * 6) % B);
 
-    // 4. Test división (/, /=)
+    // 4. Test division (/, /=)
     if (B > 10)
     { // Solo si la base permite estos tests
-        std::cout << "\n--- DIVISIÓN ---" << std::endl;
+        std::cout << "\n--- DIVISION ---" << std::endl;
         dig_type m(15u);
         dig_type n(3u);
 
@@ -98,17 +98,17 @@ void test_arithmetic_operators()
     std::cout << "-" << s.get() << " = " << t.get();
     if (s.get() == 0)
     {
-        std::cout << " (negación de 0 = 0)";
+        std::cout << " (negacion de 0 = 0)";
         assert(t.get() == 0);
     }
     else
     {
-        std::cout << " (negación modular = " << (B - s.get()) << ")";
+        std::cout << " (negacion modular = " << (B - s.get()) << ")";
         assert(t.get() == B - s.get());
     }
     std::cout << std::endl;
 
-    // 6. Test overflow en bases pequeñas
+    // 6. Test overflow en bases pequenas
     std::cout << "\n--- TEST OVERFLOW/WRAPAROUND ---" << std::endl;
     dig_type max_dig = dig_type::dig_max();
     std::cout << "max_dig = " << max_dig.get() << " (B-1 = " << (B - 1) << ")" << std::endl;
@@ -117,31 +117,31 @@ void test_arithmetic_operators()
     std::cout << "max + 1 = " << overflow.get() << " (wraparound a 0)" << std::endl;
     assert(overflow.get() == 0);
 
-    std::cout << "✅ Todos los tests aritméticos para dig_t<" << B << "> pasaron!" << std::endl;
+    std::cout << "[OK] Todos los tests aritmeticos para dig_t<" << B << "> pasaron!" << std::endl;
 }
 
 int main()
 {
-    std::cout << "=== DOCUMENTACIÓN Y TESTING DE OPERADORES ARITMÉTICOS ===" << std::endl;
-    std::cout << "Verificando aritmética modular en diferentes bases" << std::endl;
+    std::cout << "=== DOCUMENTACION Y TESTING DE OPERADORES ARITMETICOS ===" << std::endl;
+    std::cout << "Verificando aritmetica modular en diferentes bases" << std::endl;
 
     // Test con diferentes bases para verificar comportamiento
-    test_arithmetic_operators<5>();   // Base pequeña
+    test_arithmetic_operators<5>();   // Base pequena
     test_arithmetic_operators<10>();  // Base decimal
     test_arithmetic_operators<16>();  // Base hexadecimal
     test_arithmetic_operators<17>();  // Base prima
     test_arithmetic_operators<256>(); // Base grande (necesita tipos superiores)
 
-    std::cout << "\n🎉 TODOS LOS TESTS DE OPERADORES ARITMÉTICOS COMPLETADOS" << std::endl;
-    std::cout << "\n📊 RESUMEN DE FUNCIONALIDADES VERIFICADAS:" << std::endl;
-    std::cout << "✅ Suma modular (+, +=)" << std::endl;
-    std::cout << "✅ Resta modular con underflow (-, -=)" << std::endl;
-    std::cout << "✅ Multiplicación modular (*, *=)" << std::endl;
-    std::cout << "✅ División entera (/, /=)" << std::endl;
-    std::cout << "✅ Incremento/decremento (++, --)" << std::endl;
-    std::cout << "✅ Negación modular (-)" << std::endl;
-    std::cout << "✅ Wraparound automático en overflow" << std::endl;
-    std::cout << "✅ Optimizaciones por tamaño de base" << std::endl;
+    std::cout << "\n[OK] TODOS LOS TESTS DE OPERADORES ARITMETICOS COMPLETADOS" << std::endl;
+    std::cout << "\n[RESUMEN] FUNCIONALIDADES VERIFICADAS:" << std::endl;
+    std::cout << "[OK] Suma modular (+, +=)" << std::endl;
+    std::cout << "[OK] Resta modular con underflow (-, -=)" << std::endl;
+    std::cout << "[OK] Multiplicacion modular (*, *=)" << std::endl;
+    std::cout << "[OK] Division entera (/, /=)" << std::endl;
+    std::cout << "[OK] Incremento/decremento (++, --)" << std::endl;
+    std::cout << "[OK] Negacion modular (-)" << std::endl;
+    std::cout << "[OK] Wraparound automatico en overflow" << std::endl;
+    std::cout << "[OK] Optimizaciones por tamano de base" << std::endl;
 
     return 0;
 }

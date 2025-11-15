@@ -22,7 +22,7 @@ int main()
     std::cout << "========================================\n\n";
 
     std::vector<TestSuite> tests = {
-        {"auxiliary_types.hpp", nullptr},
+        {"basic_types.hpp", nullptr},
         {"auxiliary_functions.hpp", nullptr},
         {"basic_types.hpp", nullptr},
         {"dig_t.hpp", nullptr}};

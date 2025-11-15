@@ -1,14 +1,99 @@
-#ifndef NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
-#define NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
-
-#include <bit>
+#include <limits>
 #include <cstddef>
 #include <cstdint>
 // #include <cmath>
 #include <type_traits>
 #include <tuple>
-#include <expected>
-#include <concepts>
+#include "basic_types.hpp"
+
+// --- Declaración adelantada de int_log2_ct y bit_width_ct ---
+namespace NumRepr {
+namespace auxiliary_functions {
+
+  
+
+  // Versión template de valor para uso en metaprogramación
+  // Solo la versión template de valor:
+  template <std::uint64_t n>
+  constexpr std::uint64_t int_log2_ct() noexcept {
+    if constexpr (n == 0u) {
+      // ¡ADVERTENCIA! int_log2_ct<0>() retorna 0 por compatibilidad, pero matemáticamente está indefinido.
+      return 0;
+    } else {
+      return 1 + int_log2_ct<(n >> 1)>();
+    }
+  } // END FUNCTION int_log2_ct compiletime
+  
+  template <std::uint64_t n>
+  constexpr std::uint64_t bit_width_ct() noexcept {
+    return n == 0u ? 0 : int_log2_ct<n>() + 1;
+  } // END FUNCTION bit_width_ct compiletime
+
+  /**
+   * @brief Potencia de 2 en tiempo de compilación (bitwise).
+   * @tparam exponent Exponente (debe ser <= max_exponent_for_base_ct<2>()).
+   * @return 2 elevado a exponent, usando desplazamiento de bits.
+   * @note Si exponent > max_exponent_for_base_ct<2>(), el resultado es indefinido.
+   * @warning Para exponent >= 64, el resultado es indefinido (overflow).
+   * @pre exponent <= max_exponent_for_base_ct<2>()
+   */
+  template <std::size_t exponent>
+  constexpr std::uint64_t int_pow2_ct() noexcept {
+    static_assert(exponent <= 63, "exponent fuera de rango para int_pow2_ct");
+    return 1ull << exponent;
+  } // END FUNCTION int_pow2_ct compiletime
+
+  template <std::uint64_t num>
+  constexpr inline
+  bool is_power_of_2_ct() noexcept { 
+    return num > 0 && (num & (num - 1)) == 0; 
+  } // END FUNCTION is_power_of_2_ct compiletime
+
+  constexpr std::uint64_t int_log2(std::uint64_t n) noexcept {
+    if (n == 0u) {
+      // ¡ADVERTENCIA! int_log2_ct<0>() retorna 0 por compatibilidad, pero matemáticamente está indefinido.
+      return 0;
+    }
+    std::uint64_t res = 0;
+    while (n >>= 1) ++res;
+    return res;
+  } // END FUNCTION int_log2 runtime
+
+  constexpr std::uint64_t bit_width(std::uint64_t n) noexcept {
+    return n == 0u ? 0 : int_log2(n) + 1;
+  } // END FUNCTION bit_width runtime
+
+    /**
+   * @brief Potencia de 2 en tiempo de ejecución (bitwise).
+   * @tparam exponent Exponente (debe ser <= 63).
+   * @return 2 elevado a exponent, usando desplazamiento de bits.
+   * @note Si exponent > 63, el resultado es indefinido.
+   * @warning Para exponent >= 64, el resultado es indefinido (overflow).
+   * @warning No da mensajes de error en tiempo de compilación ni excepciones.
+   * @pre exponent <= 63
+   */
+    constexpr std::uint64_t int_pow2(std::size_t exponent) noexcept {
+        // assert(exponent <= 63, "exponent fuera de rango para int_pow2");
+        return 1ull << exponent;
+    } // END FUNCTION int_pow2 runtime
+
+  template <typename T>
+  constexpr inline
+  bool is_power_of_2(T num) noexcept { 
+    return num > 0 && (num & (num - 1)) == 0; 
+  } // END FUNCTION is_power_of_2 runtime
+
+} // CLOSE NAMESPACE auxiliary_functions
+} // CLOSE NAMESPACE NumRepr
+#ifndef NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
+#define NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
+
+#include <limits>
+#include <cstddef>
+#include <cstdint>
+// #include <cmath>
+#include <type_traits>
+#include <tuple>
 #include "basic_types.hpp"
 
 namespace NumRepr {
@@ -60,15 +145,9 @@ namespace NumRepr {
    * @endcode
    */
   template <std::uint64_t n, std::uint64_t x0, template<std::uint64_t, std::uint64_t> class IterExpr>
-  consteval std::uint64_t newton_raphson_ct() noexcept {
+  constexpr std::uint64_t newton_raphson_ct() noexcept {
       constexpr std::uint64_t x1 = IterExpr<x0, n>::value;
-      if constexpr (x1 >= x0) {
-          // Convergencia alcanzada
-          return x0;
-      } else {
-          // Continuar iterando recursivamente
-          return newton_raphson_ct<n, x1, IterExpr>();
-      }
+        return (x1 >= x0) ? x0 : newton_raphson_ct<n, x1, IterExpr>();
   }
 
   /**
@@ -80,15 +159,9 @@ namespace NumRepr {
    * @return La raíz cuadrada entera por defecto de `n`.
    */
   template <std::uint64_t n, std::uint64_t x0>
-  consteval std::uint64_t floorsqrt_ct_newton() noexcept {
-      // Calcular x1 = (x0 + n/x0) / 2
-      if constexpr ((x0 + n / x0) / 2 >= x0) {
-          // Convergencia alcanzada
-          return x0;
-      } else {
-          // Continuar iterando recursivamente con x1
-          return floorsqrt_ct_newton<n, (x0 + n / x0) / 2>();
-      }
+  constexpr std::uint64_t floorsqrt_ct_newton() noexcept {
+        // Protección: si x0 == 0, la raíz cuadrada de 0 es 0
+        return (x0 == 0) ? 0 : (((x0 + n / x0) / 2) >= x0 ? x0 : floorsqrt_ct_newton<n, (x0 + n / x0) / 2>());
   }
 
   /**
@@ -118,41 +191,50 @@ namespace NumRepr {
    * - La función no debe devolver un valor `r` tal que `r*r > n`.
    * - La función no debe desbordarse durante los cálculos intermedios si `n` está dentro del rango del tipo `T`.
    */
-  template <std::uint64_t n> consteval
+  namespace detail {
+
+    template <std::uint64_t n>
+    struct floorsqrt_ct_helper_big {
+      static constexpr std::uint64_t log2_n = int_log2_ct<n>();
+      static constexpr std::uint64_t x0_base = (1ull << (log2_n / 2));
+      static constexpr std::uint64_t x0 = (x0_base * x0_base < n) ? (x0_base * 2) : x0_base;
+      static constexpr std::uint64_t value = floorsqrt_ct_newton<n, x0>();
+    };
+
+    template <std::uint64_t n>
+    struct floorsqrt_ct_helper {
+      static constexpr std::uint64_t value =
+        (n == 0) ? 0 :
+        (n >= 1 && n < 4) ? 1 :
+        (n >= 4 && n < 9) ? 2 :
+        (n >= 9 && n < 16) ? 3 :
+        (n >= 16 && n < 25) ? 4 :
+        (n >= 25 && n < 36) ? 5 :
+        (n >= 36 && n < 49) ? 6 :
+        (n >= 49 && n < 64) ? 7 :
+        (n >= 64 && n < 81) ? 8 :
+        (n >= 81 && n < 100) ? 9 :
+        (n >= 100 && n < 121) ? 10 :
+        (n >= 121 && n < 144) ? 11 :
+        (n >= 144 && n < 169) ? 12 :
+        (n >= 169 && n < 196) ? 13 :
+        (n >= 196 && n < 225) ? 14 :
+        (n >= 225 && n < 256) ? 15 :
+        (n >= 256 && n < 289) ? 16 :
+        (n >= 289 && n < 324) ? 17 :
+        (n >= 324 && n < 361) ? 18 :
+        (n >= 361 && n < 400) ? 19 :
+        (n >= 400 && n < 441) ? 20 :
+        (n >= 441 && n < 484) ? 21 :
+        (n >= 484 && n < 529) ? 22 :
+        detail::floorsqrt_ct_helper_big<n>::value;
+    };
+  
+  }
+
+  template <std::uint64_t n> constexpr
   std::uint64_t floorsqrt_ct() noexcept {
-      /// VALORES PREESTABLECIDO COMO EN UNA TABLA
-      /// AL MODO LOOKUP TABLES
-      if constexpr (n == 0)                  return 0;
-      if constexpr (n >= 1 && n < 4)         return 1;
-      if constexpr (n >= 4 && n < 9)         return 2;
-      if constexpr (n >= 9 && n < 16)        return 3;
-      if constexpr (n >= 16 && n < 25)       return 4;
-      if constexpr (n >= 25 && n < 36)       return 5;
-      if constexpr (n >= 36 && n < 49)       return 6;
-      if constexpr (n >= 49 && n < 64)       return 7;
-      if constexpr (n >= 64 && n < 81)       return 8;
-      if constexpr (n >= 81 && n < 100)      return 9;
-      if constexpr (n >= 100 && n < 121)     return 10;
-      if constexpr (n >= 121 && n < 144)     return 11;
-      if constexpr (n >= 144 && n < 169)     return 12;
-      if constexpr (n >= 169 && n < 196)     return 13;
-      if constexpr (n >= 196 && n < 225)     return 14;
-      if constexpr (n >= 225 && n < 256)     return 15;
-      if constexpr (n >= 256 && n < 289)     return 16;
-      if constexpr (n >= 289 && n < 324)     return 17;
-      if constexpr (n >= 324 && n < 361)     return 18;
-      if constexpr (n >= 361 && n < 400)     return 19;
-      if constexpr (n >= 400 && n < 441)     return 20;
-      if constexpr (n >= 441 && n < 484)     return 21;
-      if constexpr (n >= 484 && n < 529)     return 22;
-      else {
-          // Calcular estimación inicial usando bit_width
-          constexpr std::uint64_t x0_base{(1ull << (std::bit_width(n) / 2))};
-          // Asegurar que la estimación inicial sea sobreestimación
-          constexpr std::uint64_t x0{(x0_base * x0_base < n) ? (x0_base * 2) : x0_base};
-          // Aplicar Newton-Raphson recursivamente
-          return floorsqrt_ct_newton<n, x0>();
-      }
+    return detail::floorsqrt_ct_helper<n>::value;
   }
 
   /**
@@ -191,9 +273,9 @@ namespace NumRepr {
       if (n >= 441 && n < 484)     return 21;
       if (n >= 484 && n < 529)     return 22;
 
-      // std::bit_width requiere un tipo sin signo.
+      // bit_width_ct requiere un tipo sin signo.
       using UnsignedT = std::make_unsigned_t<T>;
-      T x0 = T(1) << (std::bit_width(static_cast<UnsignedT>(n)) / 2);
+      T x0 = T(1) << (bit_width_ct(static_cast<UnsignedT>(n)) / 2);
       
       // La iteración de Newton-Raphson converge desde arriba si la conjetura es >= sqrt(n).
       // Si nuestra conjetura x0 es una subestimación, la primera iteración x1 será mayor.
@@ -250,7 +332,7 @@ namespace NumRepr {
       }
   }
 
-  template <std::integral T>
+  template <typename T>
   constexpr T ceilsqrt(T n) noexcept {
       if (n == 0) return 0;
       T root = floorsqrt(n);
@@ -349,21 +431,14 @@ namespace NumRepr {
    * - La función no debe desbordarse durante los cálculos intermedios si `n` 
    * está dentro del rango del tipo `T`.
    */
-  template <std::uint64_t num>
-  consteval
-  bool is_power_of_2_ct() noexcept { 
-    return num > 0 && (num & (num - 1)) == 0; 
-  }
-  /**
-   * @brief Comprueba si un número es una potencia de 2, 
-   * pero nos aseguramos que sea en tiempo de compilación. 
-   * `_ct` es compile time
-   */
-  template <std::integral T>
-  constexpr inline
-  bool is_power_of_2(T num) noexcept { 
-    return num > 0 && (num & (num - 1)) == 0; 
-  }
+    template <std::uint64_t n>
+    struct floorsqrt_ct_helper_big {
+      static constexpr std::uint64_t log2_n = (n == 0) ? 0 : int_log2_ct<n>();
+      static constexpr std::uint64_t x0_base = (1ull << (log2_n / 2));
+      static constexpr std::uint64_t x0 = (x0_base * x0_base < n) ? (x0_base * 2) : x0_base;
+      static constexpr std::uint64_t value = floorsqrt_ct_newton<n, x0>();
+    };
+  
 
   enum class factor_error {
     invalid_range,
@@ -380,9 +455,8 @@ namespace NumRepr {
    * @tparam high Límite superior (exclusivo) del rango de búsqueda.
    * @return `true` si existe k en [low, high) tal que (2*k + 1) divide a n, `false` en caso contrario.
    */
-   template <std::integral T, T n, T low, T high>
-        requires ( (low > 1) && (high > low) && (n > high) )
-   consteval bool find_factor_ct() noexcept {
+     template <typename T, T n, T low, T high>
+     constexpr bool find_factor_ct() noexcept {
     if constexpr (low + 1 >= high) {
         return (n % (2 * low + 1)) == 0;
     } else {
@@ -408,7 +482,7 @@ namespace NumRepr {
    * @post Si el valor es `true`, existe un entero `k` con `low <= k < high` tal que `n % (2*k + 1) == 0`.
    * @post Si el valor es `false`, para todo `k` con `low <= k < high`, `n % (2*k + 1) != 0`.
    */
-  template <std::integral T>
+  template <typename T>
   constexpr inline
   std::expected<bool, factor_error> find_factor(T n, T low, T high) noexcept {
     if (low <= 1) return std::unexpected(factor_error::domain_error);
@@ -556,7 +630,7 @@ namespace NumRepr {
     } else if constexpr (a == b) {
       return a;
     } else if constexpr (b > a) {
-      return gcd_ct<b, a>();
+      return gcd_ct<a, b % a>();
     } else {
       return gcd_ct<b, a % b>();
     }
@@ -731,6 +805,22 @@ namespace NumRepr {
   }
 
   /**
+   * @brief Potencia de 2 en tiempo de ejecución (bitwise, solo base==2).
+   * @tparam T tipo entero (deducido)
+   * @param base Debe ser 2.
+   * @param exponent Exponente (debe ser <= max_exponent_for_base_ct<2>()).
+   * @return 2 elevado a exponent, usando desplazamiento de bits.
+   * @note Si base != 2, el resultado es indefinido.
+   * @warning Para exponent >= 64, el resultado es indefinido (overflow).
+   * @pre base == 2 && exponent <= max_exponent_for_base_ct<2>()
+   * @note Esta función es una optimización específica para la base 2.
+   * @note Si el exponente es mayor que 63, retorna 0 como indicativo de error.
+   */
+  constexpr std::uint64_t int_pow(std::size_t exponent) noexcept {
+    return (exponent <= max_exponent_for_base_ct<2>()) ? (1ull << exponent) : 0ull;
+  }
+
+  /**
    * @brief Calcula la potencia de un número en tiempo de ejecución.
    * @param base La base.
    * @param exponent El exponente.
@@ -791,7 +881,7 @@ namespace NumRepr {
     return root * root == n;
   }
 
-  // forward declaration for integer log2 (definition appears below)
+  // Declaración anticipada (definición más abajo)
   constexpr std::uint64_t int_log2(std::uint64_t n) noexcept;
   // forward declaration for count_digits_base (defined below)
   constexpr std::size_t count_digits_base(std::uint64_t n, std::uint64_t base) noexcept;
@@ -806,8 +896,8 @@ namespace NumRepr {
    * 
    * @post int_pow_ct<base, int_log_ct<base, n>>() <= n < int_pow_ct<base, int_log_ct<base, n> + 1>()
    */
-  template <std::uint64_t base, std::int64_t n> consteval
-  std::int64_t int_log_ct() noexcept {
+  template <std::uint64_t base, std::int64_t n>
+  constexpr std::int64_t int_log_ct() noexcept {
     if constexpr (n <= 0) {
       return -1; // Not in domain of the function log_base(n)
                  // Domain(log_base) = ]0, +infinity[ = [1, +infinity[
@@ -860,39 +950,34 @@ namespace NumRepr {
    * @return `true` si result * cur^e <= limit sin overflow, `false` en caso contrario.
    */
   template <std::uint64_t result, std::uint64_t cur, std::uint32_t e, std::uint64_t limit>
-  consteval bool pow_leq_limit_ct_helper() noexcept {
+  constexpr bool pow_leq_limit_ct_helper() noexcept {
     if constexpr (e == 0) {
       return result <= limit;
     } else {
-      // Si el bit menos significativo de e es 1
+      // Protección contra división por cero y overflow
+      if constexpr (cur == 0 || result > std::numeric_limits<std::uint64_t>::max() / cur) {
+        return false;
+      }
       if constexpr (e & 1u) {
-        // Verificar si result * cur excedería el límite
-        if constexpr (result > limit / cur) {
-          return false; // Excedería el límite
+        constexpr std::uint64_t new_result = result * cur;
+        constexpr std::uint32_t new_e = e >> 1u;
+        if constexpr (new_e == 0) {
+          return new_result <= limit;
         } else {
-          constexpr std::uint64_t new_result = result * cur;
-          constexpr std::uint32_t new_e = e >> 1u;
-          if constexpr (new_e == 0) {
-            return new_result <= limit;
+          if constexpr (cur > std::numeric_limits<std::uint64_t>::max() / cur) {
+            return false;
           } else {
-            // Verificar overflow en cur * cur
-            if constexpr (cur > std::numeric_limits<std::uint64_t>::max() / cur) {
-              return false; // Overflow, resultado definitivamente > limit
-            } else {
-              constexpr std::uint64_t new_cur = cur * cur;
-              return pow_leq_limit_ct_helper<new_result, new_cur, new_e, limit>();
-            }
+            constexpr std::uint64_t new_cur = cur * cur;
+            return pow_leq_limit_ct_helper<new_result, new_cur, new_e, limit>();
           }
         }
       } else {
-        // Bit es 0, no multiplicamos result
         constexpr std::uint32_t new_e = e >> 1u;
         if constexpr (new_e == 0) {
           return result <= limit;
         } else {
-          // Verificar overflow en cur * cur
           if constexpr (cur > std::numeric_limits<std::uint64_t>::max() / cur) {
-            return false; // Overflow
+            return false;
           } else {
             constexpr std::uint64_t new_cur = cur * cur;
             return pow_leq_limit_ct_helper<result, new_cur, new_e, limit>();
@@ -911,11 +996,10 @@ namespace NumRepr {
    * @return True if b^exp <= limit, false otherwise. This function is overflow-safe.
    */
   template <std::uint64_t b, std::uint32_t exp, std::uint64_t limit>
-  consteval bool pow_leq_limit_ct() noexcept {
+  constexpr bool pow_leq_limit_ct() noexcept {
     if constexpr (b == 0) return 0 <= limit;
     if constexpr (b == 1) return 1 <= limit;
     if constexpr (exp == 0) return 1 <= limit;
-    
     return pow_leq_limit_ct_helper<1ull, b, exp, limit>();
   }
 
@@ -982,74 +1066,7 @@ namespace NumRepr {
     return static_cast<std::size_t>(lo) + 1u;
   }
 
-  // ---- util_functs moved here ----
-  template<std::uint64_t>
-  consteval std::uint64_t int_pow2_ct() noexcept;
-  template<std::uint64_t>
-  consteval std::uint64_t int_log2_ct() noexcept;
-
-  constexpr
-  std::uint64_t int_pow2(std::uint64_t) noexcept;
-  constexpr
-  std::uint64_t int_log2(std::uint64_t) noexcept;
-
-  /**
-   * @brief Calcula la potencia de 2 en tiempo de compilación.
-   * @tparam n El exponente.
-   * @return 2 elevado a n.
-   */
-  template<std::uint64_t n>
-  consteval
-  std::uint64_t int_pow2_ct() noexcept {
-    if constexpr (n == 0) { return 1ull; }
-    else if constexpr (n == 1) { return 2ull; }
-    else { return (2ull*int_pow2_ct<n-1ull>()); }
-  }
-
-  /**
-   * @brief Calcula la potencia de 2 en tiempo de ejecución.
-   * @param n El exponente.
-   * @return 2 elevado a n.
-   */
-  constexpr
-  std::uint64_t int_pow2(std::uint64_t n) noexcept {
-    if (n == 0) { return 1ull; }
-    else if (n == 1) { return 2ull; }
-    else { return (2ull*int_pow2(n-1ull)); }
-  }
-
-  // Backwards-compatible aliases
-  template<std::uint64_t N>
-  consteval std::uint64_t pow2ct() noexcept { return int_pow2_ct<N>(); }
-  constexpr std::uint64_t pow2(std::uint64_t n) noexcept { return int_pow2(n); }
-
-  /**
-   * @brief Calcula el logaritmo en base 2 en tiempo de compilación.
-   * @tparam n El número.
-   * @return El logaritmo entero en base 2 de n.
-   */
-  template<std::uint64_t n>
-    requires (n>0)
-  consteval
-  std::uint64_t int_log2_ct() noexcept {
-    return std::bit_width(n) - 1;
-  }
-
-  /**
-   * @brief Calcula el logaritmo entero en base 2 en tiempo de ejecución.
-   * @param n El número.
-   * @return El logaritmo entero en base 2 de n.
-   */
-  constexpr inline
-  std::uint64_t int_log2(std::uint64_t n) noexcept {
-    if (n == 0) return 0; // Or handle as an error, though std::bit_width(0) is 0.
-    return std::bit_width(n) - 1;
-  }
-
-    // Backwards-compatible aliases
-    template<std::uint64_t N>
-    consteval std::uint64_t log2ct() noexcept { return int_log2_ct<N>(); }
-    constexpr std::uint64_t log2(std::uint64_t n) noexcept { return int_log2(n); }
+  // Eliminar aliases ambiguos y versiones duplicadas: log2, log2ct, pow2ct, pow2, etc.
 
     /**
      * @brief Errores posibles en conversión segura de representación a entero.
@@ -1333,44 +1350,9 @@ namespace NumRepr {
          * @tparam Exp Exponente de la potencia.
          * @note Uso legacy: pow_B_to_E_t<10, 3>::value. Moderno: int_pow_ct<10, 3>()
          */
-        template <usint_t Base, usint_t Exp>
-        struct [[deprecated("Usa int_pow_ct<base, exponent>() en su lugar")]] pow_B_to_E_t {
-            static constexpr uint64_t base = static_cast<uint64_t>(Base);
-            static constexpr uint64_t exponent = static_cast<uint64_t>(Exp);
-            static constexpr uint64_t value = base * (pow_B_to_E_t<base, exponent - 1>::value);
-        };
 
-        template <usint_t Base>
-        struct [[deprecated("Usa int_pow_ct<base, 2>() en su lugar")]] pow_B_to_E_t<Base, 2> {
-            static constexpr uint64_t base = static_cast<uint64_t>(Base);
-            static constexpr uint64_t exponent = static_cast<uint64_t>(2);
-            static constexpr uint64_t value = base * base;
-        };
-
-        template <usint_t Base>
-        struct [[deprecated("Usa int_pow_ct<base, 1>() en su lugar")]] pow_B_to_E_t<Base, 1> {
-            static constexpr uint64_t base = static_cast<uint64_t>(Base);
-            static constexpr uint64_t exponent = static_cast<uint64_t>(1);
-            static constexpr uint64_t value = base;
-        };
-
-        template <usint_t Base>
-        struct [[deprecated("Usa int_pow_ct<base, 0>() en su lugar")]] pow_B_to_E_t<Base, 0> {
-            static constexpr uint64_t base = static_cast<uint64_t>(Base);
-            static constexpr uint64_t exponent = static_cast<uint64_t>(0);
-            static constexpr uint64_t value = static_cast<uint64_t>(1);
-        };
-
-        /**
-         * @brief [DEPRECADO] Variable template para potencias. Usa int_pow_ct en su lugar.
-         * @deprecated Esta variable template está obsoleta. Usa utilities::int_pow_ct<base, exponent>() directamente.
-         * @tparam Base Base de la potencia.
-         * @tparam Exp Exponente de la potencia.
-         * @note Migración: Pow_B2L_v<10, 3> → int_pow_ct<10, 3>()
-         */
-        template <usint_t Base, usint_t Exp>
-        [[deprecated("Usa int_pow_ct<base, exponent>() en su lugar")]]
-        constexpr uint64_t Pow_B2L_v = pow_B_to_E_t<Base, Exp>::value;
+        // [Legacy removido] pow_B_to_E_t y Pow_B2L_v eliminados. Usar int_pow_ct<base, exponent>() en su lugar.
+        // Si necesitas compatibilidad, consulta la versión anterior en el repositorio o legacy_museum.
 
         // ============================================================================
         // CÓDIGO MUERTO: tuple_builder_t, tuple_user_constructor_t, tuple_constr_v

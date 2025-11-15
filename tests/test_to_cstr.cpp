@@ -5,7 +5,7 @@
  * @details Verifica serialización compile-time de dig_t a string
  */
 
-#include "../include/core/dig_t.hpp"
+#include <core/dig_t.hpp>
 #include <iostream>
 #include <cassert>
 #include <cstring>

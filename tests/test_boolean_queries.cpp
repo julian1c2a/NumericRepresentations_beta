@@ -10,7 +10,7 @@
  * - Casos especiales: Base 2 (comportamiento diferente en near/far)
  */
 
-#include "../include/core/dig_t.hpp"
+#include <core/dig_t.hpp>
 #include <iostream>
 #include <cassert>
 

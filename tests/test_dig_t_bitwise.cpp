@@ -3,7 +3,7 @@
 #include <iomanip>
 
 // Test completo de operadores bitwise/lógicos de dig_t con semántica matemática
-#include "../include/dig_t.hpp"
+#include <core/dig_t.hpp>
 
 using namespace NumRepr;
 
@@ -181,7 +181,154 @@ void test_bitwise_logical_operators()
     std::cout << "-0 = " << zero_neg.get() << " (debe ser 0)" << std::endl;
     assert(zero_neg.get() == 0);
 
-    // 9. Test propiedades matemáticas
+    // 9. Test operador ! (idéntico a ~, complemento B-1)
+    std::cout << "\n--- OPERADOR ! (COMPLEMENTO B-1, IDÉNTICO A ~) ---" << std::endl;
+    dig_type s(6u);
+    dig_type comp_not = !s;
+
+    std::cout << "s = " << s.get() << std::endl;
+    std::cout << "!s = " << comp_not.get() << " (complemento B-1: " << (B - 1) << " - " << s.get() << " = " << ((B - 1) - s.get()) << ")" << std::endl;
+    assert(comp_not.get() == (B - 1) - s.get());
+
+    // Verificar equivalencia con operator~
+    dig_type comp_tilde = ~s;
+    std::cout << "Verificación: !s == ~s → " << comp_not.get() << " == " << comp_tilde.get() << std::endl;
+    assert(comp_not.get() == comp_tilde.get());
+    std::cout << "✅ Propiedad: operator! ≡ operator~" << std::endl;
+
+    // Test casos especiales
+    dig_type comp_not_zero = !zero;
+    std::cout << "!0 = " << comp_not_zero.get() << " (debe ser " << (B - 1) << ")" << std::endl;
+    assert(comp_not_zero.get() == B - 1);
+
+    dig_type comp_not_max = !max_dig;
+    std::cout << "!(B-1) = " << comp_not_max.get() << " (debe ser 0)" << std::endl;
+    assert(comp_not_max.get() == 0);
+
+    // 10. Test C_Bm1() (función con nombre explícito para complemento B-1)
+    std::cout << "\n--- FUNCIÓN C_Bm1() (COMPLEMENTO B-1 CON NOMBRE) ---" << std::endl;
+    dig_type t(8u);
+    dig_type c_bm1_t = t.C_Bm1();
+
+    std::cout << "t = " << t.get() << std::endl;
+    std::cout << "t.C_Bm1() = " << c_bm1_t.get() << " (complemento B-1: " << (B - 1) << " - " << t.get() << " = " << ((B - 1) - t.get()) << ")" << std::endl;
+    assert(c_bm1_t.get() == (B - 1) - t.get());
+
+    // Verificar equivalencia con operator~
+    dig_type comp_tilde_t = ~t;
+    std::cout << "Verificación: t.C_Bm1() == ~t → " << c_bm1_t.get() << " == " << comp_tilde_t.get() << std::endl;
+    assert(c_bm1_t.get() == comp_tilde_t.get());
+    std::cout << "✅ Propiedad: C_Bm1() ≡ operator~" << std::endl;
+
+    // Test casos especiales
+    std::cout << "dig_0.C_Bm1() = " << zero.C_Bm1().get() << " (debe ser " << (B - 1) << ")" << std::endl;
+    assert(zero.C_Bm1().get() == B - 1);
+
+    std::cout << "dig_max.C_Bm1() = " << max_dig.C_Bm1().get() << " (debe ser 0)" << std::endl;
+    assert(max_dig.C_Bm1().get() == 0);
+
+    // 11. Test C_B() (función con nombre explícito para complemento B)
+    std::cout << "\n--- FUNCIÓN C_B() (COMPLEMENTO B CON NOMBRE) ---" << std::endl;
+    dig_type u(9u);
+    dig_type c_b_u = u.C_B();
+
+    std::cout << "u = " << u.get() << std::endl;
+    if (u.get() == 0)
+    {
+        std::cout << "u.C_B() = " << c_b_u.get() << " (complemento B de 0 = 0)" << std::endl;
+        assert(c_b_u.get() == 0);
+    }
+    else
+    {
+        std::cout << "u.C_B() = " << c_b_u.get() << " (complemento B: " << B << " - " << u.get() << " = " << (B - u.get()) << ")" << std::endl;
+        assert(c_b_u.get() == B - u.get());
+    }
+
+    // Verificar equivalencia con operator- unario
+    dig_type neg_u = -u;
+    std::cout << "Verificación: u.C_B() == -u → " << c_b_u.get() << " == " << neg_u.get() << std::endl;
+    assert(c_b_u.get() == neg_u.get());
+    std::cout << "✅ Propiedad: C_B() ≡ operator- unario" << std::endl;
+
+    // Test caso especial: 0
+    std::cout << "dig_0.C_B() = " << zero.C_B().get() << " (debe ser 0)" << std::endl;
+    assert(zero.C_B().get() == 0);
+
+    // 12. Test mC_Bm1() (versión in-place de complemento B-1)
+    std::cout << "\n--- FUNCIÓN mC_Bm1() (COMPLEMENTO B-1 IN-PLACE) ---" << std::endl;
+    dig_type v(12u);
+    auto v_original = v.get();
+
+    std::cout << "Antes: v = " << v.get() << std::endl;
+
+    const dig_type& v_ref = v.mC_Bm1();
+    std::cout << "v.mC_Bm1(); Después: v = " << v.get() << " (debe ser " << ((B - 1) - v_original) << ")" << std::endl;
+    assert(v.get() == (B - 1) - v_original);
+
+    // Verificar que retorna referencia al mismo objeto
+    std::cout << "Verificación: retorna referencia al mismo objeto" << std::endl;
+    assert(&v_ref == &v);
+    std::cout << "✅ mC_Bm1() retorna referencia al objeto modificado" << std::endl;
+
+    // Test caso especial: 0
+    dig_type v_zero = dig_type::dig_0();
+    v_zero.mC_Bm1();
+    std::cout << "dig_0.mC_Bm1() = " << v_zero.get() << " (debe ser " << (B - 1) << ")" << std::endl;
+    assert(v_zero.get() == B - 1);
+
+    // Test doble aplicación: mC_Bm1().mC_Bm1() debe retornar al original
+    dig_type w(15u);
+    auto w_original = w.get();
+    std::cout << "Antes: w = " << w.get() << std::endl;
+    w.mC_Bm1();
+    w.mC_Bm1();
+    std::cout << "w.mC_Bm1().mC_Bm1() = " << w.get() << " (debe retornar al original: " << w_original << ")" << std::endl;
+    assert(w.get() == w_original);
+    std::cout << "✅ Propiedad involución: aplicar mC_Bm1() dos veces = identidad" << std::endl;
+
+    // 13. Test mC_B() (versión in-place de complemento B)
+    std::cout << "\n--- FUNCIÓN mC_B() (COMPLEMENTO B IN-PLACE) ---" << std::endl;
+    dig_type x(11u);
+    auto x_original = x.get();
+
+    std::cout << "Antes: x = " << x.get() << std::endl;
+
+    const dig_type& x_ref = x.mC_B();
+    if (x_original == 0)
+    {
+        std::cout << "x.mC_B(); Después: x = " << x.get() << " (complemento B de 0 = 0)" << std::endl;
+        assert(x.get() == 0);
+    }
+    else
+    {
+        std::cout << "x.mC_B(); Después: x = " << x.get() << " (debe ser " << (B - x_original) << ")" << std::endl;
+        assert(x.get() == B - x_original);
+    }
+
+    // Verificar que retorna referencia al mismo objeto
+    std::cout << "Verificación: retorna referencia al mismo objeto" << std::endl;
+    assert(&x_ref == &x);
+    std::cout << "✅ mC_B() retorna referencia al objeto modificado" << std::endl;
+
+    // Test caso especial: 0
+    dig_type x_zero = dig_type::dig_0();
+    x_zero.mC_B();
+    std::cout << "dig_0.mC_B() = " << x_zero.get() << " (debe ser 0)" << std::endl;
+    assert(x_zero.get() == 0);
+
+    // Test propiedad: x + x.mC_B() ≡ 0 (para x ≠ 0)
+    if (x_original != 0)
+    {
+        dig_type y(x_original);
+        dig_type y_copy(x_original);
+        y_copy.mC_B();
+        dig_type sum = y + y_copy;
+        std::cout << "Propiedad: x + x.mC_B() = " << y.get() << " + " << y_copy.get() << " = " << sum.get() << " (debe ser 0)" << std::endl;
+        assert(sum.get() == 0);
+        std::cout << "✅ Propiedad: x + mC_B(x) ≡ 0 (mod B) para x ≠ 0" << std::endl;
+    }
+
+    // 14. Test propiedades matemáticas
     std::cout << "\n--- VERIFICACIÓN DE PROPIEDADES MATEMÁTICAS ---" << std::endl;
 
     // Propiedad: a & b = min(a, b)
@@ -234,8 +381,15 @@ int main()
     std::cout << "✅ Operador ^= con optimizaciones para exp=0,1,2" << std::endl;
     std::cout << "✅ Operador ~ como complemento B-1" << std::endl;
     std::cout << "✅ Operador - unario como complemento B" << std::endl;
+    std::cout << "✅ Operador ! como complemento B-1 (equivalente a ~)" << std::endl;
+    std::cout << "✅ Función C_Bm1() como complemento B-1 con nombre" << std::endl;
+    std::cout << "✅ Función C_B() como complemento B con nombre" << std::endl;
+    std::cout << "✅ Función mC_Bm1() como complemento B-1 in-place" << std::endl;
+    std::cout << "✅ Función mC_B() como complemento B in-place" << std::endl;
     std::cout << "✅ Casos especiales (0, B-1, exponentes pequeños)" << std::endl;
-    std::cout << "✅ Propiedades matemáticas (min/max, negación, doble complemento)" << std::endl;
+    std::cout << "✅ Propiedades matemáticas (min/max, negación, doble complemento, involución)" << std::endl;
+    std::cout << "✅ Equivalencias: ! ≡ ~, C_Bm1() ≡ ~, C_B() ≡ - unario" << std::endl;
+    std::cout << "✅ Retorno de referencias para mC_Bm1() y mC_B()" << std::endl;
     std::cout << "✅ Semántica matemática especializada vs bitwise tradicional" << std::endl;
 
     return 0;

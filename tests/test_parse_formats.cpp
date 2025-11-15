@@ -9,7 +9,8 @@
  * - "dig[N]BM" - formato largo con corchetes (NUEVO)
  */
 
-#include "../include/core/dig_t.hpp"
+#include <core/dig_t.hpp>
+#include <core/dig_t.hpp>
 #include <iostream>
 #include <cassert>
 
@@ -21,16 +22,16 @@ void test_formato_d_corchetes() {
     
     try {
         auto d1 = dig_t<50>::from_cstr("d[42]B50");
-        assert(d1.get() == 42);
-        cout << "✓ d[42]B50 = 42" << endl;
+            assert(d1->get() == 42);
+            cout << "[OK] d[42]B50 = 42" << endl;
         
         auto d2 = dig_t<10>::from_cstr("d[0]B10");
-        assert(d2.get() == 0);
-        cout << "✓ d[0]B10 = 0" << endl;
+            assert(d2->get() == 0);
+            cout << "[OK] d[0]B10 = 0" << endl;
         
         auto d3 = dig_t<256>::from_cstr("d[999]B256");
-        assert(d3.get() == 999 % 256);
-        cout << "✓ d[999]B256 = " << static_cast<int>(d3.get()) << " (normalizado)" << endl;
+            assert(d3->get() == 999 % 256);
+            cout << "[OK] d[999]B256 = " << static_cast<int>(d3->get()) << " (normalizado)" << endl;
     } catch (const exception& e) {
         cerr << "❌ Error: " << e.what() << endl;
         assert(false);
@@ -49,16 +50,16 @@ void test_formato_d_almohadillas() {
     
     try {
         auto d1 = dig_t<50>::from_cstr("d#42#B50");
-        assert(d1.get() == 42);
-        cout << "✓ d#42#B50 = 42" << endl;
+            assert(d1->get() == 42);
+            cout << "[OK] d#42#B50 = 42" << endl;
         
         auto d2 = dig_t<10>::from_cstr("d#0#B10");
-        assert(d2.get() == 0);
-        cout << "✓ d#0#B10 = 0" << endl;
+            assert(d2->get() == 0);
+            cout << "[OK] d#0#B10 = 0" << endl;
         
         auto d3 = dig_t<256>::from_cstr("d#999#B256");
-        assert(d3.get() == 999 % 256);
-        cout << "✓ d#999#B256 = " << static_cast<int>(d3.get()) << " (normalizado)" << endl;
+            assert(d3->get() == 999 % 256);
+            cout << "[OK] d#999#B256 = " << static_cast<int>(d3->get()) << " (normalizado)" << endl;
     } catch (const exception& e) {
         cerr << "❌ Error: " << e.what() << endl;
         assert(false);
@@ -77,16 +78,16 @@ void test_formato_dig_almohadillas() {
     
     try {
         auto d1 = dig_t<50>::from_cstr("dig#42#B50");
-        assert(d1.get() == 42);
-        cout << "✓ dig#42#B50 = 42" << endl;
+            assert(d1->get() == 42);
+            cout << "[OK] dig#42#B50 = 42" << endl;
         
         auto d2 = dig_t<10>::from_cstr("dig#0#B10");
-        assert(d2.get() == 0);
-        cout << "✓ dig#0#B10 = 0" << endl;
+            assert(d2->get() == 0);
+            cout << "[OK] dig#0#B10 = 0" << endl;
         
         auto d3 = dig_t<256>::from_cstr("dig#999#B256");
-        assert(d3.get() == 999 % 256);
-        cout << "✓ dig#999#B256 = " << static_cast<int>(d3.get()) << " (normalizado)" << endl;
+            assert(d3->get() == 999 % 256);
+            cout << "[OK] dig#999#B256 = " << static_cast<int>(d3->get()) << " (normalizado)" << endl;
     } catch (const exception& e) {
         cerr << "❌ Error: " << e.what() << endl;
         assert(false);
@@ -105,16 +106,16 @@ void test_formato_dig_corchetes() {
     
     try {
         auto d1 = dig_t<50>::from_cstr("dig[42]B50");
-        assert(d1.get() == 42);
-        cout << "✓ dig[42]B50 = 42" << endl;
+            assert(d1->get() == 42);
+            cout << "[OK] dig[42]B50 = 42" << endl;
         
         auto d2 = dig_t<10>::from_cstr("dig[0]B10");
-        assert(d2.get() == 0);
-        cout << "✓ dig[0]B10 = 0" << endl;
+            assert(d2->get() == 0);
+            cout << "[OK] dig[0]B10 = 0" << endl;
         
         auto d3 = dig_t<256>::from_cstr("dig[999]B256");
-        assert(d3.get() == 999 % 256);
-        cout << "✓ dig[999]B256 = " << static_cast<int>(d3.get()) << " (normalizado)" << endl;
+            assert(d3->get() == 999 % 256);
+            cout << "[OK] dig[999]B256 = " << static_cast<int>(d3->get()) << " (normalizado)" << endl;
     } catch (const exception& e) {
         cerr << "❌ Error: " << e.what() << endl;
         assert(false);
@@ -152,7 +153,7 @@ void test_equivalencia_formatos() {
             assert(d2.get() == d3.get());
             assert(d3.get() == d4.get());
             
-            cout << "✓ Todos los formatos para " << num << " → " << static_cast<int>(d1.get()) << endl;
+                cout << "[OK] Todos los formatos para " << num << " -> " << static_cast<int>(d1.get()) << endl;
         } catch (const exception& e) {
             cerr << "❌ Error para " << num << ": " << e.what() << endl;
             assert(false);
@@ -165,20 +166,20 @@ void test_multiples_bases() {
     
     try {
         auto d1 = dig_t<2>::from_cstr("d[5]B2");
-        assert(d1.get() == 1);
-        cout << "✓ Base 2: d[5]B2 = 1 (normalizado)" << endl;
+            assert(d1->get() == 1);
+            cout << "[OK] Base 2: d[5]B2 = 1 (normalizado)" << endl;
         
         auto d2 = dig_t<16>::from_cstr("d#255#B16");
-        assert(d2.get() == 15);
-        cout << "✓ Base 16: d#255#B16 = 15 (normalizado)" << endl;
+            assert(d2->get() == 15);
+            cout << "[OK] Base 16: d#255#B16 = 15 (normalizado)" << endl;
         
         auto d3 = dig_t<256>::from_cstr("dig[1000]B256");
-        assert(d3.get() == 1000 % 256);
-        cout << "✓ Base 256: dig[1000]B256 = " << static_cast<int>(d3.get()) << " (normalizado)" << endl;
+            assert(d3->get() == 1000 % 256);
+            cout << "[OK] Base 256: dig[1000]B256 = " << static_cast<int>(d3->get()) << " (normalizado)" << endl;
         
         auto d4 = dig_t<257>::from_cstr("dig#500#B257");
-        assert(d4.get() == 500 % 257);
-        cout << "✓ Base 257: dig#500#B257 = " << static_cast<int>(d4.get()) << " (normalizado)" << endl;
+            assert(d4->get() == 500 % 257);
+            cout << "[OK] Base 257: dig#500#B257 = " << static_cast<int>(d4->get()) << " (normalizado)" << endl;
     } catch (const exception& e) {
         cerr << "❌ Error: " << e.what() << endl;
         assert(false);

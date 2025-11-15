@@ -9,7 +9,6 @@
 #include <array>
 #include <expected>
 #include <string>
-#include <stdexcept>
 
 #include "internal/basic_types.hpp"
 #include "internal/auxiliary_functions.hpp"
@@ -428,57 +427,61 @@ namespace NumRepr {
     /**
      * @brief Constructor desde std::string con parsing de formato específico
      * @param str Cadena a parsear (formatos: "d[N]BM", "dig#N#BM", etc.)
-     * @throws std::invalid_argument si el formato es inválido
+     * @note Si el formato es inválido, construye dig_t(0) (noexcept)
      * @note Explicit: no se permite conversión implícita desde string
-     * @see from_string() para versión static
+     * @see from_string() para versión que retorna std::expected con errores
      */
-    explicit dig_t(const std::string &str);
+    explicit dig_t(const std::string &str) noexcept;
     
     /**
      * @brief Constructor desde C-string con parsing de formato específico
      * @param str Cadena C a parsear (formatos: "d[N]BM", "dig#N#BM", etc.)
+     * @note Si el formato es inválido o str==nullptr, construye dig_t(0) (noexcept)
      * @note Explicit: no se permite conversión implícita desde const char*
-     * @note constexpr pero NO consteval (usa std::to_string en caso de error)
-     * @see from_cstr() para versión static
+     * @note constexpr noexcept para uso seguro en tiempo de compilación
+     * @see from_cstr() para versión que retorna std::expected con errores
      */
-    explicit constexpr dig_t(const char *str);
+    explicit constexpr dig_t(const char *str) noexcept;
 
     /**
-     * @brief Parsing desde std::string (versión static factory)
+     * @brief Parsing desde std::string (versión static factory) SIN excepciones
      * @param str Cadena a parsear
-     * @return Dígito parseado
-     * @throws std::invalid_argument si el formato es inválido
+     * @return std::expected<dig_t, parse_error_t> con dígito o error detallado
+     * @note No lanza excepciones, usa std::expected para manejo de errores
+     * @note Usa parse_impl internamente
      */
-    static dig_t from_string(const std::string &str);
+    static std::expected<dig_t, parse_error_t> from_string(const std::string &str) noexcept;
     
     /**
-     * @brief Parsing desde C-string (versión static factory)
+     * @brief Parsing desde C-string (versión static factory) SIN excepciones
      * @param str Cadena C a parsear
-     * @return Dígito parseado
-     * @note constexpr para permitir uso en contextos constexpr
+     * @return std::expected<dig_t, parse_error_t> con dígito o error detallado
+     * @note constexpr y noexcept, no lanza excepciones
+     * @note Retorna parse_error_t::null_input si str == nullptr
+     * @note Usa parse_impl internamente
      */
-    static constexpr dig_t from_cstr(const char *str);
+    [[nodiscard]] static constexpr std::expected<dig_t, parse_error_t> from_cstr(const char *str) noexcept;
 
     /**
      * @brief Parsing desde std::array SIN excepciones (versión static factory)
-     * @tparam N Tamaño del array de caracteres
-     * @param arr Array con el string a parsear
+     * @tparam Arr Array de caracteres (deducido automáticamente)
      * @return std::expected<dig_t, parse_error_t> con dígito o error detallado
      * 
-     * @note Completamente constexpr, no lanza excepciones
+     * @note Array pasado como argumento template (compile-time)
      * @note Usa parse_impl_ct internamente
      * @note Ideal para metaprogramación y contextos sin excepciones
+     * @note MSVC limitation: std::expected no puede evaluarse en consteval con errores,
+     *       así que la función es inline (runtime) a pesar del array compile-time
      * 
      * @example
      * ```cpp
-     * constexpr std::array<char, 7> str = {'d', '[', '5', ']', 'B', '1', '0'};
-     * constexpr auto result = dig_t<10>::from_array_ct(str);
-     * static_assert(result.has_value() && result->get() == 5);
+     * auto result = dig_t<10>::from_array_ct<std::array{'d', '[', '5', ']', 'B', '1', '0'}>();
+     * assert(result.has_value() && result->get() == 5);
      * ```
      */
-    template <std::size_t N>
-    static constexpr std::expected<dig_t, parse_error_t>
-    from_array_ct(const std::array<char, N>& arr) noexcept;
+    template <auto Arr>
+    [[nodiscard]] static inline std::expected<dig_t, parse_error_t>
+    from_array_ct() noexcept;
 
     // =========================================================================
     // OPERADORES DE ASIGNACIÓN
@@ -2543,6 +2546,11 @@ namespace NumRepr {
 
   private:
 
+    /**
+     * @brief Convierte el valor del dígito a string decimal
+     * @return String con representación decimal del valor (ej: "42", "255")
+     * @note Helper interno para to_string()
+     */
     std::string num_to_string() const noexcept {
       const std::int64_t data_member{static_cast<std::int64_t>(this->m_d)};
       std::ostringstream fmtr_obj;
@@ -2551,7 +2559,13 @@ namespace NumRepr {
       return ret;
     }
 
-    std::string radix_str() const noexcept {
+    /**
+     * @brief Genera string con formato "B<base>" para serialización
+     * @return String con la base (ej: "B10", "B256")
+     * @note Helper interno para to_string()
+     * @note static porque solo depende de la constante template B
+     */
+    static std::string radix_str() noexcept {
       constexpr std::int64_t radix{static_cast<std::int64_t>(B)};
       std::ostringstream fmtr_obj;
       fmtr_obj << radix;
@@ -2609,8 +2623,7 @@ namespace NumRepr {
         result.delimiter_close = ']';
         result.next_pos = 2;
         return result;
-      }
-      else if (size >= 4 && char_at(0) == 'd' && char_at(1) == '#') {
+      } else if (size >= 4 && char_at(0) == 'd' && char_at(1) == '#') {
         result.delimiter_open = '#';
         result.delimiter_close = '#';
         result.next_pos = 2;
@@ -2623,9 +2636,10 @@ namespace NumRepr {
         result.delimiter_close = '#';
         result.next_pos = 4;
         return result;
-      }
-      else if (size >= 6 && char_at(0) == 'd' && char_at(1) == 'i' && 
-               char_at(2) == 'g' && char_at(3) == '[') {
+      } else if (size >= 6 && char_at(0) == 'd' && 
+               char_at(1) == 'i' && char_at(2) == 'g' && 
+               char_at(3) == '['
+        ) {
         result.delimiter_open = '[';
         result.delimiter_close = ']';
         result.next_pos = 4;
@@ -2753,6 +2767,226 @@ namespace NumRepr {
       return BaseResult{base_leida, pos};
     }
 
+  public:
+    // =========================================================================
+    // VERSIONES CONSTEVAL PURAS (con recursión) - EXPERIMENTAL
+    // =========================================================================
+    
+    /**
+     * @brief Versión consteval pura de parse_prefix_fsm
+     * @tparam Container Tipo contenedor (std::array)
+     * @param container Contenedor con los datos
+     * @param size Tamaño del contenedor
+     * @return std::expected con PrefixResult o parse_error_t
+     * 
+     * @note Esta versión es completamente consteval y trabaja con std::array
+     */
+    template<typename Container>
+    static consteval std::expected<PrefixResult, parse_error_t>
+    parse_prefix_fsm_ct(const Container& container, std::size_t size) noexcept {
+      if (size < 4) {
+        return std::unexpected(parse_error_t::empty_or_null);
+      }
+      
+      PrefixResult result;
+      
+      // Detectar "d[" o "d#"
+      if (size >= 4 && container[0] == 'd' && container[1] == '[') {
+        result.delimiter_open = '[';
+        result.delimiter_close = ']';
+        result.next_pos = 2;
+        return result;
+      } else if (size >= 4 && container[0] == 'd' && container[1] == '#') {
+        result.delimiter_open = '#';
+        result.delimiter_close = '#';
+        result.next_pos = 2;
+        return result;
+      }
+      // Detectar "dig#" o "dig["
+      else if (size >= 6 && container[0] == 'd' && container[1] == 'i' && 
+               container[2] == 'g' && container[3] == '#') {
+        result.delimiter_open = '#';
+        result.delimiter_close = '#';
+        result.next_pos = 4;
+        return result;
+      } else if (size >= 6 && container[0] == 'd' && 
+               container[1] == 'i' && container[2] == 'g' && 
+               container[3] == '['
+        ) {
+        result.delimiter_open = '[';
+        result.delimiter_close = ']';
+        result.next_pos = 4;
+        return result;
+      }
+      
+      return std::unexpected(parse_error_t::invalid_prefix);
+    }
+    
+    /**
+     * @brief Helper recursivo para parsear número (compile-time)
+     * @tparam Container Tipo contenedor (std::array)
+     * @param container Contenedor con los datos
+     * @param size Tamaño del contenedor
+     * @param pos Posición actual
+     * @param delim_close Delimitador de cierre
+     * @param accumulator Acumulador del valor
+     * @param digit_count Contador de dígitos parseados
+     * @return std::expected con NumberResult o parse_error_t
+     */
+    template<typename Container>
+    static consteval std::expected<NumberResult, parse_error_t>
+    parse_number_fsm_ct_impl(const Container& container, std::size_t size,
+                             std::size_t pos, char delim_close,
+                             sig_uint_t accumulator, std::size_t digit_count) noexcept {
+      // Caso base: llegamos al delimitador de cierre
+      if (pos >= size) {
+        return std::unexpected(parse_error_t::missing_delimiter);
+      }
+      
+      if (container[pos] == delim_close) {
+        if (digit_count == 0) {
+          return std::unexpected(parse_error_t::no_digits);
+        }
+        return NumberResult{accumulator, pos + 1};
+      }
+      
+      // Validar dígito
+      if (container[pos] < '0' || container[pos] > '9') {
+        return std::unexpected(parse_error_t::invalid_digit);
+      }
+      
+      // Caso recursivo: procesar dígito y continuar
+      sig_uint_t new_acc = accumulator * 10 + (container[pos] - '0');
+      return parse_number_fsm_ct_impl(container, size, pos + 1, delim_close,
+                                      new_acc, digit_count + 1);
+    }
+    
+    /**
+     * @brief Versión consteval pura de parse_number_fsm
+     * @tparam Container Tipo contenedor (std::array)
+     * @param container Contenedor con los datos
+     * @param size Tamaño del contenedor
+     * @param pos Posición donde empieza el número
+     * @param delim_close Delimitador de cierre esperado
+     * @return std::expected con NumberResult o parse_error_t
+     */
+    template<typename Container>
+    static consteval std::expected<NumberResult, parse_error_t>
+    parse_number_fsm_ct(const Container& container, std::size_t size,
+                        std::size_t pos, char delim_close) noexcept {
+      return parse_number_fsm_ct_impl(container, size, pos, delim_close, 0, 0);
+    }
+    
+    /**
+     * @brief Helper recursivo para parsear base (compile-time)
+     * @tparam Container Tipo contenedor (std::array)
+     * @param container Contenedor con los datos
+     * @param size Tamaño del contenedor
+     * @param pos Posición actual
+     * @param accumulator Acumulador de la base
+     * @param digit_count Contador de dígitos
+     * @return std::expected con sig_uint_t o parse_error_t
+     */
+    template<typename Container>
+    static consteval std::expected<sig_uint_t, parse_error_t>
+    parse_base_fsm_ct_impl(const Container& container, std::size_t size,
+                           std::size_t pos, sig_uint_t accumulator,
+                           std::size_t digit_count) noexcept {
+      // Caso base: no hay más caracteres o no es dígito
+      if (pos >= size || container[pos] < '0' || container[pos] > '9') {
+        if (digit_count == 0) {
+          return std::unexpected(parse_error_t::no_base_digits);
+        }
+        return accumulator;
+      }
+      
+      // Caso recursivo: procesar dígito y continuar
+      sig_uint_t new_acc = accumulator * 10 + (container[pos] - '0');
+      return parse_base_fsm_ct_impl(container, size, pos + 1, new_acc, digit_count + 1);
+    }
+    
+    /**
+     * @brief Versión consteval pura de parse_base_fsm
+     * @tparam Container Tipo contenedor (std::array)
+     * @param container Contenedor con los datos
+     * @param size Tamaño del contenedor
+     * @param pos Posición donde debe estar 'B'
+     * @param expected_base Base esperada
+     * @return std::expected con BaseResult o parse_error_t
+     */
+    template<typename Container>
+    static consteval std::expected<BaseResult, parse_error_t>
+    parse_base_fsm_ct(const Container& container, std::size_t size,
+                      std::size_t pos, std::uint64_t expected_base) noexcept {
+      // Verificar 'B'
+      if (pos >= size || container[pos] != 'B') {
+        return std::unexpected(parse_error_t::missing_B);
+      }
+      
+      // Parsear dígitos de la base recursivamente
+      auto base_result = parse_base_fsm_ct_impl(container, size, pos + 1, 0, 0);
+      if (!base_result) {
+        return std::unexpected(base_result.error());
+      }
+      
+      sig_uint_t base_leida = *base_result;
+      
+      if (base_leida != expected_base) {
+        return std::unexpected(parse_error_t::base_mismatch);
+      }
+      
+      return BaseResult{base_leida, size};  // Posición final aproximada
+    }
+    
+    /**
+     * @brief Parser compile-time completamente consteval
+     * @tparam N Tamaño del array
+     * @param arr Array de caracteres con el string a parsear
+     * @param base_template Base esperada (debe coincidir con B)
+     * @return std::expected con uint_t parseado o parse_error_t
+     * 
+     * @details Usa versiones consteval puras con recursión.
+     *          Soporta los 4 formatos: "d[N]BM", "d#N#BM", "dig#N#BM", "dig[N]BM"
+     * 
+     * @note Esta versión es completamente consteval y puede usarse
+     *       en contextos que requieren evaluación en tiempo de compilación.
+     */
+    template<std::size_t N>
+    static consteval std::expected<uint_t, parse_error_t>
+    parse_impl_pure_ct(const std::array<char, N>& arr, 
+                       std::uint64_t base_template) noexcept {
+      constexpr std::size_t size = N;
+      
+      if (size < 4) {
+        return std::unexpected(parse_error_t::empty_or_null);
+      }
+      
+      // FSM 1: Parsear prefijo
+      auto prefix = parse_prefix_fsm_ct(arr, size);
+      if (!prefix) {
+        return std::unexpected(prefix.error());
+      }
+      
+      // FSM 2: Parsear número
+      auto number = parse_number_fsm_ct(arr, size, prefix->next_pos, 
+                                         prefix->delimiter_close);
+      if (!number) {
+        return std::unexpected(number.error());
+      }
+      
+      // FSM 3: Parsear y validar base
+      auto base = parse_base_fsm_ct(arr, size, number->next_pos, base_template);
+      if (!base) {
+        return std::unexpected(base.error());
+      }
+      
+      // Normalizar el valor
+      sig_uint_t numero_final = number->value % base_template;
+      
+      return static_cast<uint_t>(numero_final);
+    }
+
+  private:
     // =========================================================================
     // PARSING DESDE CADENAS - Implementación interna
     // =========================================================================
@@ -2969,13 +3203,11 @@ namespace NumRepr {
   /// FUNCIÓN DE PARSEO DESDE UNA CADENA DE CARACTERES (STATIC)
   template <std::uint64_t Base>
     requires(Base > 1)
-  dig_t<Base> dig_t<Base>::from_string(const std::string &str) {
+  std::expected<dig_t<Base>, parse_error_t> dig_t<Base>::from_string(const std::string &str) noexcept {
     auto [value, success] = parse_impl(str.c_str(), str.size(), Base);
 
     if (!success) {
-      throw std::invalid_argument("Invalid dig_t format: expected 'd[number]B" +
-                                  std::to_string(Base) + "' or 'dig#number#B" +
-                                  std::to_string(Base) + "'");
+      return std::unexpected(parse_error_t::unknown);
     }
 
     return dig_t<Base>(value);
@@ -2984,9 +3216,9 @@ namespace NumRepr {
   /// FUNCIÓN DE PARSEO DESDE UNA CADENA DE CARACTERES CSTR (STATIC)
   template <std::uint64_t Base>
     requires(Base > 1)
-  constexpr dig_t<Base> dig_t<Base>::from_cstr(const char *str) {
+  constexpr std::expected<dig_t<Base>, parse_error_t> dig_t<Base>::from_cstr(const char *str) noexcept {
     if (str == nullptr) {
-      throw std::invalid_argument("Null pointer passed to from_cstr");
+      return std::unexpected(parse_error_t::empty_or_null);
     }
 
     std::size_t len = 0;
@@ -2995,52 +3227,46 @@ namespace NumRepr {
 
     auto [value, success] = parse_impl(str, len, Base);
 
-    if (!success)
-    {
-      throw std::invalid_argument("Invalid dig_t format: expected 'd[number]B" +
-                                  std::to_string(Base) + "' or 'dig#number#B" +
-                                  std::to_string(Base) + "'");
+    if (!success) {
+      return std::unexpected(parse_error_t::unknown);
     }
 
     return dig_t<Base>(value);
   }
 
   /**
-   * @brief Factory constexpr para crear dig_t desde std::array SIN excepciones
+   * @brief Factory consteval para crear dig_t desde std::array SIN excepciones
    * @tparam Base Base del sistema numérico (debe ser > 1)
-   * @tparam N Tamaño del array de caracteres
-   * @param arr Array con el string a parsear
+   * @tparam Arr Array de caracteres (argumento template)
    * @return std::expected con dig_t o parse_error_t
    * 
-   * @details Función factory que usa parse_impl_ct para parsing seguro sin excepciones.
-   *          Ideal para contextos constexpr donde no se permiten excepciones.
+   * @details Función factory consteval que usa parse_impl_ct para parsing seguro.
+   *          Array pasado como argumento template garantiza evaluación compile-time.
    * 
-   * @note VENTAJAS sobre from_cstr():
+   * @note VENTAJAS:
+   *       - consteval: garantiza evaluación en tiempo de compilación
    *       - No lanza excepciones (std::expected)
    *       - Errores detallados (parse_error_t enum)
-   *       - Completamente constexpr (apto para static_assert)
    *       - No requiere nullptr checking (std::array siempre válido)
+   *       - Array como template: cero overhead runtime
    * 
    * @note USO TÍPICO:
    *       ```cpp
-   *       constexpr std::array<char, 7> str = {'d', '[', '7', ']', 'B', '1', '0'};
-   *       constexpr auto result = dig_t<10>::from_array_ct(str);
-   *       if (result) {
-   *           constexpr dig_t<10> d = *result;
-   *           static_assert(d.get() == 7);
-   *       }
+   *       constexpr auto result = dig_t<10>::from_array_ct<std::array{'d', '[', '7', ']', 'B', '1', '0'}>();
+   *       static_assert(result.has_value());
+   *       static_assert(result->get() == 7);
    *       ```
    * 
    * @see parse_impl_ct() para parsing de bajo nivel
-   * @see from_string() para versión runtime con excepciones
-   * @see from_cstr() para versión constexpr con excepciones
+   * @see from_string() para versión runtime sin excepciones
+   * @see from_cstr() para versión constexpr sin excepciones
    */
   template <std::uint64_t Base>
     requires(Base > 1)
-  template <std::size_t N>
-  constexpr std::expected<dig_t<Base>, parse_error_t>
-  dig_t<Base>::from_array_ct(const std::array<char, N>& arr) noexcept {
-    auto result = parse_impl_ct(arr);
+  template <auto Arr>
+  inline std::expected<dig_t<Base>, parse_error_t>
+  dig_t<Base>::from_array_ct() noexcept {
+    auto result = parse_impl_ct(Arr);
     
     if (result.has_value()) {
       return dig_t<Base>(*result);
@@ -3052,12 +3278,28 @@ namespace NumRepr {
   /// IMPLEMENTACIÓN DE LOS CONSTRUCTORES DESDE CADENA DE CARACTERES
   template <std::uint64_t Base>
     requires(Base > 1)
-  dig_t<Base>::dig_t(const std::string &str) : dig_t(from_string(str)) {}
+  dig_t<Base>::dig_t(const std::string &str) noexcept {
+    auto result = from_string(str);
+    if (result) {
+      *this = *result;
+    } else {
+      // Si parsing falla, construir dig_t(0)
+      m_d = 0;
+    }
+  }
 
   /// IMPLEMENTACIÓN DE LOS CONSTRUCTORES DESDE CADENA DE CARACTERES CSTR
   template <std::uint64_t Base>
     requires(Base > 1)
-  constexpr dig_t<Base>::dig_t(const char *str) : dig_t(from_cstr(str)) {}
+  constexpr dig_t<Base>::dig_t(const char *str) noexcept {
+    auto result = from_cstr(str);
+    if (result) {
+      *this = *result;
+    } else {
+      // Si parsing falla o str==nullptr, construir dig_t(0)
+      m_d = 0;
+    }
+  }
 
     /// SOBRECARGAS DE LOS OPERADORES DE FLUJO
   template <std::uint64_t Base>
@@ -3066,17 +3308,12 @@ namespace NumRepr {
     std::string input_str;
     is >> input_str;
 
-    if (is.fail())
-    {
-      return is;
-    }
+    if (is.fail()) { return is; }
 
-    try
-    {
-      arg = dig_t<Base>::from_string(input_str);
-    }
-    catch (const std::exception &)
-    {
+    auto result = dig_t<Base>::from_string(input_str);
+    if (result) {
+      arg = *result;
+    } else {
       is.setstate(std::ios::failbit);
     }
 
@@ -3091,6 +3328,196 @@ namespace NumRepr {
        << "]B" << static_cast<std::int64_t>(Base);
     return os;
   }
+
+  // ===========================================================================
+  // FUNCIONES LIBRES - FACTORY FUNCTIONS
+  // ===========================================================================
+  
+  /**
+   * @defgroup make_digit Factory functions para creación conveniente de dig_t
+   * @{
+   * 
+   * @brief Familia de funciones libres para crear dígitos de forma ergonómica
+   * 
+   * @details Esta familia proporciona 4 sobrecargas de `make_digit()`:
+   * 
+   * **1. make_digit<Base, Arr>()** - Array compile-time
+   * ```cpp
+   * auto d = make_digit<10, std::array{'d','[','5',']','B','1','0'}>();
+   * // Retorna: std::expected<dig_t<10>, parse_error_t>
+   * ```
+   * 
+   * **2. make_digit<Base>(string)** - String runtime
+   * ```cpp
+   * std::string str = "d[5]B10";
+   * auto d = make_digit<10>(str);
+   * // Retorna: std::expected<dig_t<10>, parse_error_t>
+   * ```
+   * 
+   * **3. make_digit<Base>(const char*)** - C-string
+   * ```cpp
+   * auto d = make_digit<16>("d[7]B16");
+   * // Retorna: std::expected<dig_t<16>, parse_error_t>
+   * ```
+   * 
+   * **4. make_digit<Base>(entero)** - Valor directo
+   * ```cpp
+   * auto d = make_digit<10>(5);
+   * // Retorna: dig_t<10> (siempre éxito, sin expected)
+   * ```
+   * 
+   * @note Las versiones 1-3 retornan `std::expected` porque pueden fallar (parsing)
+   * @note La versión 4 retorna `dig_t` directamente porque siempre tiene éxito
+   * @note Todas normalizan valores automáticamente: `value % Base`
+   * @note Base debe especificarse explícitamente (no se puede deducir)
+   * 
+   * @see dig_t<Base>::from_string() - Método estático equivalente a versión 2
+   * @see dig_t<Base>::from_cstr() - Método estático equivalente a versión 3
+   * @see dig_t<Base>::from_array_ct<Arr>() - Método estático equivalente a versión 1
+   */
+
+  /**
+   * @brief Factory function para crear dig_t desde array con base especificada
+   * @ingroup make_digit
+   * @tparam Base Base del sistema numérico (debe coincidir con la del string)
+   * @tparam Arr Array de caracteres (deducido automáticamente)
+   * @return std::expected<dig_t<Base>, parse_error_t>
+   * 
+   * @details Versión que requiere especificar la base explícitamente.
+   *          Valida que la base del string coincida con Base template.
+   * 
+   * @note NOTA IMPORTANTE: No es posible crear una versión que deduzca la base
+   *       automáticamente sin especificarla, porque el tipo de retorno dig_t<Base>
+   *       depende de Base como parámetro template (no puede ser runtime).
+   * 
+   * @note Para casos donde la base es dinámica, se necesitaría usar std::variant
+   *       con todas las bases posibles, lo cual es poco práctico.
+   * 
+   * @note MSVC limitation: std::expected no puede evaluarse en constexpr con errores,
+   *       así que la función es inline (runtime) a pesar del array compile-time
+   * 
+   * @example Uso básico:
+   * ```cpp
+   * auto d = make_digit<10, std::array{'d','[','5',']','B','1','0'}>();
+   * assert(d.has_value());
+   * assert(d->get() == 5);
+   * ```
+   * 
+   * @example Con validación:
+   * ```cpp
+   * auto d = make_digit<16, std::array{'d','[','7',']','B','1','6'}>();
+   * if (d) {
+   *     std::cout << d->get() << std::endl; // 7
+   * }
+   * ```
+   */
+  template <std::uint64_t Base, auto Arr>
+    requires(Base > 1)
+  [[nodiscard]] inline auto make_digit() noexcept 
+    -> std::expected<dig_t<Base>, parse_error_t> {
+    return dig_t<Base>::template from_array_ct<Arr>();
+  }
+
+  /**
+   * @brief Factory function runtime para crear dig_t desde string con base especificada
+   * @ingroup make_digit
+   * @tparam Base Base del sistema numérico
+   * @param str String a parsear (formato: "d[N]BM" o "dig#N#BM")
+   * @return std::expected<dig_t<Base>, parse_error_t>
+   * 
+   * @details Versión runtime que funciona con strings dinámicos.
+   *          Útil cuando el string no se conoce en compile-time.
+   * 
+   * @note Para compile-time, usar make_digit<Base, Arr>() con std::array
+   * 
+   * @example Runtime:
+   * ```cpp
+   * std::string input = "d[5]B10";
+   * auto d = make_digit<10>(input);
+   * if (d) {
+   *     std::cout << d->get() << std::endl; // 5
+   * }
+   * ```
+   * 
+   * @example Runtime con input de usuario:
+   * ```cpp
+   * std::string user_input;
+   * std::cin >> user_input; // Usuario ingresa "d[42]B10"
+   * auto d = make_digit<10>(user_input);
+   * ```
+   */
+  template <std::uint64_t Base>
+    requires(Base > 1)
+  [[nodiscard]] inline std::expected<dig_t<Base>, parse_error_t> 
+  make_digit(const std::string& str) noexcept {
+    return dig_t<Base>::from_string(str);
+  }
+
+  /**
+   * @brief Factory function runtime para crear dig_t desde C-string
+   * @ingroup make_digit
+   * @tparam Base Base del sistema numérico
+   * @param str C-string a parsear (formato: "d[N]BM" o "dig#N#BM")
+   * @return std::expected<dig_t<Base>, parse_error_t>
+   * 
+   * @details Versión runtime/constexpr que funciona con C-strings.
+   * 
+   * @note constexpr: puede usarse en compile-time si str es constexpr
+   * 
+   * @example Compile-time:
+   * ```cpp
+   * constexpr auto d = make_digit<10>("d[5]B10");
+   * static_assert(d.has_value() && d->get() == 5);
+   * ```
+   * 
+   * @example Runtime:
+   * ```cpp
+   * const char* input = "d[7]B16";
+   * auto d = make_digit<16>(input);
+   * ```
+   */
+  template <std::uint64_t Base>
+    requires(Base > 1)
+  [[nodiscard]] constexpr std::expected<dig_t<Base>, parse_error_t> 
+  make_digit(const char* str) noexcept {
+    return dig_t<Base>::from_cstr(str);
+  }
+
+  /**
+   * @brief Factory function para crear dig_t desde valor entero con base especificada
+   * @ingroup make_digit
+   * @tparam Base Base del sistema numérico
+   * @tparam Int_t Tipo entero (deducido automáticamente)
+   * @param value Valor del dígito (se normalizará módulo Base)
+   * @return dig_t<Base> con valor normalizado
+   * 
+   * @details Crea un dígito directamente desde un valor entero.
+   *          El valor se normaliza automáticamente módulo Base.
+   * 
+   * @note Esta función siempre tiene éxito (no puede fallar)
+   * @note Base debe especificarse explícitamente como template parameter
+   * @note El valor se normaliza: value % Base
+   * 
+   * @example Uso básico:
+   * ```cpp
+   * auto d1 = make_digit<10>(5);        // dig_t<10> con valor 5
+   * auto d2 = make_digit<16>(15);       // dig_t<16> con valor 15 (0xF)
+   * auto d3 = make_digit<10>(42);       // dig_t<10> con valor 2 (42 % 10)
+   * ```
+   * 
+   * @example Con diferentes tipos enteros:
+   * ```cpp
+   * auto d1 = make_digit<256>(255u);           // unsigned
+   * auto d2 = make_digit<100>(static_cast<uint8_t>(99)); // uint8_t
+   * ```
+   */
+  template <std::uint64_t Base, type_traits::integral_c Int_t>
+    requires(Base > 1)
+  constexpr dig_t<Base> make_digit(Int_t value) noexcept {
+    return dig_t<Base>(value);
+  }
+
+  /** @} */ // end of make_digit group
 
 } // namespace NumRepr
 

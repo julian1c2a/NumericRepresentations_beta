@@ -2,7 +2,7 @@
 #define REGISTER_VARIANT_T_HPP_INCLUDED
 
 #include <variant>
-#include "core/internal/util_functs.hpp"
+#include "core/internal/auxiliary_functions.hpp"
 #include "digit_variant_t.hpp"
 #include "reg_digs_t.hpp"
 

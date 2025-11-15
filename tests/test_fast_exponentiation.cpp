@@ -9,7 +9,7 @@
  * - Exponentes grandes (demostrar mejora de complejidad)
  */
 
-#include "../include/core/dig_t.hpp"
+#include <core/dig_t.hpp>
 #include <iostream>
 #include <chrono>
 

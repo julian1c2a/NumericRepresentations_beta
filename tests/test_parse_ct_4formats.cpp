@@ -5,7 +5,7 @@
  * OBJETIVO: Verificar que parse_impl_ct soporta los 4 formatos correctamente
  */
 
-#include "../include/core/dig_t.hpp"
+#include <core/dig_t.hpp>
 #include <iostream>
 
 using namespace std;

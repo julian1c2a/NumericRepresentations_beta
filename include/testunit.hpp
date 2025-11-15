@@ -2,18 +2,19 @@
 #define TESTUNIT_HPP_INCLUDED
 
 #include "int_reg_digs_t.hpp"
-#include "core/internal/utilities.hpp"
+#include "core/internal/basic_types.hpp"
 
 namespace NumRepr { /// BEGIN OF NAMESPACE NUMREPR
 namespace testing { /// BEGIN OF NAMESPACE TESTING
 
+
 void show_test_convert_to_int_driver();
 
+// Usa directamente la función de auxiliary_functions
 template <std::size_t B, std::size_t L>
 constexpr inline uint64_t
 conversion_to_int(const reg_digs_t<B, L> &arg) noexcept {
-  namespace us = utilities::special;
-  return us::conversion_to_int<B, L, reg_digs_t<B, L>>(arg);
+  return NumRepr::auxiliary_functions::conversion_to_int<B, L, reg_digs_t<B, L>>(arg);
 }
 
 template <std::size_t B, std::size_t L>
@@ -36,10 +37,9 @@ convert_to_int(const reg_digs_t<B, L> &arg) noexcept {
  * @return B^L calculado de manera eficiente.
  */
 template <std::size_t B, std::size_t L>
-[[deprecated("Usa utilities::int_pow_ct<base, exponent>() en su lugar")]]
+[[deprecated("Usa int_pow_ct<base, exponent>() en su lugar")]]
 constexpr inline uint64_t Base_pow_to_Size() noexcept {
-  namespace us = utilities::special;
-  return us::Base_pow_to_Size<B, L>();
+  return NumRepr::auxiliary_functions::int_pow_ct<B, L>();
 }
 
 ///                              todo, num_pruebas , num_pruebas
@@ -55,44 +55,34 @@ namespace reg_digs { /// BEGIN OF NAMESPACE REG_DIGS
 
 template <std::uint64_t Base, std::size_t Long>
 test_result_t test_div_fediv_entre_dos_objetos_tipo_reg_digs() {
-  namespace us = utilities::special;
   using reg_digs_t = reg_digs_t<Base, Long>;
-
   size_t correctos = 0;
   size_t errores = 0;
-
   bool first_bad_result = true;
   bool todo_ha_ido_bien = true;
-
   reg_digs_t dndo{};
   reg_digs_t dsor{};
   dndo = 0;
-  for (size_t dndo_idx{0}; dndo_idx < us::int_pow_ct<Base, Long>(); ++dndo_idx) {
+  for (size_t dndo_idx{0}; dndo_idx < NumRepr::auxiliary_functions::int_pow_ct<Base, Long>(); ++dndo_idx) {
     dsor = 1;
-    for (size_t dsor_idx{1}; dsor_idx < us::int_pow_ct<Base, Long>(); ++dsor_idx) {
+    for (size_t dsor_idx{1}; dsor_idx < NumRepr::auxiliary_functions::int_pow_ct<Base, Long>(); ++dsor_idx) {
       const auto dndo_int{convert_to_int<Base, Long>(dndo)};
       const auto dsor_int{convert_to_int<Base, Long>(dsor)};
-
       const auto result(fediv(dndo, dsor));
       const auto cociente = std::get<0>(result);
       const auto resto = std::get<1>(result);
-
       const auto cociente_calc = dndo_int / dsor_int;
       const auto resto_calc = dndo_int % dsor_int;
-
       const auto cociente_sync = dndo_idx / dsor_idx;
       const auto resto_sync = dndo_idx % dsor_idx;
-
       const auto cociente_int{convert_to_int<Base, Long>(cociente)};
       const auto resto_int{convert_to_int<Base, Long>(resto)};
-
       const bool cociente_bien_1 = (cociente_int == cociente_sync);
       const bool cociente_bien_2 = (cociente_int == cociente_calc);
       const bool resto_bien_1 = (resto_int == resto_sync);
       const bool resto_bien_2 = (resto_int == resto_calc);
       const bool bien =
           cociente_bien_1 && cociente_bien_2 && resto_bien_1 && resto_bien_2;
-
       if (bien) {
         ++correctos;
       } else {
@@ -101,11 +91,9 @@ test_result_t test_div_fediv_entre_dos_objetos_tipo_reg_digs() {
           first_bad_result = false;
         }
       }
-
       todo_ha_ido_bien = todo_ha_ido_bien && bien;
       m_incr(dsor);
     }
-
     m_incr(dndo);
   }
   return test_result_t{todo_ha_ido_bien, correctos, errores};
@@ -114,14 +102,10 @@ test_result_t test_div_fediv_entre_dos_objetos_tipo_reg_digs() {
 template <std::uint64_t Base, std::size_t Long>
 test_result_t test_comparacion_igual_que_entre_dos_objetos_tipo_reg_digs() {
   using reg_digs_t = reg_digs_t<Base, Long>;
-  namespace us = utilities::special;
   bool todo_correcto = true;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Long>()};
-
-  std::size_t correctos{0};
-  std::size_t errores{0};
-
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Long>()};
+    std::size_t correctos{0};
+    std::size_t errores{0};
   reg_digs_t rd_x{0};
   for (std::uint64_t ix{0}; ix < B2L; ++ix) {
     reg_digs_t rd_y{0};
@@ -146,14 +130,10 @@ test_result_t test_comparacion_igual_que_entre_dos_objetos_tipo_reg_digs() {
 template <std::uint64_t Base, std::size_t Long>
 test_result_t test_comparacion_distinto_que_entre_dos_objetos_tipo_reg_digs() {
   using reg_digs_t = reg_digs_t<Base, Long>;
-  namespace us = utilities::special;
   bool todo_correcto = true;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Long>()};
-
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Long>()};
   std::size_t correctos{0};
   std::size_t errores{0};
-
   reg_digs_t rd_x{0};
   for (std::uint64_t ix{0}; ix < B2L; ++ix) {
     reg_digs_t rd_y{0};
@@ -178,11 +158,10 @@ test_result_t test_comparacion_distinto_que_entre_dos_objetos_tipo_reg_digs() {
 template <std::uint64_t Base, std::size_t Long>
 test_result_t test_comparacion_menor_que_entre_dos_objetos_tipo_reg_digs() {
   using reg_digs_t = reg_digs_t<Base, Long>;
-  namespace us = utilities::special;
 
   bool todo_correcto = true;
 
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Long>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Long>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -212,11 +191,10 @@ template <std::uint64_t Base, std::size_t Long>
 test_result_t
 test_comparacion_menor_o_igual_que_entre_dos_objetos_tipo_reg_digs() {
   using reg_digs_t = reg_digs_t<Base, Long>;
-  namespace us = utilities::special;
 
   bool todo_correcto = true;
 
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Long>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Long>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -245,11 +223,10 @@ test_comparacion_menor_o_igual_que_entre_dos_objetos_tipo_reg_digs() {
 template <std::uint64_t Base, std::size_t Long>
 test_result_t test_comparacion_mayor_que_entre_dos_objetos_tipo_reg_digs() {
   using reg_digs_t = reg_digs_t<Base, Long>;
-  namespace us = utilities::special;
 
   bool todo_correcto = true;
 
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Long>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Long>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -279,11 +256,10 @@ template <std::uint64_t Base, std::size_t Long>
 test_result_t
 test_comparacion_mayor_o_igual_que_entre_dos_objetos_tipo_reg_digs() {
   using reg_digs_t = reg_digs_t<Base, Long>;
-  namespace us = utilities::special;
 
   bool todo_correcto = true;
 
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Long>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Long>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -311,11 +287,10 @@ test_comparacion_mayor_o_igual_que_entre_dos_objetos_tipo_reg_digs() {
 
 template <std::uint64_t Base> test_result_t test_dig_suma_dig_con_asignacion() {
   using d_t = dig_t<Base>;
-  namespace us = utilities::special;
 
   bool todo_correcto = true;
 
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, 1>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, 1>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -344,11 +319,10 @@ template <std::uint64_t Base> test_result_t test_dig_suma_dig_con_asignacion() {
 
 template <std::uint64_t Base> test_result_t test_dig_mult_dig_con_asignacion() {
   using d_t = dig_t<Base>;
-  namespace us = utilities::special;
 
   bool todo_correcto = true;
 
-  [[maybe_unused]] constexpr uint64_t B2L{us::Base_pow_to_Size<Base, 1>()};
+  [[maybe_unused]] constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, 1>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -415,11 +389,8 @@ std::tuple<bool, uint32_t, uint32_t> test_dig_mult_reg_n_dig_con_asignacion() {
 template <std::uint64_t Base, std::size_t Long>
 test_result_t test_reg_mult_reg_con_asignacion() {
   using rd_t = reg_digs_t<Base, Long>;
-  namespace us = utilities::special;
-
   bool todo_correcto = true;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Long>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Long>()};
   std::fstream fichero("test_mult_reg_reg_w_assign.txt",
                        fichero.out | fichero.app);
 
@@ -459,17 +430,14 @@ test_result_t test_reg_mult_reg_con_asignacion() {
 template <std::uint64_t Base>
 test_result_t test_dig_resta_dig_con_asignacion() {
   using d_t = dig_t<Base>;
-  namespace us = utilities::special;
-
   bool todo_correcto = true;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, 1>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, 1>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
 
   d_t rd_x{Base - 1};
-  for (std::int64_t ix{B2L - 1}; ix > -1; --ix) {
+  for (std::int64_t ix = static_cast<std::int64_t>(B2L) - 1; ix > -1; --ix) {
     d_t rd_y{ix};
     for (std::int64_t iy{ix}; iy > -1; --iy) {
       d_t rd_z{rd_x};
@@ -495,19 +463,16 @@ template <std::uint64_t Base>
 std::tuple<bool, std::size_t, std::size_t>
 test_dig_resta_con_borrow_dig_con_asignacion() {
   using d_t = dig_t<Base>;
-  namespace us = utilities::special;
-
   bool todo_correcto = true;
-
-  [[maybe_unused]] constexpr uint64_t B2L{us::Base_pow_to_Size<Base, 1>()};
+  [[maybe_unused]] constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, 1>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
 
   d_t rd_x{Base - 1};
-  for (std::int64_t ix{Base - 1}; ix > -1; --ix) {
+  for (std::int64_t ix = static_cast<std::int64_t>(Base) - 1; ix > -1; --ix) {
     d_t rd_y{Base - 1};
-    for (std::int64_t iy{Base - 1}; iy > -1; --iy) {
+    for (std::int64_t iy = static_cast<std::int64_t>(Base) - 1; iy > -1; --iy) {
       d_t rd_z{rd_x};
       m_subtract_digs_borrowin_1(rd_z, rd_y);
       const std::int64_t iz = rd_z();
@@ -529,18 +494,16 @@ test_dig_resta_con_borrow_dig_con_asignacion() {
 
 template <std::uint64_t Base> void lista_dig_resta_dig_con_asignacion() {
   using d_t = dig_t<Base>;
-  namespace us = utilities::special;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, 1>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, 1>()};
 
   std::string filename{"resta_de_digitos_lista.txt"};
   std::fstream fichero{filename, fichero.out | fichero.app};
 
   bool todo_correcto = true;
   d_t rd_x{Base - 1};
-  for (std::int64_t ix{B2L - 1}; ix > -1; --ix) {
+  for (std::int64_t ix = static_cast<std::int64_t>(B2L) - 1; ix > -1; --ix) {
     d_t rd_y{Base - 1};
-    for (std::int64_t iy{B2L - 1}; iy > -1; --iy) {
+    for (std::int64_t iy = static_cast<std::int64_t>(B2L) - 1; iy > -1; --iy) {
       d_t rd_z{rd_x};
       d_t borrow = m_subtract_digs_borrowin_0(rd_z, rd_y);
       const std::int64_t iz = rd_z();
@@ -571,11 +534,8 @@ template <std::uint64_t Base> void lista_dig_resta_dig_con_asignacion() {
 template <std::uint64_t Base>
 test_result_t test_dig_suma_dig_con_carry_con_asignacion() {
   using d_t = dig_t<Base>;
-  namespace us = utilities::special;
-
   bool todo_correcto = true;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, 1>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, 1>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -607,11 +567,8 @@ template <std::uint64_t Base, std::uint64_t Longitud>
 test_result_t test_incremento_con_asignacion() {
   using rd_t = reg_digs_t<Base, Longitud>;
   using d_t = dig_t<Base>;
-  namespace us = utilities::special;
-
   bool todo_correcto = true;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Longitud>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Longitud>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -638,14 +595,10 @@ test_result_t test_incremento_con_asignacion() {
 
 template <std::uint64_t Base, std::uint64_t Longitud>
 test_result_t test_decremento_con_asignacion() {
-  namespace us = utilities::special;
-
   using rd_t = reg_digs_t<Base, Longitud>;
   using d_t = dig_t<Base>;
-
   bool todo_correcto = true;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Longitud>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Longitud>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -673,11 +626,8 @@ template <std::uint64_t Base, std::uint64_t Longitud>
 test_result_t test_suma_con_asignacion() {
   using rd_t = reg_digs_t<Base, Longitud>;
   using d_t = dig_t<Base>;
-  namespace us = utilities::special;
-
   bool todo_correcto = true;
-
-  constexpr uint64_t B2L{us::Base_pow_to_Size<Base, Longitud>()};
+  constexpr uint64_t B2L{NumRepr::auxiliary_functions::int_pow_ct<Base, Longitud>()};
 
   std::size_t correctos{0};
   std::size_t errores{0};
@@ -721,10 +671,10 @@ test_result_t test_resta_con_asignacion() {
 
   rd_t rd_x;
   rd_x.fill(d_t::dig_Bm1());
-  for (std::int64_t ix{B2L - 1}; ix > -1; --ix) {
+  for (std::int64_t ix = static_cast<std::int64_t>(B2L) - 1; ix > -1; --ix) {
     rd_t rd_y;
     rd_y.fill(d_t::dig_0());
-    for (std::int64_t iy{0}; iy <= ix; ++iy) {
+    for (std::int64_t iy = 0; iy <= ix; ++iy) {
       rd_t rd_z{rd_x};
       d_t borrow = m_subtract(rd_z, rd_y);
       const std::uint64_t iz = convert_to_int<Base, Longitud>(rd_z);
@@ -757,7 +707,7 @@ test_result_t test_calc_coc_dig_rem_div_dsor() {
   rd_t dndo{};
   rd_t dsor{};
 
-  constexpr auto B2L{Base_pow_to_Size<B, L>()};
+  constexpr auto B2L{NumRepr::auxiliary_functions::int_pow_ct<B, L>()};
   bool todo_ha_ido_bien = true;
   uint64_t correctos{0};
   uint64_t errores{0};

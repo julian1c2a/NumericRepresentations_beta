@@ -3,7 +3,7 @@
 #include <type_traits>
 
 // Test que documenta y verifica constructores y métodos básicos de dig_t
-#include "../include/dig_t.hpp"
+#include <core/dig_t.hpp>
 
 using namespace NumRepr;
 

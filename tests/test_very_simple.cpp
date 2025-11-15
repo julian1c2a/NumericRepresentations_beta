@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/dig_t.hpp"
+#include <dig_t.hpp>
 
 using namespace NumRepr;
 

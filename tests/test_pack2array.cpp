@@ -8,10 +8,9 @@
  * - Eficiencia con tipos no-triviales
  */
 
-#define CATCH_CONFIG_MAIN
-#include <catch2/catch_test_macros.hpp>
+#include <catch_amalgamated.hpp>
 
-#include "core/internal/basic_types.hpp"
+#include <core/internal/basic_types.hpp>
 #include <array>
 #include <string>
 #include <iostream>
@@ -61,7 +60,7 @@ struct TrackedInt {
 
 TEST_CASE("pack2array - Conversión básica", "[pack2array]") {
     SECTION("Tipos primitivos") {
-        using P2A = ugly_pack_details::pack2array<int, int, int>;
+        using P2A = NumRepr::auxiliary_functions::pack2array<int, int, int>;
         
         constexpr auto arr = P2A{}(10, 20, 30);
         STATIC_REQUIRE(arr.size() == 3);
@@ -71,7 +70,7 @@ TEST_CASE("pack2array - Conversión básica", "[pack2array]") {
     }
     
     SECTION("get - Obtener elemento") {
-        using P2A = ugly_pack_details::pack2array<int, int, int, int>;
+        using P2A = NumRepr::auxiliary_functions::pack2array<int, int, int, int>;
         
         constexpr auto elem0 = P2A::get<0>(10, 20, 30, 40);
         constexpr auto elem1 = P2A::get<1>(10, 20, 30, 40);
@@ -86,7 +85,7 @@ TEST_CASE("pack2array - Conversión básica", "[pack2array]") {
 }
 
 TEST_CASE("pack2array - for_each", "[pack2array]") {
-    using P2A = ugly_pack_details::pack2array<int, int, int, int>;
+    using P2A = NumRepr::auxiliary_functions::pack2array<int, int, int, int>;
     
     std::array<int, 4> arr{};
     P2A::for_each(arr, 100, 200, 300, 400);
@@ -117,7 +116,7 @@ TEST_CASE("pack2array - Análisis de copias/movimientos", "[pack2array][performa
         std::cout << "Antes de pack2array:\n";
         std::cout << "  a.copy_count=" << a.copy_count << ", a.move_count=" << a.move_count << "\n";
         
-        using P2A = ugly_pack_details::pack2array<TrackedInt, TrackedInt, TrackedInt>;
+        using P2A = NumRepr::auxiliary_functions::pack2array<TrackedInt, TrackedInt, TrackedInt>;
         auto arr = P2A{}(a, b, c);
         
         std::cout << "Después de pack2array:\n";
@@ -136,7 +135,7 @@ TEST_CASE("pack2array - Análisis de copias/movimientos", "[pack2array][performa
     SECTION("Con rvalues - ¿se pueden mover?") {
         std::cout << "\n=== Con rvalues temporales ===\n";
         
-        using P2A = ugly_pack_details::pack2array<TrackedInt, TrackedInt, TrackedInt>;
+        using P2A = NumRepr::auxiliary_functions::pack2array<TrackedInt, TrackedInt, TrackedInt>;
         auto arr = P2A{}(TrackedInt(10), TrackedInt(20), TrackedInt(30));
         
         std::cout << "Resultado final:\n";
@@ -153,7 +152,7 @@ TEST_CASE("pack2array - Uso como en register_variant_t", "[pack2array][real-worl
         int a = 10, b = 20, c = 30;
         
         // Así se usa en register_variant_t.hpp línea 120
-        using P2A = ugly_pack_details::pack2array<const int&, const int&, const int&>;
+        using P2A = NumRepr::auxiliary_functions::pack2array<const int&, const int&, const int&>;
         auto arr = P2A{}(a, b, c);
         
         REQUIRE(arr[0] == 10);
@@ -168,7 +167,7 @@ TEST_CASE("pack2array - Uso como en register_variant_t", "[pack2array][real-worl
         const int& rc = c;
         
         // Así se usa en int_reg_digs_t.hpp línea 256
-        using P2A = ugly_pack_details::pack2array<int, int, int>;
+        using P2A = NumRepr::auxiliary_functions::pack2array<int, int, int>;
         auto arr = P2A{}(ra, rb, rc);
         
         REQUIRE(arr[0] == 10);

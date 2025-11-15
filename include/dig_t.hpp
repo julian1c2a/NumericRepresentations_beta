@@ -26,7 +26,7 @@
 #include <stdexcept>
 
 #include "core/internal/basic_types.hpp"
-#include "core/internal/auxiliary_types.hpp"
+#include "core/internal/basic_types.hpp"
 #include "core/internal/auxiliary_functions.hpp"
 
 namespace NumRepr

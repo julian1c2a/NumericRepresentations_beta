@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/dig_t.hpp"
+#include <core/dig_t.hpp>
 
 int main()
 {
