@@ -2,14 +2,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
-#include <tuple>
 #include "basic_types.hpp"
 
 // --- Declaración adelantada de int_log2_ct y bit_width_ct ---
 namespace NumRepr {
 namespace auxiliary_functions {
-
-  
 
   // Versión template de valor para uso en metaprogramación
   // Solo la versión template de valor:
@@ -91,7 +88,6 @@ namespace auxiliary_functions {
 #include <limits>
 #include <cstddef>
 #include <cstdint>
-// #include <cmath>
 #include <type_traits>
 #include <tuple>
 #include "basic_types.hpp"
