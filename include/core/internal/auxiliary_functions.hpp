@@ -1,7 +1,6 @@
 #include <limits>
 #include <cstddef>
 #include <cstdint>
-// #include <cmath>
 #include <type_traits>
 #include <tuple>
 #include "basic_types.hpp"
@@ -63,7 +62,7 @@ namespace auxiliary_functions {
     return n == 0u ? 0 : int_log2(n) + 1;
   } // END FUNCTION bit_width runtime
 
-    /**
+  /**
    * @brief Potencia de 2 en tiempo de ejecución (bitwise).
    * @tparam exponent Exponente (debe ser <= 63).
    * @return 2 elevado a exponent, usando desplazamiento de bits.
@@ -85,6 +84,7 @@ namespace auxiliary_functions {
 
 } // CLOSE NAMESPACE auxiliary_functions
 } // CLOSE NAMESPACE NumRepr
+
 #ifndef NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
 #define NUMREPR_CORE_INTERNAL_AUXILIARY_FUNCTIONS_HPP_INCLUDED
 
@@ -148,7 +148,7 @@ namespace NumRepr {
   constexpr std::uint64_t newton_raphson_ct() noexcept {
       constexpr std::uint64_t x1 = IterExpr<x0, n>::value;
         return (x1 >= x0) ? x0 : newton_raphson_ct<n, x1, IterExpr>();
-  }
+  } // END FUNCTION newton_raphson_ct compiletime (FUNCTOR TEMPLATE)
 
   /**
    * @brief Función auxiliar recursiva para el método de Newton-Raphson en tiempo de compilación.
@@ -162,7 +162,7 @@ namespace NumRepr {
   constexpr std::uint64_t floorsqrt_ct_newton() noexcept {
         // Protección: si x0 == 0, la raíz cuadrada de 0 es 0
         return (x0 == 0) ? 0 : (((x0 + n / x0) / 2) >= x0 ? x0 : floorsqrt_ct_newton<n, (x0 + n / x0) / 2>());
-  }
+  } // END FUNCTION floorsqrt_ct_newton compiletime
 
   /**
    * @brief Calcula la raíz cuadrada entera por defecto de un número entero no negativo.
@@ -230,12 +230,12 @@ namespace NumRepr {
         detail::floorsqrt_ct_helper_big<n>::value;
     };
   
-  }
+  } // CLOSE NAMESPACE detail
 
   template <std::uint64_t n> constexpr
   std::uint64_t floorsqrt_ct() noexcept {
     return detail::floorsqrt_ct_helper<n>::value;
-  }
+  } // END FUNCTION floorsqrt_ct compiletime
 
   /**
    * @brief Calcula la raíz cuadrada entera por defecto de un número en tiempo de ejecución.
@@ -293,7 +293,7 @@ namespace NumRepr {
       // La iteración se detiene cuando x0 <= sqrt(n).
       // x0 es el resultado correcto.
       return x0;
-  }
+  } // END FUNCTION floorsqrt runtime
 
   /**
    * @brief Calcula la raíz cuadrada entera por exceso (techo) de un número.
@@ -330,7 +330,7 @@ namespace NumRepr {
       } else {
           return root + 1;
       }
-  }
+  } // END FUNCTION ceilsqrt_ct compiletime
 
   template <typename T>
   constexpr T ceilsqrt(T n) noexcept {
@@ -338,7 +338,7 @@ namespace NumRepr {
       T root = floorsqrt(n);
       // Si n no es un cuadrado perfecto, la raíz cuadrada entera superior es root + 1.
       return (root * root == n) ? root : root + 1;
-  }
+  } // END FUNCTION ceilsqrt runtime
 
   /**
    * @brief Comprueba si un número es un cuadrado perfecto.
@@ -391,19 +391,19 @@ namespace NumRepr {
     if ((n == 0)||(n == 1)) return true;
     T root = floorsqrt(n);
     return root * root == n;
-  }
+  } // END FUNCTION is_perfect_square runtime
 
   // --- Backward compatibility wrappers for std::size_t ---
   // This overload is kept for compatibility with code that might call it with 3 arguments.
   constexpr inline
   std::size_t ceilsqrt(std::size_t n, std::size_t, std::size_t) noexcept {
     return ceilsqrt<std::size_t>(n);
-  }
+  } // END FUNCTION ceilsqrt std::size_t with 3 args DEPRECATED
 
   constexpr inline
   std::size_t ceilsqrt(std::size_t n) noexcept {
     return ceilsqrt<std::size_t>(n);
-  }
+  } // END FUNCTION ceilsqrt std::size_t DEPRECATED (WRAPPER)
 
   /**
    * @brief Comprueba si un número es una potencia de 2.
@@ -463,7 +463,7 @@ namespace NumRepr {
         constexpr auto mid = std::midpoint(low, high);
         return find_factor_ct<T, n, low, mid>() || find_factor_ct<T, n, mid, high>();
     }
-  }
+  } // END FUNCTION find_factor_ct compiletime
 
   /**
    * @brief Busca recursivamente un factor impar de un número en un rango.
@@ -499,7 +499,7 @@ namespace NumRepr {
     if (*res_low) return true; // found
 
     return find_factor(n, mid, high);
-  }
+  } // END FUNCTION find_factor runtime
   
   /**
    * @brief Comprueba si un número es primo en tiempo de compilación.
@@ -584,7 +584,7 @@ namespace NumRepr {
     } else {
         return !find_factor_ct<std::uint64_t, n, low, high>();
     }
-  }
+  } // END OF FUNCTION is_prime_ct
 
   /**
    * @brief Comprueba si un número es primo.
@@ -612,7 +612,7 @@ namespace NumRepr {
     // Use find_factor for even larger numbers
     auto result = find_factor(n, static_cast<T>(2), (ceilsqrt(n) + 1) / 2);
     return !result.value_or(false);
-  }
+  } // END OF FUNCTION is_prime
 
   /**
    * @brief Calcula el máximo común divisor (MCD) de dos números.
@@ -634,7 +634,7 @@ namespace NumRepr {
     } else {
       return gcd_ct<b, a % b>();
     }
-  }
+  } // END OF FUNCTION gcd_ct
 
   /**
    * @brief Algoritmo de Euclides iterativo para calcular el MCD en tiempo de ejecución.
@@ -655,7 +655,7 @@ namespace NumRepr {
       a = temp; 
     }
     return a;
-  }
+  } // END OF FUNCTION gcd
 
   /**
    * @brief Calcula el mínimo común múltiplo (mcm) de dos números, 
@@ -671,7 +671,7 @@ namespace NumRepr {
     return (a == 0 || b == 0) ? 
                0              : // a o b es 0 <=> mcm es 0 
                (minimum / gcd_ct<a, b>()) * maximum;
-  }
+  } // END OF FUNCTION lcm_ct
 
   /**
    * @brief Calcula el mínimo común múltiplo en tiempo de ejecución.
@@ -685,7 +685,7 @@ namespace NumRepr {
     return (a == 0 || b == 0) ? 
                0              : // a o b es 0 <=> mcm es 0 
                (std::min(a, b) / gcd(a, b)) * std::max(a, b);
-  }
+  } // END OF FUNCTION lcm
 
   /**
    * @brief Calcula en tiempo de compilación el exponente máximo para una base dada que no desborda un uint64_t.
@@ -725,7 +725,7 @@ namespace NumRepr {
       else if constexpr (base >= 65536ull && base < 2642246ull) return 3;
       else if constexpr (base >= 2642246ull && base < 4294967296ull) return 2;
       else return 1;
-  }
+  } // END OF FUNCTION max_exponent_for_base_ct (LOOK UP TABLE)
 
   /**
    * @brief Calcula en tiempo de ejecución el exponente máximo para una base dada que no desborda un uint64_t.
@@ -761,7 +761,7 @@ namespace NumRepr {
       else if (base >= 65536 && base < 2642246) return 3;
       else if (base >= 2642246 && base < 4294967296) return 2;
       else return 1;
-  }
+  } // END OF FUNCTION max_exponent_for_base (LOOK UP TABLE)
 
   /**
    * @brief Calcula la potencia de un número en tiempo de compilación.
@@ -802,7 +802,7 @@ namespace NumRepr {
       }
       return result;
     }
-  }
+  } // END OF FUNCTION int_pow_ct
 
   /**
    * @brief Potencia de 2 en tiempo de ejecución (bitwise, solo base==2).
@@ -818,7 +818,7 @@ namespace NumRepr {
    */
   constexpr std::uint64_t int_pow(std::size_t exponent) noexcept {
     return (exponent <= max_exponent_for_base_ct<2>()) ? (1ull << exponent) : 0ull;
-  }
+  } // END OF FUNCTION int_pow
 
   /**
    * @brief Calcula la potencia de un número en tiempo de ejecución.
@@ -859,7 +859,7 @@ namespace NumRepr {
     } else {
       return 0; // overflow case
     }
-  }
+  } // END OF FUNCTION int_pow
 
   
   /**
@@ -872,17 +872,17 @@ namespace NumRepr {
     if constexpr (n == 0ull || n == 1ull) { return true; }
     constexpr auto root = floorsqrt_ct<n>();
     return root * root == n;
-  }
+  } // END OF FUNCTION is_perfect_square_ct
 
   constexpr inline
   bool is_perfect_square(std::uint64_t n) noexcept {
     if (n == 0 || n == 1) { return true; }
     const auto root = ceilsqrt(n);
     return root * root == n;
-  }
+  } // END OF FUNCTION is_perfect_square
 
   // Declaración anticipada (definición más abajo)
-  constexpr std::uint64_t int_log2(std::uint64_t n) noexcept;
+  // constexpr std::uint64_t int_log2(std::uint64_t n) noexcept;
   // forward declaration for count_digits_base (defined below)
   constexpr std::size_t count_digits_base(std::uint64_t n, std::uint64_t base) noexcept;
 
@@ -906,7 +906,7 @@ namespace NumRepr {
     } else {
       return 1 + int_log_ct<base, n / base>();
     }
-  }
+  } // END OF FUNCTION int_log_ct
 
   /**
    * @brief Calcula el logaritmo entero en tiempo de ejecución.
@@ -927,7 +927,7 @@ namespace NumRepr {
     } else {
       return 1 + int_log(base, n / base);
     }
-  }
+  } // END OF FUNCTION int_log
 
   /**
    * @brief Cuenta el número de dígitos de un número en base 10.
@@ -937,7 +937,7 @@ namespace NumRepr {
   constexpr inline
   std::size_t count_digits_base10(std::uint64_t n) noexcept { 
     return count_digits_base(n, 10);
-  }
+  } // END OF FUNCTION count_digits_base10
 
   /**
    * @brief Función auxiliar recursiva para verificar si base^exponent <= limit.
@@ -985,7 +985,7 @@ namespace NumRepr {
         }
       }
     }
-  }
+  } // END OF FUNCTION pow_leq_limit_ct
 
   /**
    * @brief Checks if base^exponent is less than or equal to a limit 
@@ -1031,7 +1031,7 @@ namespace NumRepr {
       }
     }
     return result <= limit;
-  }
+  } // END OF FUNCTION pow_leq_limit
 
   /**
    * @brief Cuenta el número de dígitos de un número en una base dada.
@@ -1064,7 +1064,7 @@ namespace NumRepr {
     }
 
     return static_cast<std::size_t>(lo) + 1u;
-  }
+  } // END OF FUNCTION count_digits_base
 
   // Eliminar aliases ambiguos y versiones duplicadas: log2, log2ct, pow2ct, pow2, etc.
 
@@ -1124,7 +1124,7 @@ namespace NumRepr {
             acc += static_cast<uint64_t>(arg[ix]());
         };
         return acc;
-    }
+    } // END OF FUNCTION conversion_to_int
 
     /**
      * @brief Versión segura de conversion_to_int con validación y manejo de errores.
@@ -1209,7 +1209,7 @@ namespace NumRepr {
         }
         
         return acc;
-    }
+    }   // END OF FUNCTION conversion_to_int_safe
 
     /**
      * @brief Versión compile-time de conversion_to_int.
@@ -1241,7 +1241,7 @@ namespace NumRepr {
             acc += static_cast<uint64_t>(arg[ix]());
         }
         return acc;
-    }
+    }   // END OF FUNCTION conversion_to_int_ct
 
     /**
      * @brief Versión compile-time SEGURA con validación de errores.
@@ -1308,7 +1308,7 @@ namespace NumRepr {
         }
         
         return acc;
-    }
+    }  // END OF FUNCTION conversion_to_int_safe_ct
 
     namespace special {
         // NOTE: The following metaprogramming utilities are complex and lack documentation and tests.
@@ -1338,7 +1338,7 @@ namespace NumRepr {
             static_assert(L <= max_exponent_for_base_ct<B>(),
                           "Exponente excede el máximo seguro para esta base. Usa max_exponent_for_base_ct<base>() para verificar.");
             return int_pow_ct<B, L>();
-        }
+        }  // END OF DEPRECATED Base_pow_to_Size
 
         /**
          * @brief [DEPRECADO] Estructura template para potencias. Usa int_pow_ct en su lugar.
@@ -1472,7 +1472,7 @@ namespace NumRepr {
         [[deprecated("Usa auxiliary_functions::conversion_to_int")]]
         constexpr inline uint64_t conversion_to_int(const A &arg) noexcept {
             return auxiliary_functions::conversion_to_int<B, L>(arg);
-        }
+        } // END OF DEPRECATED ALIASES 
 
         /**
          * @brief [DEPRECADO] Alias de compatibilidad. Usa auxiliary_functions::conversion_to_int_safe.
@@ -1486,7 +1486,7 @@ namespace NumRepr {
         constexpr inline std::expected<uint64_t, auxiliary_functions::ConversionError> 
         conversion_to_int_safe(const A &arg) noexcept {
             return auxiliary_functions::conversion_to_int_safe<B, L>(arg);
-        }
+        } // END OF DEPRECATED ALIASES 
 
         /**
          * @brief [DEPRECADO] Alias de compatibilidad. Usa auxiliary_functions::conversion_to_int_ct.
@@ -1499,7 +1499,7 @@ namespace NumRepr {
         [[deprecated("Usa auxiliary_functions::conversion_to_int_ct")]]
         consteval inline uint64_t conversion_to_int_ct(const A &arg) noexcept {
             return auxiliary_functions::conversion_to_int_ct<B, L>(arg);
-        }
+        } // END OF DEPRECATED ALIASES 
 
         /**
          * @brief [DEPRECADO] Alias de compatibilidad. Usa auxiliary_functions::conversion_to_int_safe_ct.
@@ -1513,9 +1513,8 @@ namespace NumRepr {
         consteval inline std::expected<uint64_t, auxiliary_functions::ConversionError> 
         conversion_to_int_safe_ct(const A &arg) noexcept {
             return auxiliary_functions::conversion_to_int_safe_ct<B, L>(arg);
-        }
-
-    } /// CLOSE NAMESPACE special
+        } // END OF DEPRECATED ALIASES 
+    } // CLOSE NAMESPACE special
   } // CLOSE NAMESPACE auxiliary_functions
 } // CLOSE NAMESPACE NumRepr
 
